@@ -1,9 +1,6 @@
 import User from './models/user';
 import OAuth2Strategy from 'passport-google-oauth2';
 
-const GOOGLE_CLIENT_ID = "739501964319-pbncdr2bmsqr7ra8tmng8m0b0pks9bfp.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "dhhLw29jwYRXykrlqxteJONR";
-
 export default function authInit(passport) {
   passport.serializeUser(function(user, done) {
     console.log("serialized");
@@ -19,8 +16,8 @@ export default function authInit(passport) {
 
   passport.use(new OAuth2Strategy(
     {
-      clientID:     GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
+      clientID:     process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/auth/google/callback"
     },
     function(accessToken, refreshToken, profile, done) {

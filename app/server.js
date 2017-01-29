@@ -9,8 +9,11 @@ import authInit from './authentication';
 
 var app = express();
 
+// load environment variables
+require('dotenv').load()
+
 // passport google oauth initialization
-app.use(session({secret: 'semfd82asfvcx'}));
+app.use(session({secret: process.env.SESSION_SECRET}));
 app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
@@ -22,7 +25,7 @@ app.get('/auth/google/callback',
 	});
 
 // DB Setup
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/notist';
+const mongoURI = process.env.MONGODB_URI;
 mongoose.connect(mongoURI);
 // set mongoose promises to es6 default
 mongoose.Promise = global.Promise;
@@ -39,7 +42,7 @@ app.use('/', router);
 
 // START THE SERVER
 // =============================================================================
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 app.listen(port);
 
 console.log(`listening on: ${port}`);
