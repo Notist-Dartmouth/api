@@ -1,8 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
 const UserSchema = new Schema({
+  googleId: {type: String, ref: 'User'},
   name: String,
-  password: String,
   email: String,
 });
 

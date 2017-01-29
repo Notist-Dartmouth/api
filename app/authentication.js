@@ -21,18 +21,22 @@ export default function authInit(passport) {
     {
       clientID:     GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://thawing-ridge-63598.herokuapp.com/auth/google/callback"
+      callbackURL: "/auth/google/callback"
     },
     function(accessToken, refreshToken, profile, done) {
-      User.findOrCreate(
+      User.findOne(
 	{
 	  googleId: profile.id,
-	  name: profile.displayName,
-	  email: profile.emails[0]
+	  name: profile.displayName
 	},
 	function (err, user) {
+	  if (!user) {
+	    user = new User({googleId: profile.id, name: profile.displayName});
+	    user.save();
+	  }
 	  return done(err, user);
-	});
+	}
+      );
     }
   ));
 }
