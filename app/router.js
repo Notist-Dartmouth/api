@@ -9,7 +9,17 @@ router.get('/', (req, res) => {
 });
 
 router.get('/home', (req, res) => {
-  res.send('You are logged in.');
+  if (req.isAuthenticated()) {
+    res.sendFile(path.join(__dirname, 'home.html'));
+  } else {
+    res.redirect('/');
+  }
+});
+
+router.get('/logout', (req, res) => {
+  req.logout();
+  req.session.destroy();
+  res.redirect('/');
 });
 
 router.route('/users')
