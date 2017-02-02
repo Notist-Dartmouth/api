@@ -6,14 +6,29 @@ import passport from 'passport';
 import session from 'express-session';
 import router from './router';
 import authInit from './authentication';
+const MongoStore = require('connect-mongo')(session);
 
 var app = express();
 
 // load environment variables
 require('dotenv').load()
 
+// DB Setup
+const mongoURI = process.env.MONGODB_URI;
+mongoose.connect(mongoURI);
+// set mongoose promises to es6 default
+mongoose.Promise = global.Promise;
+
 // passport google oauth initialization
-app.use(session({secret: process.env.SESSION_SECRET}));
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false, // don't create session until something stored
+    resave: false, // don't save session if unmodified
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection,
+        touchAfter: 24 * 3600 // time period in seconds to forced session resave
+    })
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
@@ -23,12 +38,6 @@ app.get('/auth/google/callback',
 	function(req, res) {
 	  res.redirect('/home');
 	});
-
-// DB Setup
-const mongoURI = process.env.MONGODB_URI;
-mongoose.connect(mongoURI);
-// set mongoose promises to es6 default
-mongoose.Promise = global.Promise;
 
 // enable/disable cross origin resource sharing if necessary
 app.use(cors());

@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
 
 router.get('/home', (req, res) => {
   if (req.isAuthenticated()) {
+    console.log(req.user.name, 'is logged in.')    
     res.sendFile(path.join(__dirname, 'home.html'));
   } else {
     res.redirect('/');
