@@ -1,37 +1,24 @@
 import User from './models/user';
 import OAuth2Strategy from 'passport-google-oauth2';
-import Strategy from 'passport-facebook';
+import FacebookStrategy from 'passport-facebook';
 
-var googleCallback = function(accessToken, refreshToken, profile, done) {
+var authCallback = function(accessToken, refreshToken, profile, done) {
   process.nextTick(function() {
     User.findOne(
-      { googleId: profile.id },
+      { email: {"$in": profile.emails.map(e => e.value) } },
       function (err, user) {
 	if (!user) {
 	  user = new User({
-	    googleId: profile.id,
 	    name: profile.displayName,
-	    email: profile.email
+	    email: profile.emails[0].value
 	  });
-	  user.save();
 	}
-	done(err, user);
-      });
-  });
-}
-
-var facebookCallback = function(accessToken, refreshToken, profile, done) {
-  process.nextTick(function() {
-    User.findOne(
-      { facebookId: profile.id },
-      function (err, user) {
-	if (!user) {
-	  user = new User({
-	    facebookId: profile.id,
-	    name: profile.displayName
-	  });
-	  user.save();
+	if (profile.provider === 'facebook') {
+	  user.facebookId = profile.id;
+	} else if (profile.provider === 'google') {
+	  user.googleId = profile.id;
 	}
+	user.save();
 	done(err, user);
       });
   });
@@ -54,11 +41,12 @@ export default function authInit(passport) {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/callback"
-  }, googleCallback));
+  }, authCallback));
 
-  passport.use(new Strategy({
+  passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "/auth/facebook/callback"
-  }, facebookCallback));
+    callbackURL: "/auth/facebook/callback",
+    profileFields: ['email']
+  }, authCallback));
 }
