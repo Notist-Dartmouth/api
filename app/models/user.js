@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const UserSchema = new Schema({
   googleId: String,
+  facebookId: String,
   name: String,
   email: String,
 });

@@ -17,12 +17,14 @@ app.use(session({secret: process.env.SESSION_SECRET}));
 app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
-app.get('/auth/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback',
-	passport.authenticate('google', { failureRedirect: '/' }),
-	function(req, res) {
-	  res.redirect('/home');
-	});
+	passport.authenticate('google', { successRedirect: '/',
+					  failureRedirect: '/login' }));
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { successRedirect: '/',
+                                      failureRedirect: '/login' }));
 
 // DB Setup
 const mongoURI = process.env.MONGODB_URI;
