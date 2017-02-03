@@ -4,23 +4,25 @@ import FacebookStrategy from 'passport-facebook';
 
 var authCallback = function(accessToken, refreshToken, profile, done) {
   process.nextTick(function() {
-    User.findOne(
-      { email: {"$in": profile.emails.map(e => e.value) } },
-      function (err, user) {
-	if (!user) {
-	  user = new User({
-	    name: profile.displayName,
-	    email: profile.emails[0].value
-	  });
-	}
-	if (profile.provider === 'facebook') {
-	  user.facebookId = profile.id;
-	} else if (profile.provider === 'google') {
-	  user.googleId = profile.id;
-	}
-	user.save();
-	done(err, user);
-      });
+    User.findOne({"$or": [
+      {facebookId: profile.id},
+      {googleId: profile.id},
+      {email: {"$in": profile.emails.map(e => e.value)}}
+    ]}, function (err, user) {
+      if (!user) {
+	user = new User({
+	  name: profile.displayName,
+	  email: profile.emails[0].value
+	});
+      }
+      if (profile.provider === 'facebook') {
+	user.facebookId = profile.id;
+      } else if (profile.provider === 'google') {
+	user.googleId = profile.id;
+      }
+      user.save();
+      done(err, user);
+    });
   });
 }
 
