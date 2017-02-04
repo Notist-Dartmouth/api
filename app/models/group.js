@@ -1,24 +1,25 @@
 import mongoose, { Schema } from 'mongoose';
+import User from './user'
  // maybe need to import article/user models
 
-const ObjectId = Schema.Types.Objectid;
+const ObjectId = Schema.Types.ObjectId;
 
-const groupSchema = new Schema({
+const GroupSchema = new Schema({
 	name: String,
 	description: { type: String, trim: true, default: '' },
 	creator: { type: ObjectId, ref: 'User' },
 	createDate: { type: Date, default: Date.now },
 	editDate: { type: Date, default: Date.now },
 
-	articleIds: [{ type: ObjectId, ref: 'Article' }],
+	// articleIds: [{ type: ObjectId, ref: 'Article' }],
 	members: [{ type: ObjectId, ref: 'User' }],
 
-	// optional
-	joinableBy: ??, // most impt to figure out
-	readableBy: ??, // less impt
-	writableBy: ??  // less impt
+	// // optional
+	// joinableBy: ??, // most impt to figure out
+	// readableBy: ??, // less impt
+	// writableBy: ??  // less impt
 });
 
-const groupModel = mongoose.model('Group', groupSchema);
+const GroupModel = mongoose.model('Group', GroupSchema);
 
-export default groupModel;
+export default GroupModel;
