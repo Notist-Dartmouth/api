@@ -4,22 +4,27 @@ import path from 'path';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
+router.get('/login', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect('/');
+  } else {
+    res.sendFile(path.join(__dirname, 'login.html'));
+  }
 });
 
-router.get('/home', (req, res) => {
+router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
+    console.log(req.user.name, 'is logged in.')    
     res.sendFile(path.join(__dirname, 'home.html'));
   } else {
-    res.redirect('/');
+    res.redirect('/login');
   }
 });
 
 router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
-  res.redirect('/');
+  res.redirect('/login');
 });
 
 router.route('/users')
