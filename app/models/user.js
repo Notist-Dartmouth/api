@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
 const UserSchema = new Schema({
-  googleId: {type: String, ref: 'User'},
+  googleId: String,
+  facebookId: String,
   name: String,
   email: String,
 });
