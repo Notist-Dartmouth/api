@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
+import * as Articles from './controllers/article_controller';
 import path from 'path';
 
 const router = Router();

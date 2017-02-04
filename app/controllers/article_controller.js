@@ -1,0 +1,1 @@
+import Article from '../models/Article';
