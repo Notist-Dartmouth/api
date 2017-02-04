@@ -5,12 +5,11 @@ export const createGroup = (req, res) => {
   group.name = req.body.name;
   group.description = req.body.description;
   group.creator = req.body.creator;
-  group.createDate = req.body.createDate;
-  group.editDate = req.body.editDate;
+  group.createDate = Date.now();
+  group.editDate = Date.now();
 
   group.articleIds = req.body.articleIds;
   group.members = req.body.members;
-//halp
 
   group.save()
       .then(result => {
@@ -22,5 +21,5 @@ export const createGroup = (req, res) => {
 };
 
 export const getGroup = (req, res) => {
-  res.send('blah blah');
+  res.send('getting groups');
 }
