@@ -14,6 +14,7 @@ router.get('/login', (req, res) => {
 
 router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
+    console.log(req.user.name, 'is logged in.')    
     res.sendFile(path.join(__dirname, 'home.html'));
   } else {
     res.redirect('/login');
