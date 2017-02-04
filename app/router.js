@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
+import * as Annotations from './controllers/annotation_controller';
 import path from 'path';
 
 const router = Router();
@@ -14,7 +15,7 @@ router.get('/login', (req, res) => {
 
 router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req.user.name, 'is logged in.')    
+    console.log(req.user.name, 'is logged in.')
     res.sendFile(path.join(__dirname, 'home.html'));
   } else {
     res.redirect('/login');
@@ -29,6 +30,9 @@ router.get('/logout', (req, res) => {
 
 router.route('/users')
       .post(Users.createUser)
-      .get(Users.getUsers)
+      .get(Users.getUsers);
+
+router.route('/annotations')
+      .post(Annotations.createAnnotation);
 
 export default router;

@@ -10,15 +10,15 @@ var authCallback = function(accessToken, refreshToken, profile, done) {
       {email: {"$in": profile.emails.map(e => e.value)}}
     ]}, function (err, user) {
       if (!user) {
-	user = new User({
-	  name: profile.displayName,
-	  email: profile.emails[0].value
-	});
+        user = new User({
+          name: profile.displayName,
+          email: profile.emails[0].value
+        });
       }
       if (profile.provider === 'facebook') {
-	user.facebookId = profile.id;
+        user.facebookId = profile.id;
       } else if (profile.provider === 'google') {
-	user.googleId = profile.id;
+        user.googleId = profile.id;
       }
       user.save();
       done(err, user);
@@ -31,7 +31,7 @@ export default function authInit(passport) {
     console.log("serialized");
     done(null, user._id);
   });
-  
+
   passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user) {
       console.log("deserialized");
