@@ -4,6 +4,7 @@ const UserSchema = new Schema({
   googleId: String,
   facebookId: String,
   name: String,
+  username: { type: String, required: true, unique: true },
   email: String,
 });
 

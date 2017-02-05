@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
+import * as Groups from './controllers/group_controller';
+
 import path from 'path';
 
 const router = Router();
@@ -44,5 +46,9 @@ router.post('/api/article', (req, res) => {
 router.route('/users')
       .post(Users.createUser)
       .get(Users.getUsers);
+
+router.route('/groups')
+      .post(Groups.createGroup)
+      .get(Groups.getGroup);
 
 export default router;
