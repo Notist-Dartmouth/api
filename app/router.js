@@ -40,15 +40,20 @@ router.get('/api/articles', (req, res) => {
 router.post('/api/article', (req, res) => {
   Articles.createArticle(req, res);
 });
-      /* .post(Articles.createArticle);*/
-      /* .get(Articles.getArticles);*/
 
-router.route('/users')
+router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
-router.route('/groups')
-      .post(Groups.createGroup)
-      .get(Groups.getGroup);
+router.route('/api/group')
+      .post(Groups.createGroup);
+
+router.get('/group/:id', (req, res) => {
+  Groups.getGroup(req.params.id, (err, groupJSON) => {
+    if (err) { res.send(`error: ${err}`); }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(groupJSON);
+  });
+});
 
 export default router;
