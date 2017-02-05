@@ -1,10 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
 
 const ArticleSchema = new Schema({
-	uri: String,
-	annotations: [{ annotation_id: Schema.Types.ObjectId, group_id: Schema.Types.ObjectId }],
-	group_id: [Schema.Types.ObjectId]
+  uri: String,
+  annotations: [{ annotation_id: { type: Schema.Types.ObjectId, ref: 'Annotation' }, group_id: { type: Schema.Types.ObjectId, ref: 'Group' } }],
+  group_id: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
 });
 
-const ArticleModel = mongose.model('Article', ArticleSchema);
+const ArticleModel = mongoose.model('Article', ArticleSchema);
 export default ArticleModel;

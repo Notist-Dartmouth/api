@@ -5,10 +5,10 @@ export const createUser = (req, res) => {
   user.name = req.body.name;
   user.save()
       .then(result => {
-	res.json({ message: 'User created' });
+        res.json({ message: 'User created' });
       })
       .catch(error => {
-	res.json({ error });
+        res.json({ error });
       });
 };
 
