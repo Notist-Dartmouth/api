@@ -12,7 +12,8 @@ var authCallback = function(accessToken, refreshToken, profile, done) {
       if (!user) {
         user = new User({
           name: profile.displayName,
-          email: profile.emails[0].value
+          email: profile.emails[0].value,
+          groupIds: []
         });
       }
       if (profile.provider === 'facebook') {
@@ -49,6 +50,6 @@ export default function authInit(passport) {
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: "/auth/facebook/callback",
-    profileFields: ['email']
+    profileFields: ['id','displayName','email']
   }, authCallback));
 }
