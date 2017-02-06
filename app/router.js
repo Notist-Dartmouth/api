@@ -15,7 +15,7 @@ router.get('/login', (req, res) => {
 
 router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req.user.name, 'is logged in.')
+    console.log(req.user.name, 'is logged in.');
     res.sendFile(path.join(__dirname, 'home.html'));
   } else {
     res.redirect('/login');
@@ -28,11 +28,20 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-router.route('/users')
+const error404 = function(req, res) {
+  res.status(404).end();
+}
+
+router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
-router.route('/annotations')
-      .post(Annotations.createAnnotation);
+router.route('/api/annotations')
+      .post(Annotations.createAnnotation)
+      .get(error404);
+
+router.route('/api/annotations/:id')
+      .get(Annotations.getAnnotation)
+      .put(Annotations.editAnnotation);
 
 export default router;

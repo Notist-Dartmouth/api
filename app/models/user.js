@@ -5,6 +5,7 @@ const userSchema = new Schema({
   facebookId: String,
   name: String,
   email: String,
+  groupIds: [{ type: Schema.Types.ObjectId, ref: "Group" }]
 });
 
 const UserModel = mongoose.model('User', userSchema);
