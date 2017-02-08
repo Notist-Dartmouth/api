@@ -1,24 +1,23 @@
 import Article from '../models/article';
 import * as Group from './group_controller';
 
-export const createArticle = (req, res) => {
+const ObjectId = require('mongoose').Types.ObjectId;
+
+export const createArticle = (uri, groupid) => {
   const article = new Article();
-  const groupid = req.body.group;
-  article.uri = req.body.uri;
+  article.uri = uri;
   article.groups.push(groupid);
-  article.save()
+  console.log(groupid);
+  return article.save()
       .then(result => {
         Group.addGroupArticle(groupid, article._id);
-        res.json({ message: 'Article created' });
-      })
-      .catch(error => {
-        res.json({ error });
       });
 };
 
-export const getArticles = (cb) => {
-  Article.find({}, (err, articles) => {
-    if (err) cb(err);
-    cb(null, articles);
-  });
+export const getAllArticles = () => {
+  return Article.find({});
+};
+
+export const getArticle = (id) => {
+  return Article.find({ _id: ObjectId(id) });
 };
