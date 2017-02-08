@@ -33,15 +33,26 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-router.get('/api/articles', (req, res) => {
-  Articles.getArticles((err, articles) => {
-    if (err) { res.send(`error: ${err}`); }
-    res.render('articles', { articles });
+router.get('/api/article', (req, res) => {
+  Articles.getAllArticles()
+  .then(result => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
+  })
+  .catch(err => {
+    res.json({ err });
   });
 });
 
 router.post('/api/article', (req, res) => {
-  Articles.createArticle(req, res);
+  Articles.createArticle(req.body.uri, req.body.group)
+  .then(result => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
+  })
+  .catch(err => {
+    res.json({ err });
+  });
 });
 
 
@@ -49,9 +60,27 @@ router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
+router.post('/api/group', (req, res) => {
+  Groups.createGroup(req.body.name, req.body.description, req.body.creator)
+  .then(result => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
 
-router.route('/api/group')
-      .post(Groups.createGroup);
+router.get('/group/:id', (req, res) => {
+  Groups.getGroup(req.params.id)
+  .then(result => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
 
 router.post('/api/annotations', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
@@ -141,14 +170,5 @@ router.post('/api/annotation/:id/edit', (req, res) => {
     res.status(401).end();
   }
 });
-
-router.get('/group/:id', (req, res) => {
-  Groups.getGroup(req.params.id, (err, groupJSON) => {
-    if (err) { res.send(`error: ${err}`); }
-    res.setHeader('Content-Type', 'application/json');
-    res.send(groupJSON);
-  });
-});
-
 
 export default router;
