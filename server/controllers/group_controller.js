@@ -2,50 +2,36 @@ import Group from '../models/group';
 
 const ObjectId = require('mongoose').Types.ObjectId;
 
-export const createGroup = (req, res) => {
+export const createGroup = (name, description, creator) => {
+  // TODO: error check on names, descriptions and creators?
   const group = new Group();
-  group.name = req.body.name;
-  group.description = req.body.description;
-  group.creator = req.body.creator; // how to get authenticated user ??
+  group.name = name;
+  group.description = description;
+  group.creator = creator; // TODO: @ploomis how to get authenticated user ??
   group.createDate = Date.now();
   group.editDate = Date.now();
+  group.members.push(ObjectId(creator));   // TODO: make sure creator is a valid user ID
 
-  // group.members = req.body.creator;
-
-  group.save()
-      .then(result => {
-        res.json({ message: 'Group created' });
-      })
-      .catch(error => {
-        res.json({ error });
-      });
+  return group.save(); // TODO: catch errors
 };
 
 export const addGroupMember = (groupid, memberid) => {
-// TO DO: similar to addGroupArticle
-// Group.findOne({ _id: ObjectId(groupid) });
+// TODO: similar to addGroupArticle
+  Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
+    group.members.push(memberid); // TODO: validate member is a real member
+    return group.save();
+  });
 };
 
 export const addGroupArticle = (groupid, articleid) => {
   Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
-    if (err) return;
+    // if (err) return; TODO: figure out how to actually catch errors
     group.articles.push(articleid);
-    group.save()
-      .then(result => {
-        return group;
-      })
-      .catch(error => {
-        return error;
-      });
+    return group.save();
   });
 };
 
-export const getGroup = (id, cb) => {
-  Group
-    .findOne({ _id: ObjectId(id) })
-    .populate('articles')
-    .exec(function (err, group) {
-      if (err) return cb(err);
-      return cb(null, group);
-    });
+export const getGroup = (id) => {
+  return Group.findOne({ _id: ObjectId(id) })
+              .populate('articles');
 };
