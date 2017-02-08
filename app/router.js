@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
 import * as Annotations from './controllers/annotation_controller';
+import * as Groups from './controllers/group_controller';
 import path from 'path';
 
 const router = Router();
@@ -43,5 +44,9 @@ router.route('/api/annotations')
 router.route('/api/annotations/:id')
       .get(Annotations.getAnnotation)
       .put(Annotations.editAnnotation);
+
+router.route('/groups')
+      .post(Groups.createGroup)
+      .get(Groups.getGroup)
 
 export default router;
