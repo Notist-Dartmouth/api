@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
+import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 
 import path from 'path';
@@ -41,12 +42,25 @@ router.post('/api/article', (req, res) => {
   Articles.createArticle(req, res);
 });
 
+const error404 = function(req, res) {
+  res.status(404).end();
+}
+
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
+
 router.route('/api/group')
       .post(Groups.createGroup);
+
+router.route('/api/annotations')
+      .post(Annotations.createAnnotation)
+      .get(error404);
+
+router.route('/api/annotations/:id')
+      .get(Annotations.getAnnotation)
+      .put(Annotations.editAnnotation);
 
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id, (err, groupJSON) => {
