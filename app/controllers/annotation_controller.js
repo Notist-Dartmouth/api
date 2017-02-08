@@ -1,49 +1,34 @@
 import Annotation from '../models/annotation';
 
-export const createAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const user = req.user;
-    const annotation = new Annotation();
-    annotation.authorId = user._id;
-    annotation.articleId = req.body.articleId;
-    annotation.text = req.body.text;
-    annotation.articleText = req.body.articleText;
-    if (req.body.parentId) {
-      Annotation.findById(req.body.parentId)
-        .then(parent => {
-          // inherit properties from parent
-          annotation.groupIds = parent.groupIds;
-          annotation.ancestors = parent.ancestors.concat([parent._id]);
-          saveAnnotation(annotation, res);
-        })
-        .catch(err => {
-          res.json({ err });
-        });
-    } else {
-      annotation.groupIds = req.body.groupIds;
-      annotation.ancestors = [];
-      saveAnnotation(annotation, res);
-    }
+export const createAnnotation = (user, body) => {
+  const annotation = new Annotation();
+  annotation.authorId = user._id;
+  annotation.articleId = body.articleId;
+  annotation.text = body.text;
+  annotation.articleText = body.articleText;
+  if (body.parentId) {
+    return Annotation.findById(body.parentId)
+      .then(parent => {
+        // inherit properties from parent
+        annotation.groupIds = parent.groupIds;
+        annotation.ancestors = parent.ancestors.concat([parent._id]);
+        return annotation.save();
+      });
   } else {
-    // not authenticated - send 401 Unauthorized
-    res.status(401).end();
+    annotation.groupIds = body.groupIds;
+    annotation.ancestors = [];
+    return annotation.save();
   }
 };
 
-const saveAnnotation = (annotation, res) => {
-  annotation.save()
-    .then(result => {
-      const aid = annotation._id.valueOf();
-      res.json({ message: 'Annotation ' + aid + ' created!' });
-    })
-    .catch(err => {
-      res.json({ err });
-    });
-};
 
 const intersectOIDArrays = (a, b) => {
-  return a.filter(ael => b.map(bel => ael.equals(bel)).some(x => x));
-}
+  return a.filter(ael => {
+    return b.map(bel => {
+      return ael.equals(bel);
+    }).some(x => { return x; });
+  });
+};
 
 // direct access to a specific annotation
 export const getAnnotation = (req, res) => {
@@ -51,7 +36,7 @@ export const getAnnotation = (req, res) => {
     const userGroups = req.user.groupIds;
     Annotation.findById(req.params.id)
       .then(antn => {
-        var intersectGroups = intersectOIDArrays(userGroups, antn.groupIds);
+        const intersectGroups = intersectOIDArrays(userGroups, antn.groupIds);
         if (intersectGroups.length !== 0) {
           // user is authorized to view this annotation
           res.json(antn);
@@ -72,21 +57,17 @@ export const getAnnotation = (req, res) => {
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.
-export const getArticleAnnotations = (user, articleId, groupIds, toplevelOnly) => {
+export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
   if (user !== null) {
-    if (typeof groupIds == 'undefined' || groupIds === null) {
-      var gidsToAccess = user.groupIds;
-    } else {
-      // find intersection between accessible and requested groups
-      var gidsToAccess = intersectOIDArrays(user.groupIds, groupIds);
+    const conditions = { articleId, groupIds: { $in: user.groupIds } };
+    if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
+      conditions.ancestors = { $size: 0 };
     }
-    var conditions = {articleId: articleId, groupIds: {$in: gidsToAccess}};
-    if (typeof toplevelOnly != 'undefined' && toplevelOnly) {
-      conditions.ancestors = {$size: 0};
-    }
-    return Annotations.find(conditions).exec();
+    console.log('lol we in here');
+    return Annotation.find(conditions).exec();
   } else {
     // TODO: return public annotations
+    console.log('we got in here...');
     return Promise.resolve([]);
   }
 };
@@ -94,8 +75,8 @@ export const getArticleAnnotations = (user, articleId, groupIds, toplevelOnly) =
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
 // Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
 // Returns a promise.
-export const getTopLevelAnnotations = (user, articleId, groupIds) => {
-  return getArticleAnnotations(user, articleId, groupIds, true);
+export const getTopLevelAnnotations = (user, articleId) => {
+  return getArticleAnnotations(user, articleId, true);
 };
 
 // Get all replies to parentId (verifying that user has access to this comment)
