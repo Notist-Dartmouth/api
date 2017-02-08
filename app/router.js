@@ -8,6 +8,8 @@ import path from 'path';
 
 const router = Router();
 
+// TODO: Deal with errors like goddamn adults instead of ignoring them
+
 router.get('/login', (req, res) => {
   if (req.isAuthenticated()) {
     res.redirect('/');
@@ -54,9 +56,41 @@ router.route('/api/user')
 router.route('/api/group')
       .post(Groups.createGroup);
 
-router.route('/api/annotations')
-      .post(Annotations.createAnnotation)
-      .get(error404);
+// router.route('/api/annotations')
+//       .post(Annotations.createAnnotation)
+//       .get(error404);
+
+router.post('/api/annotations', (req, res) => {
+  // Assumption: if isAuthenticated, user !== NULL
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const body = req.body;
+    Annotations.createAnnotation(user, body).then(result => {
+      res.json({ message: result });
+    })
+    .catch(err => {
+      res.json({ err });
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+router.get('/api/:articleid/annotations', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const articleId = req.params.articleid;
+  console.log(articleId);
+  Annotations.getArticleAnnotations(user, articleId).then(result => {
+    res.json(result);
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
+
 
 router.route('/api/annotations/:id')
       .get(Annotations.getAnnotation)
