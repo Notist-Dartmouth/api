@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
+import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+
 import path from 'path';
 
 const router = Router();
@@ -29,6 +31,17 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+router.get('/api/articles', (req, res) => {
+  Articles.getArticles((err, articles) => {
+    if (err) { res.send(`error: ${err}`); }
+    res.render('articles', { articles });
+  });
+});
+
+router.post('/api/article', (req, res) => {
+  Articles.createArticle(req, res);
+});
+
 const error404 = function(req, res) {
   res.status(404).end();
 }
@@ -36,6 +49,10 @@ const error404 = function(req, res) {
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
+
+
+router.route('/api/group')
+      .post(Groups.createGroup);
 
 router.route('/api/annotations')
       .post(Annotations.createAnnotation)
@@ -45,8 +62,12 @@ router.route('/api/annotations/:id')
       .get(Annotations.getAnnotation)
       .put(Annotations.editAnnotation);
 
-router.route('/groups')
-      .post(Groups.createGroup)
-      .get(Groups.getGroup)
+router.get('/group/:id', (req, res) => {
+  Groups.getGroup(req.params.id, (err, groupJSON) => {
+    if (err) { res.send(`error: ${err}`); }
+    res.setHeader('Content-Type', 'application/json');
+    res.send(groupJSON);
+  });
+});
 
 export default router;
