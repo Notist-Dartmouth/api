@@ -7,7 +7,7 @@ const annotationSchema = new Schema({
   articleId: { type: ObjectId, ref: 'Article' },
   groupIds: [{ type: ObjectId, ref: 'Group' }],
   ancestors: [{ type: ObjectId, ref: 'Annotation' }],
-  isPublic: Boolean,
+  isPublic: { type: Boolean, default: true },
 
   text: { type: String, trim: true },
   articleText: String,
