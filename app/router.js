@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
@@ -31,28 +32,35 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-router.get('/api/articles', (req, res) => {
-  Articles.getArticles((err, articles) => {
-    if (err) { res.send(`error: ${err}`); }
-    res.render('articles', { articles });
+router.get('/api/article', (req, res) => {
+  Articles.getAllArticles().then((result) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
   });
 });
 
 router.post('/api/article', (req, res) => {
-  Articles.createArticle(req, res);
+  Articles.createArticle(req.body.uri, req.body.group).then((result) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
+  });
 });
 
-const error404 = function(req, res) {
+const error404 = function (req, res) {
   res.status(404).end();
-}
+};
 
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
-
-router.route('/api/group')
-      .post(Groups.createGroup);
+router.post('/api/group', (req, res) => {
+  Groups.createGroup(req.body.name, req.body.description, req.body.creator)
+        .then((result) => {
+          res.setHeader('Content-Type', 'application/json');
+          res.send(result);
+        });
+});
 
 router.route('/api/annotations')
       .post(Annotations.createAnnotation)
@@ -63,10 +71,9 @@ router.route('/api/annotations/:id')
       .put(Annotations.editAnnotation);
 
 router.get('/group/:id', (req, res) => {
-  Groups.getGroup(req.params.id, (err, groupJSON) => {
-    if (err) { res.send(`error: ${err}`); }
+  Groups.getGroup(req.params.id).then((result) => {
     res.setHeader('Content-Type', 'application/json');
-    res.send(groupJSON);
+    res.send(result);
   });
 });
 
