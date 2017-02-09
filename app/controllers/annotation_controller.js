@@ -35,41 +35,30 @@ const intersectOIDArrays = (a, b) => {
 };
 
 // direct access to a specific annotation
-export const getAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const userGroups = req.user.groupIds;
-    Annotation.findById(req.params.id)
-      .then(antn => {
-        const intersectGroups = intersectOIDArrays(userGroups, antn.groupIds);
-        if (intersectGroups.length !== 0) {
-          // user is authorized to view this annotation
-          res.json(antn);
-        } else {
-          // not authorized - send 401 Unauthorized
-          res.status(401).end();
-        }
-      })
-      .catch(err => {
-        res.json({ err });
-      });
+export const getAnnotation = (user, annotationId) => {
+  const conditions = { _id: annotationId };
+  if (user === null) {
+    conditions.isPublic = true;
   } else {
-    // TODO: show annotation if it's public
-    res.status(401).end();
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
+  return Annotation.find(conditions);
 };
 
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.
 export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
-  let conditions = { articleId, isPublic: true };
-  if (user !== null) {
-    conditions = { articleId, $or: [{ groupIds: { $in: user.groupIds } }, { isPublic: true }] };
+  const conditions = { articleId };
+  if (user === null) {
+    conditions.isPublic = true;
+  } else {
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
     conditions.ancestors = { $size: 0 };
   }
-  return Annotation.find(conditions).exec();
+  return Annotation.find(conditions);
 };
 
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
