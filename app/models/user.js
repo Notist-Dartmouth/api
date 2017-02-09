@@ -4,7 +4,7 @@ const userSchema = new Schema({
   googleId: String,
   facebookId: String,
   name: String,
-  username: { type: String, required: true, unique: true },
+  username: { type: String, unique: true },
   email: String,
   groupIds: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
 });
