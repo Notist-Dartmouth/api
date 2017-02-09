@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema({
+  // TODO: Some of these need to be required fields
   googleId: String,
   facebookId: String,
   name: String,
