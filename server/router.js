@@ -93,13 +93,28 @@ router.get('/api/article/:id/annotations', (req, res) => {
 });
 
 
-router.get('/api/annotations/:id', (req, res) => {
+router.get('/api/annotation/:id', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
     user = req.user;
   }
   const annotationId = req.params.id;
   Annotations.getAnnotation(user, annotationId)
+  .then(result => {
+    res.json({ result });
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
+
+router.get('/api/annotation/:id/replies', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const annotationId = req.params.id;
+  Annotations.getReplies(user, annotationId)
   .then(result => {
     res.json({ result });
   })

@@ -25,15 +25,6 @@ export const createAnnotation = (user, body) => {
   }
 };
 
-
-const intersectOIDArrays = (a, b) => {
-  return a.filter(ael => {
-    return b.map(bel => {
-      return ael.equals(bel);
-    }).some(x => { return x; });
-  });
-};
-
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
   const conditions = { _id: annotationId };
@@ -71,40 +62,15 @@ export const getTopLevelAnnotations = (user, articleId) => {
 // Get all replies to parentId (verifying that user has access to this comment)
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
-export const getReplies = (user, articleId, parentId, directOnly) => {
+export const getReplies = (user, parentId) => {
+  const conditions = { ancestors: { $in: [parentId] } };
   if (user === null) {
-    // TODO: assign the appropriate public group
-    var userGroups = [];
+    conditions.isPublic = true;
   } else {
-    var userGroups = user.groupIds;
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
-  // check that the user has access
-  return Annotations.findById(parentId)
-    .then(parent => {
-      if (intersectOIDArrays(parent.groupIds, userGroups).length === 0) {
-        throw new Error('User does not have access to this annotation');
-      }
-      // user is authorized
-      if (typeof directOnly == 'undefined' || !directOnly) {
-        var conditions = {articleId: articleId, ancestors: {$in: [parentId]}};
-      } else {
-        var parentAncestors = parent.ancestors.length;
-        var conditions = {$and: [{articleId: articleId},
-                                 {ancestors: {$in: [parentId]}},
-                                 {ancestors: {$size: parentAncestors + 1}}
-                                ]
-                          };
-      }
-      return Annotations.find(conditions).exec();
-    });
+  return Annotation.find(conditions);
 };
-
-// Get direct replies to parentId (verifying that user has access to this comment)
-// Also succeeds if user is null and comment thread is public.
-// Returns a promise.
-export const getDirectReplies = (user, articleId, parentId) => {
-  return getReplies(user, articleId, parentId, true);
-}
 
 export const editAnnotation = (req, res) => {
   if (req.isAuthenticated()) {
