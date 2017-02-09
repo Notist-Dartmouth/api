@@ -76,14 +76,15 @@ router.post('/api/annotations', (req, res) => {
   }
 });
 
-router.get('/api/:articleid/annotations', (req, res) => {
+router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
     user = req.user;
   }
-  const articleId = req.params.articleid;
+  const articleId = req.params.id;
   console.log(articleId);
-  Annotations.getArticleAnnotations(user, articleId).then(result => {
+  Annotations.getArticleAnnotations(user, articleId)
+  .then(result => {
     res.json({ result });
   })
   .catch(err => {
@@ -92,9 +93,24 @@ router.get('/api/:articleid/annotations', (req, res) => {
 });
 
 
-router.route('/api/annotations/:id')
-      .get(Annotations.getAnnotation)
-      .put(Annotations.editAnnotation);
+router.get('/api/annotations/:id', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const annotationId = req.params.id;
+  Annotations.getAnnotation(user, annotationId)
+  .then(result => {
+    res.json({ result });
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
+
+// router.route('/api/annotations/:id')
+//       .get(Annotations.getAnnotation)
+//       .put(Annotations.editAnnotation);
 
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id, (err, groupJSON) => {
