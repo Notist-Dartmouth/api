@@ -84,7 +84,7 @@ router.get('/api/:articleid/annotations', (req, res) => {
   const articleId = req.params.articleid;
   console.log(articleId);
   Annotations.getArticleAnnotations(user, articleId).then(result => {
-    res.json(result);
+    res.json({ result });
   })
   .catch(err => {
     res.json({ err });

@@ -3,20 +3,24 @@ import Annotation from '../models/annotation';
 export const createAnnotation = (user, body) => {
   const annotation = new Annotation();
   annotation.authorId = user._id;
-  annotation.articleId = body.articleId;
   annotation.text = body.text;
-  annotation.articleText = body.articleText;
   if (body.parentId) {
     return Annotation.findById(body.parentId)
       .then(parent => {
         // inherit properties from parent
+        annotation.articleText = parent.articleText;
+        annotation.articleId = parent.articleId;
         annotation.groupIds = parent.groupIds;
         annotation.ancestors = parent.ancestors.concat([parent._id]);
+        annotation.isPublic = parent.isPublic;
         return annotation.save();
       });
   } else {
+    annotation.articleText = body.articleText;
+    annotation.articleId = body.articleId;
     annotation.groupIds = body.groupIds;
     annotation.ancestors = [];
+    annotation.isPublic = body.isPublic;
     return annotation.save();
   }
 };
@@ -58,18 +62,14 @@ export const getAnnotation = (req, res) => {
 // If user is null, return public annotations.
 // Returns a promise.
 export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
+  let conditions = { articleId, isPublic: true };
   if (user !== null) {
-    const conditions = { articleId, groupIds: { $in: user.groupIds } };
-    if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-      conditions.ancestors = { $size: 0 };
-    }
-    console.log('lol we in here');
-    return Annotation.find(conditions).exec();
-  } else {
-    // TODO: return public annotations
-    console.log('we got in here...');
-    return Promise.resolve([]);
+    conditions = { articleId, $or: [{ groupIds: { $in: user.groupIds } }, { isPublic: true }] };
   }
+  if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
+    conditions.ancestors = { $size: 0 };
+  }
+  return Annotation.find(conditions).exec();
 };
 
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
