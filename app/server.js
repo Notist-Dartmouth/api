@@ -9,6 +9,7 @@ import authInit from './authentication';
 
 const MongoStore = require('connect-mongo')(session);
 const app = express();
+module.exports.app = app;
 
 // load environment variables
 require('dotenv').load();
