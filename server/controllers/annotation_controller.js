@@ -72,33 +72,12 @@ export const getReplies = (user, parentId) => {
   return Annotation.find(conditions);
 };
 
-export const editAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const userId = req.user._id;
-    Annotation.findById(req.params.id, 'authorId')
-      .then(antn => {
-        if (antn.authorId.equals(userId)) {
-          // allow this edit
-          var update = {};
-          update.text = req.body.text;
-          update.editDate = Date.now();
-          Annotation.updateOne({_id: req.params.id}, update)
-            .then(result => {
-              res.json({ message: "Annotation " + req.params.id.valueOf() + " updated" });
-            })
-            .catch(err => {
-              res.json({ err });
-            })
-        } else {
-          // not the author - send 401 Unauthorized
-          res.status(401).end();
-        }
-      })
-      .catch(err => {
-        res.json({ err });
-      });
+export const editAnnotation = (user, annotationId, updateText) => {
+  if (user === null) {
+    return 'Err: Cannot edit annotations w/o login.';
   } else {
-    // not authenticated - send 401 Unauthorized
-    res.status(401).end();
-  }
+    const conditions = { _id: annotationId, authorId: user._id };
+    const update = { $set: { 'text': updateText, 'editDate': Date.now() } };
+    return Annotation.findOneAndUpdate(annotationId, update);
+  };
 };

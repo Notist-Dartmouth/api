@@ -44,9 +44,6 @@ router.post('/api/article', (req, res) => {
   Articles.createArticle(req, res);
 });
 
-const error404 = function(req, res) {
-  res.status(404).end();
-}
 
 router.route('/api/user')
       .post(Users.createUser)
@@ -55,10 +52,6 @@ router.route('/api/user')
 
 router.route('/api/group')
       .post(Groups.createGroup);
-
-// router.route('/api/annotations')
-//       .post(Annotations.createAnnotation)
-//       .get(error404);
 
 router.post('/api/annotations', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
@@ -123,9 +116,23 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   });
 });
 
-// router.route('/api/annotations/:id')
-//       .get(Annotations.getAnnotation)
-//       .put(Annotations.editAnnotation);
+router.post('/api/annotation/:id/edit', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const annotationId = req.params.id;
+  // for some reason only works with x-www-form-urlencoded body on postman
+  // otherwise gets "undefined"
+  const updateText = req.body.text;
+  Annotations.editAnnotation(user, annotationId, updateText)
+  .then( result => {
+    res.json({ result });
+  })
+  .catch(err => {
+    res.json({ err });
+  });
+});
 
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id, (err, groupJSON) => {
@@ -134,5 +141,6 @@ router.get('/group/:id', (req, res) => {
     res.send(groupJSON);
   });
 });
+
 
 export default router;
