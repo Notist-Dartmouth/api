@@ -1,5 +1,6 @@
 import Annotation from '../models/annotation';
 
+// PRECONDITION: user is not null.
 export const createAnnotation = (user, body) => {
   const annotation = new Annotation();
   annotation.authorId = user._id;
@@ -13,15 +14,32 @@ export const createAnnotation = (user, body) => {
         annotation.groupIds = parent.groupIds;
         annotation.ancestors = parent.ancestors.concat([parent._id]);
         annotation.isPublic = parent.isPublic;
-        return annotation.save();
+        // check that user is allowed to post to the groups
+        if (user.isMemberOfAll(annotation.groupIds)) {
+          return annotation.save();
+        } else {
+          const err = { notistDescription: 'Not authorized for these groups' };
+          throw err;
+        }
+      })
+      .catch(err => {
+        const newErr = err;
+        newErr.notistDescription = 'Error finding parent annotation';
+        throw newErr;
       });
   } else {
     annotation.articleText = body.articleText;
     annotation.articleId = body.articleId;
-    annotation.groupIds = body.groupIds;
     annotation.ancestors = [];
     annotation.isPublic = body.isPublic;
-    return annotation.save();
+    annotation.groupIds = body.groupIds;
+    // check that user is allowed to post to the groups
+    if (user.isMemberOfAll(annotation.groupIds)) {
+      return annotation.save();
+    } else {
+      const err = { notistDescrpition: 'Not authorized for these groups' };
+      return Promise.reject(err);
+    }
   }
 };
 
@@ -72,12 +90,9 @@ export const getReplies = (user, parentId) => {
   return Annotation.find(conditions);
 };
 
-export const editAnnotation = (user, annotationId, updateText) => {
-  if (user === null) {
-    return 'Err: Cannot edit annotations w/o login.';
-  } else {
-    const conditions = { _id: annotationId, authorId: user._id };
-    const update = { $set: { 'text': updateText, 'editDate': Date.now() } };
-    return Annotation.findOneAndUpdate(annotationId, update);
-  };
+// PRECONDITION: user is not null.
+export const editAnnotation = (userId, annotationId, updateText) => {
+  const conditions = { _id: annotationId, authorId: userId };
+  const update = { $set: { text: updateText, editDate: Date.now() } };
+  return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };

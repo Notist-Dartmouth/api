@@ -59,12 +59,13 @@ router.post('/api/annotations', (req, res) => {
     const user = req.user;
     const body = req.body;
     Annotations.createAnnotation(user, body).then(result => {
-      res.json({ message: result });
+      res.json({ added: result });
     })
     .catch(err => {
       res.json({ err });
     });
   } else {
+    // send 401 Unauthorized.
     res.status(401).end();
   }
 });
@@ -117,21 +118,28 @@ router.get('/api/annotation/:id/replies', (req, res) => {
 });
 
 router.post('/api/annotation/:id/edit', (req, res) => {
-  let user = null;
   if (req.isAuthenticated()) {
-    user = req.user;
+    const userId = req.user._id;
+    const annotationId = req.params.id;
+    // for some reason only works with x-www-form-urlencoded body on postman
+    // otherwise gets "undefined"
+    const updateText = req.body.text;
+    Annotations.editAnnotation(userId, annotationId, updateText)
+    .then(result => {
+      if (result === null) {
+        // either the annotation doesn't exist or wasn't written by this user
+        res.json({ err: 'Annotation not found' });
+      } else {
+        res.json({ edited: result });
+      }
+    })
+    .catch(err => {
+      res.json({ err });
+    });
+  } else {
+    // send 401 Unauthorized.
+    res.status(401).end();
   }
-  const annotationId = req.params.id;
-  // for some reason only works with x-www-form-urlencoded body on postman
-  // otherwise gets "undefined"
-  const updateText = req.body.text;
-  Annotations.editAnnotation(user, annotationId, updateText)
-  .then( result => {
-    res.json({ result });
-  })
-  .catch(err => {
-    res.json({ err });
-  });
 });
 
 router.get('/group/:id', (req, res) => {
