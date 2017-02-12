@@ -1,7 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-// maybe need to import article/user models
-
 const ObjectId = Schema.Types.ObjectId;
 
 const GroupSchema = new Schema({
@@ -13,10 +11,8 @@ const GroupSchema = new Schema({
   articles: [{ type: ObjectId, ref: 'Article' }],
   members: [{ type: ObjectId, ref: 'User' }],
 
-	// // optional
-	// joinableBy: ??, // most impt to figure out
-	// readableBy: ??, // less impt
-	// writableBy: ??  // less impt
+  publicRead: Boolean,
+  publicWrite: Boolean,
 });
 
 const GroupModel = mongoose.model('Group', GroupSchema);
