@@ -3,6 +3,7 @@ import User from '../models/user';
 export const createUser = (req, res) => {
   const user = new User();
   user.name = req.body.name;
+  user.groupIds = req.body.groupIds;
   user.save()
       .then(result => {
         res.json({ message: 'User created' });

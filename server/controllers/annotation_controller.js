@@ -1,168 +1,98 @@
 import Annotation from '../models/annotation';
 
-export const createAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const user = req.user;
-    const annotation = new Annotation();
-    annotation.authorId = user._id;
-    annotation.articleId = req.body.articleId;
-    annotation.text = req.body.text;
-    annotation.articleText = req.body.articleText;
-    if (req.body.parentId) {
-      Annotation.findById(req.body.parentId)
-        .then(parent => {
-          // inherit properties from parent
-          annotation.groupIds = parent.groupIds;
-          annotation.ancestors = parent.ancestors.concat([parent._id]);
-          saveAnnotation(annotation, res);
-        })
-        .catch(err => {
-          res.json({ err });
-        });
-    } else {
-      annotation.groupIds = req.body.groupIds;
-      annotation.ancestors = [];
-      saveAnnotation(annotation, res);
-    }
-  } else {
-    // not authenticated - send 401 Unauthorized
-    res.status(401).end();
-  }
-};
-
-const saveAnnotation = (annotation, res) => {
-  annotation.save()
-    .then(result => {
-      const aid = annotation._id.valueOf();
-      res.json({ message: 'Annotation ' + aid + ' created!' });
-    })
-    .catch(err => {
-      res.json({ err });
-    });
-};
-
-const intersectOIDArrays = (a, b) => {
-  return a.filter(ael => b.map(bel => ael.equals(bel)).some(x => x));
-}
-
-// direct access to a specific annotation
-export const getAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const userGroups = req.user.groupIds;
-    Annotation.findById(req.params.id)
-      .then(antn => {
-        var intersectGroups = intersectOIDArrays(userGroups, antn.groupIds);
-        if (intersectGroups.length !== 0) {
-          // user is authorized to view this annotation
-          res.json(antn);
+// PRECONDITION: user is not null.
+export const createAnnotation = (user, body) => {
+  const annotation = new Annotation();
+  annotation.authorId = user._id;
+  annotation.text = body.text;
+  if (body.parentId) {
+    return Annotation.findById(body.parentId)
+      .then(parent => {
+        // inherit properties from parent
+        annotation.articleText = parent.articleText;
+        annotation.articleId = parent.articleId;
+        annotation.groupIds = parent.groupIds;
+        annotation.ancestors = parent.ancestors.concat([parent._id]);
+        annotation.isPublic = parent.isPublic;
+        // check that user is allowed to post to the groups
+        if (user.isMemberOfAll(annotation.groupIds)) {
+          return annotation.save();
         } else {
-          // not authorized - send 401 Unauthorized
-          res.status(401).end();
+          const err = { notistDescription: 'Not authorized for these groups' };
+          throw err;
         }
       })
       .catch(err => {
-        res.json({ err });
+        const newErr = err;
+        newErr.notistDescription = 'Error finding parent annotation';
+        throw newErr;
       });
   } else {
-    // TODO: show annotation if it's public
-    res.status(401).end();
+    annotation.articleText = body.articleText;
+    annotation.articleId = body.articleId;
+    annotation.ancestors = [];
+    annotation.isPublic = body.isPublic;
+    annotation.groupIds = body.groupIds;
+    // check that user is allowed to post to the groups
+    if (user.isMemberOfAll(annotation.groupIds)) {
+      return annotation.save();
+    } else {
+      const err = { notistDescrpition: 'Not authorized for these groups' };
+      return Promise.reject(err);
+    }
   }
+};
+
+// direct access to a specific annotation
+export const getAnnotation = (user, annotationId) => {
+  const conditions = { _id: annotationId };
+  if (user === null) {
+    conditions.isPublic = true;
+  } else {
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
+  }
+  return Annotation.find(conditions);
 };
 
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.
-export const getArticleAnnotations = (user, articleId, groupIds, toplevelOnly) => {
-  if (user !== null) {
-    if (typeof groupIds == 'undefined' || groupIds === null) {
-      var gidsToAccess = user.groupIds;
-    } else {
-      // find intersection between accessible and requested groups
-      var gidsToAccess = intersectOIDArrays(user.groupIds, groupIds);
-    }
-    var conditions = {articleId: articleId, groupIds: {$in: gidsToAccess}};
-    if (typeof toplevelOnly != 'undefined' && toplevelOnly) {
-      conditions.ancestors = {$size: 0};
-    }
-    return Annotations.find(conditions).exec();
+export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
+  const conditions = { articleId };
+  if (user === null) {
+    conditions.isPublic = true;
   } else {
-    // TODO: return public annotations
-    return Promise.resolve([]);
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
+  if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
+    conditions.ancestors = { $size: 0 };
+  }
+  return Annotation.find(conditions);
 };
 
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
 // Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
 // Returns a promise.
-export const getTopLevelAnnotations = (user, articleId, groupIds) => {
-  return getArticleAnnotations(user, articleId, groupIds, true);
+export const getTopLevelAnnotations = (user, articleId) => {
+  return getArticleAnnotations(user, articleId, true);
 };
 
 // Get all replies to parentId (verifying that user has access to this comment)
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
-export const getReplies = (user, articleId, parentId, directOnly) => {
+export const getReplies = (user, parentId) => {
+  const conditions = { ancestors: { $in: [parentId] } };
   if (user === null) {
-    // TODO: assign the appropriate public group
-    var userGroups = [];
+    conditions.isPublic = true;
   } else {
-    var userGroups = user.groupIds;
+    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
-  // check that the user has access
-  return Annotations.findById(parentId)
-    .then(parent => {
-      if (intersectOIDArrays(parent.groupIds, userGroups).length === 0) {
-        throw new Error('User does not have access to this annotation');
-      }
-      // user is authorized
-      if (typeof directOnly == 'undefined' || !directOnly) {
-        var conditions = {articleId: articleId, ancestors: {$in: [parentId]}};
-      } else {
-        var parentAncestors = parent.ancestors.length;
-        var conditions = {$and: [{articleId: articleId},
-                                 {ancestors: {$in: [parentId]}},
-                                 {ancestors: {$size: parentAncestors + 1}}
-                                ]
-                          };
-      }
-      return Annotations.find(conditions).exec();
-    });
+  return Annotation.find(conditions);
 };
 
-// Get direct replies to parentId (verifying that user has access to this comment)
-// Also succeeds if user is null and comment thread is public.
-// Returns a promise.
-export const getDirectReplies = (user, articleId, parentId) => {
-  return getReplies(user, articleId, parentId, true);
-}
-
-export const editAnnotation = (req, res) => {
-  if (req.isAuthenticated()) {
-    const userId = req.user._id;
-    Annotation.findById(req.params.id, 'authorId')
-      .then(antn => {
-        if (antn.authorId.equals(userId)) {
-          // allow this edit
-          var update = {};
-          update.text = req.body.text;
-          update.editDate = Date.now();
-          Annotation.updateOne({_id: req.params.id}, update)
-            .then(result => {
-              res.json({ message: "Annotation " + req.params.id.valueOf() + " updated" });
-            })
-            .catch(err => {
-              res.json({ err });
-            })
-        } else {
-          // not the author - send 401 Unauthorized
-          res.status(401).end();
-        }
-      })
-      .catch(err => {
-        res.json({ err });
-      });
-  } else {
-    // not authenticated - send 401 Unauthorized
-    res.status(401).end();
-  }
+// PRECONDITION: user is not null.
+export const editAnnotation = (userId, annotationId, updateText) => {
+  const conditions = { _id: annotationId, authorId: userId };
+  const update = { $set: { text: updateText, editDate: Date.now() } };
+  return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };
