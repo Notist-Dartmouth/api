@@ -37,7 +37,7 @@ export const createAnnotation = (user, body) => {
     if (user.isMemberOfAll(annotation.groupIds)) {
       return annotation.save();
     } else {
-      const err = { notistDescrpition: 'Not authorized for these groups' };
+      const err = { notistDescription: 'Not authorized for these groups' };
       return Promise.reject(err);
     }
   }

@@ -49,10 +49,6 @@ router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
-
-router.route('/api/group')
-      .post(Groups.createGroup);
-
 router.post('/api/annotations', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
@@ -137,17 +133,51 @@ router.post('/api/annotation/:id/edit', (req, res) => {
       res.json({ err });
     });
   } else {
-    // send 401 Unauthorized.
+    // send 401 unauthorized
     res.status(401).end();
   }
 });
 
-router.get('/group/:id', (req, res) => {
-  Groups.getGroup(req.params.id, (err, groupJSON) => {
-    if (err) { res.send(`error: ${err}`); }
-    res.setHeader('Content-Type', 'application/json');
-    res.send(groupJSON);
-  });
+
+router.post('/api/group', (req, res) => {
+  if (req.isAuthenticated()) {
+    console.log(req);
+    const name = req.body.name;
+    const description = req.body.description;
+    const userId = req.user._id;
+    Groups.createGroup(name, description, userId)
+    .then(result => {
+      if (result === null) {
+        res.json({ err: 'Group not created' });
+      } else {
+        res.json({ created: result });
+      }
+    });
+  }
+});
+
+router.get('/api/group/:id', (req, res) => {
+  console.log(req.isAuthenticated());
+  if (req.isAuthenticated()) {
+    const groupId = req.params.id;
+    const userId = req.user._id;
+    Groups.getGroup(userId, groupId)
+    .then(result => {
+      if (result === null) {
+        res.json({ err: 'Group not found.' });
+      } else {
+        res.json({ group: result });
+        // res.setHeader('Content-Type', 'application/json');
+        // res.send(groupJSON);
+      }
+    })
+    .catch(err => {
+      res.json({ err });
+    });
+  } else {
+    // send 401 unauthorized
+    res.status(401).end();
+  }
 });
 
 

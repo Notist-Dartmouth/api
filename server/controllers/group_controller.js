@@ -1,24 +1,14 @@
 import Group from '../models/group';
 
-const ObjectId = require('mongoose').Types.ObjectId;
-
-export const createGroup = (req, res) => {
+export const createGroup = (name, description, userId) => {
   const group = new Group();
-  group.name = req.body.name;
-  group.description = req.body.description;
-  group.creator = req.body.creator; // how to get authenticated user ??
+  group.name = name;
+  group.description = description;
+  group.creator = userId; // how to get authenticated user ??
   group.createDate = Date.now();
   group.editDate = Date.now();
 
-  // group.members = req.body.creator;
-
-  group.save()
-      .then(result => {
-        res.json({ message: 'Group created' });
-      })
-      .catch(error => {
-        res.json({ error });
-      });
+  return group.save();
 };
 
 export const addGroupMember = (groupid, memberid) => {
@@ -27,7 +17,7 @@ export const addGroupMember = (groupid, memberid) => {
 };
 
 export const addGroupArticle = (groupid, articleid) => {
-  Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
+  Group.findOne({ _id: groupid }, (err, group) => {
     if (err) return;
     group.articles.push(articleid);
     group.save()
@@ -40,12 +30,8 @@ export const addGroupArticle = (groupid, articleid) => {
   });
 };
 
-export const getGroup = (id, cb) => {
-  Group
-    .findOne({ _id: ObjectId(id) })
-    .populate('articles')
-    .exec(function (err, group) {
-      if (err) return cb(err);
-      return cb(null, group);
-    });
+export const getGroup = (userId, groupId) => {
+  // need to check if user is in the group OR the group is public
+  return Group.findOne({ _id: groupId });
+    // .populate('articles');
 };
