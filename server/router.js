@@ -40,9 +40,22 @@ router.get('/api/articles', (req, res) => {
   });
 });
 
-router.post('/api/article', (req, res) => {
-  Articles.createArticle(req, res);
-});
+// We should only create articles when creating annotations
+// router.post('/api/article', (req, res) => {
+//   if (req.isAuthenticated()) {
+//     const uri = req.body.uri;
+//     const groupIds = req.body.groupIds;
+//     Articles.createArticle(uri, groupIds)
+//     .then(result => {
+//       Groups.addGroupArticle(groupIds, result._id);
+//       res.json({ created: result });
+//     })
+//     .catch(err => {
+//       res.json({ error: err });
+//     });
+//   }
+//   Articles.createArticle(req, res);
+// });
 
 
 router.route('/api/user')
@@ -54,17 +67,59 @@ router.post('/api/annotations', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const body = req.body;
-    Annotations.createAnnotation(user, body).then(result => {
-      res.json({ added: result });
+    // check if article exists, articleID
+    let articleId;
+    const groupIds = req.body.groupIds;
+    const uri = req.body.uri;
+
+    return Articles.getArticle({ uri })
+    .then( article => {
+      if (article === null) {
+        return Articles.createArticle(uri, groupIds)
+        .then( new_article => {
+          articleId = new_article._id;
+          return createAnnotation(user, body, articleId)
+        })
+      } else {
+        articleId = article._id;
+        return createAnnotation(user, body, articleId)
+      }
     })
-    .catch(err => {
-      res.json({ err });
+    .then( annotation => {
+      res.json({ annotation });
+    })
+    .catch( err => {
+      res.err({ err });
     });
-  } else {
-    // send 401 Unauthorized.
-    res.status(401).end();
-  }
-});
+    // LOGIC
+    // if article already exists, get its ID
+    // if article does not already exist, create it and get its ID
+    // create the annotation with the article ID passed in
+    // race two promises:
+      // 1. article exists, get the ID
+      // 2. article doesn't exist, create and get the ID
+  //   Articles.getArticle({ uri })
+  //   .then(result => {
+  //     if (result === null) {
+  //       Articles.createArticle(uri, groupIds)
+  //       .then(article => {
+  //         articleId = article._id;
+  //       });
+  //     } else {
+  //       articleId = result._id;
+  //     }
+  //     Annotations.createAnnotation(user, body, articleId)
+  //     .then(annotation => {
+  //       res.json({ annotation });
+  //     });
+  //   })
+  //   .catch(err => {
+  //     res.json({ err });
+  //   });
+  // } else {
+  //   res.status(401).end();
+  // }
+// });
 
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;

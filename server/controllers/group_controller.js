@@ -16,18 +16,20 @@ export const addGroupMember = (groupid, memberid) => {
 // Group.findOne({ _id: ObjectId(groupid) });
 };
 
-export const addGroupArticle = (groupid, articleid) => {
-  Group.findOne({ _id: groupid }, (err, group) => {
-    if (err) return;
-    group.articles.push(articleid);
-    group.save()
-      .then(result => {
-        return group;
-      })
-      .catch(error => {
-        return error;
-      });
-  });
+// can this just be called on an array of groupids? yes
+export const addGroupArticle = (groupIds, articleId) => {
+
+  // Group.findOne({ _id: groupid }, (err, group) => {
+  //   if (err) return;
+  //   group.articles.push(articleid);
+  //   group.save()
+  //     .then(result => {
+  //       return group;
+  //     })
+  //     .catch(error => {
+  //       return error;
+  //     });
+  // });
 };
 
 export const getGroup = (userId, groupId) => {
