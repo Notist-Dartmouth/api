@@ -12,10 +12,24 @@ const annotationSchema = new Schema({
   articleText: String,
 
   groupIds: [{ type: ObjectId, ref: 'Group' }],
-  isPublic: { type: Boolean, default: true },
+  isPublic: Boolean,
 
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
+  edited: { type: Boolean, default: false },
+});
+
+// Enforce that private annotations have exactly one group.
+annotationSchema.pre('save', function preSave(next) {
+  if (!this.isPublic && this.groupIds.length === 0) {
+    const err = new Error('Must assign private annotation to a group');
+    next(err);
+  } else if (!this.isPublic && this.groupIds.length > 1) {
+    const err = new Error('Cannot assign private annotation to multiple groups');
+    next(err);
+  } else {
+    next();
+  }
 });
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
