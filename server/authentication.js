@@ -24,8 +24,14 @@ const authCallback = (accessToken, refreshToken, profile, done) => {
       } else if (profile.provider === 'google') {
         myUser.googleId = profile.id;
       }
-      myUser.save();
-      done(err, user);
+      console.log(myUser);
+      myUser.save()
+        .then((result) => {
+          done(null, myUser);
+        })
+        .catch((err) => {
+          done(err);
+        });
     });
   });
 };

@@ -3,3 +3,4 @@ config.js
 .env
 npm-debug.log
 dist
+.DS_Store
