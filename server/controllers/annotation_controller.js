@@ -56,7 +56,7 @@ export const createAnnotation = (user, body) => {
       if (body.groupIds.length === 0) {
         const err = new Error('Must assign private annotation to a group');
         return Promise.reject(err);
-      } else if (!body.isPublic && body.groupIds.length > 1) {
+      } else if (body.groupIds.length > 1) {
         const err = new Error('Cannot assign private annotation to multiple groups');
         return Promise.reject(err);
       }
