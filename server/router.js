@@ -10,6 +10,7 @@ const router = Router();
 
 // TODO: Deal with errors like goddamn adults instead of ignoring them
 
+// navigate to login page
 router.get('/login', (req, res) => {
   if (req.isAuthenticated()) {
     res.redirect('/');
@@ -18,6 +19,7 @@ router.get('/login', (req, res) => {
   }
 });
 
+// navigate to home page
 router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
     console.log(req.user.name, 'is logged in.');
@@ -27,12 +29,14 @@ router.get('/', (req, res) => {
   }
 });
 
+// navigate to logout page
 router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
   res.redirect('/login');
 });
 
+// retrieve all articles
 router.get('/api/article', (req, res) => {
   Articles.getAllArticles()
   .then(result => {
@@ -44,6 +48,7 @@ router.get('/api/article', (req, res) => {
   });
 });
 
+// create new article
 router.post('/api/article', (req, res) => {
   Articles.createArticle(req.body.uri, req.body.group)
   .then(result => {
@@ -57,11 +62,12 @@ router.post('/api/article', (req, res) => {
   });
 });
 
-
+// TODO: are we using this?
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
+// create new group
 router.post('/api/group', (req, res) => {
   Groups.createGroup(req.body.name, req.body.description, req.body.creator)
   .then(result => {
@@ -73,6 +79,7 @@ router.post('/api/group', (req, res) => {
   });
 });
 
+// get specific group
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
@@ -84,7 +91,8 @@ router.get('/group/:id', (req, res) => {
   });
 });
 
-router.post('/api/annotations', (req, res) => {
+// create new annotation
+router.post('/api/annotation', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
     const user = req.user;
@@ -101,6 +109,7 @@ router.post('/api/annotations', (req, res) => {
   }
 });
 
+// get annotations on an article
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -117,7 +126,7 @@ router.get('/api/article/:id/annotations', (req, res) => {
   });
 });
 
-
+// get specific annotation
 router.get('/api/annotation/:id', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -133,6 +142,7 @@ router.get('/api/annotation/:id', (req, res) => {
   });
 });
 
+// get replies to an annotation
 router.get('/api/annotation/:id/replies', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -148,6 +158,7 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   });
 });
 
+// edit an annotation
 router.post('/api/annotation/:id/edit', (req, res) => {
   if (req.isAuthenticated()) {
     const userId = req.user._id;
