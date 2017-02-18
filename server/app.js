@@ -6,16 +6,25 @@ import passport from 'passport';
 import session from 'express-session';
 import router from './router';
 import authInit from './authentication';
+import config from './_config'; // *** config file *** //
 
 const MongoStore = require('connect-mongo')(session);
 const app = express();
+module.exports.app = app;
 
 // load environment variables
 require('dotenv').load();
 
 // DB Setup
-const mongoURI = process.env.MONGODB_URI;
-mongoose.connect(mongoURI);
+// *** mongoose *** ///
+mongoose.connect(config.mongoURI[app.settings.env], function (err, res) {
+  if (err) {
+    console.log('Error connecting to the database. ' + err);
+  } else {
+    console.log('Connected to Database: ' + config.mongoURI[app.settings.env]);
+  }
+});
+
 // set mongoose promises to es6 default
 mongoose.Promise = global.Promise;
 
