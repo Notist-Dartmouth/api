@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import serializeError from 'serialize-error';
 
 import path from 'path';
 
@@ -41,10 +42,10 @@ router.get('/api/article', (req, res) => {
   Articles.getAllArticles()
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -54,11 +55,11 @@ router.post('/api/article', (req, res) => {
   .then(result => {
     console.log(result);
     res.setHeader('Content-Type', 'application/json');
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
     console.log(res);
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -72,10 +73,10 @@ router.post('/api/group', (req, res) => {
   Groups.createGroup(req.body.name, req.body.description, req.body.creator)
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -84,10 +85,10 @@ router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -98,10 +99,10 @@ router.post('/api/annotation', (req, res) => {
     const user = req.user;
     const body = req.body;
     Annotations.createAnnotation(user, body).then(result => {
-      res.json({ 'SUCCESS': result });
+      res.json({ SUCCESS: result });
     })
     .catch(err => {
-      res.json({ 'ERROR': err });
+      res.json({ ERROR: serializeError(err) });
     });
   } else {
     // send 401 Unauthorized.
@@ -119,10 +120,10 @@ router.get('/api/article/:id/annotations', (req, res) => {
   console.log(articleId);
   Annotations.getArticleAnnotations(user, articleId)
   .then(result => {
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -135,10 +136,10 @@ router.get('/api/annotation/:id', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getAnnotation(user, annotationId)
   .then(result => {
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -151,10 +152,10 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
   .then(result => {
-    res.json({ 'SUCCESS': result });
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ 'ERROR': err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
@@ -170,13 +171,14 @@ router.post('/api/annotation/:id/edit', (req, res) => {
     .then(result => {
       if (result === null) {
         // either the annotation doesn't exist or wasn't written by this user
-        res.json({ 'ERROR': 'Annotation not found' });
+        const err = new Error('Annotation not found');
+        res.json({ ERROR: serializeError(err) });
       } else {
-        res.json({ 'SUCCESS': result });
+        res.json({ SUCCESS: result });
       }
     })
     .catch(err => {
-      res.json({ 'ERROR': err });
+      res.json({ ERROR: serializeError(err) });
     });
   } else {
     // send 401 Unauthorized.
