@@ -34,5 +34,4 @@ export const getGroup = (userId, groupId) => {
   // need to check if user is in the group OR the group is public
   return Group.findOne({ _id: groupId });
     // .populate('articles');
-
 };

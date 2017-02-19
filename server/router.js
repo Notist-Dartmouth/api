@@ -51,12 +51,9 @@ router.get('/api/article', (req, res) => {
 
 // create new article
 router.post('/api/article', (req, res) => {
-  Articles.createArticle(req.body.uri, req.body.group)
+  Articles.createArticle(req.body.uri, req.body.groupIds)
   .then(result => {
-    console.log(result);
-    res.setHeader('Content-Type', 'application/json');
     res.json({ SUCCESS: result });
-    console.log(res);
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
@@ -102,26 +99,25 @@ router.post('/api/annotation', (req, res) => {
     let articleId;
     const groupIds = req.body.groupIds;
     const uri = req.body.uri;
-    console.log(body);
+
     Articles.getArticle(uri)
     .then(article => {
       if (article === null) {
         return Articles.createArticle(uri, groupIds)
         .then(newArticle => {
-          console.log('created new article!');
-          console.log(newArticle);
           articleId = newArticle._id;
           return Annotations.createAnnotation(user, body, articleId);
         });
       } else {
-        console.log('found previous article!');
-        console.log(article._id);
         articleId = article._id;
         return Annotations.createAnnotation(user, body, articleId);
       }
     })
     .then(annotation => {
-      res.json({ SUCCESS: annotation });
+      Articles.addArticleAnnotation(articleId, annotation._id)
+      .then(result => {
+        res.json({ SUCCESS: annotation });
+      });
     })
     .catch(err => {
       res.json({ ERROR: serializeError(err) });
@@ -147,7 +143,6 @@ router.get('/api/article/:id/annotations', (req, res) => {
     user = req.user;
   }
   const articleId = req.params.id;
-  console.log(articleId);
   Annotations.getArticleAnnotations(user, articleId)
   .then(result => {
     res.json({ SUCCESS: result });
@@ -218,7 +213,6 @@ router.post('/api/annotation/:id/edit', (req, res) => {
 
 router.post('/api/group', (req, res) => {
   if (req.isAuthenticated()) {
-    console.log(req);
     const name = req.body.name;
     const description = req.body.description;
     const userId = req.user._id;
@@ -235,7 +229,6 @@ router.post('/api/group', (req, res) => {
 });
 
 router.get('/api/group/:id', (req, res) => {
-  console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const groupId = req.params.id;
     const userId = req.user._id;
