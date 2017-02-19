@@ -18,6 +18,7 @@ export const getArticle = (uri) => {
   // find article and return it if it exists
 };
 
+
 // getUserArticles
 // getArticle
 // getGroupArticles

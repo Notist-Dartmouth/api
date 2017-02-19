@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import serializeError from 'serialize-error';
 
 import path from 'path';
 
@@ -10,6 +11,7 @@ const router = Router();
 
 // TODO: Deal with errors like goddamn adults instead of ignoring them
 
+// navigate to login page
 router.get('/login', (req, res) => {
   if (req.isAuthenticated()) {
     res.redirect('/');
@@ -18,6 +20,7 @@ router.get('/login', (req, res) => {
   }
 });
 
+// navigate to home page
 router.get('/', (req, res) => {
   if (req.isAuthenticated()) {
     console.log(req.user.name, 'is logged in.');
@@ -27,12 +30,14 @@ router.get('/', (req, res) => {
   }
 });
 
+// navigate to logout page
 router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
   res.redirect('/login');
 });
 
+// retrieve all articles
 router.get('/api/article', (req, res) => {
   Articles.getAllArticles()
   .then(result => {
@@ -40,30 +45,30 @@ router.get('/api/article', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
+// create new article
 router.post('/api/article', (req, res) => {
-  if (req.isAuthenticated()) {
-    const uri = req.body.uri;
-    const groupIds = req.body.groupIds;
-    Articles.createArticle(uri, groupIds)
-    .then(result => {
-      Groups.addGroupArticle(groupIds, result._id);
-      res.json({ created: result });
-    })
-    .catch(err => {
-      res.json({ error: err });
-    });
-  }
-  Articles.createArticle(req, res);
+  Articles.createArticle(req.body.uri, req.body.group)
+  .then(result => {
+    console.log(result);
+    res.setHeader('Content-Type', 'application/json');
+    res.json({ SUCCESS: result });
+    console.log(res);
+  })
+  .catch(err => {
+    res.json({ ERROR: serializeError(err) });
+  });
 });
 
+// TODO: are we using this?
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
+// create new group
 router.post('/api/group', (req, res) => {
   Groups.createGroup(req.body.name, req.body.description, req.body.creator)
   .then(result => {
@@ -71,10 +76,11 @@ router.post('/api/group', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
+// get specific group
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
@@ -82,10 +88,11 @@ router.get('/group/:id', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
+// create new annotation
 router.post('/api/annotation', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
@@ -117,13 +124,14 @@ router.post('/api/annotation', (req, res) => {
       res.json({ SUCCESS: annotation });
     })
     .catch(err => {
-      res.json({ ERROR: err });
+      res.json({ ERROR: serializeError(err) });
     });
   } else {
     // send 401 unauthorized
     res.status(401).end();
   }
 });
+
     // LOGIC
     // if article already exists, get its ID
     // if article does not already exist, create it and get its ID
@@ -131,29 +139,8 @@ router.post('/api/annotation', (req, res) => {
     // race two promises:
       // 1. article exists, get the ID
       // 2. article doesn't exist, create and get the ID
-  //   Articles.getArticle({ uri })
-  //   .then(result => {
-  //     if (result === null) {
-  //       Articles.createArticle(uri, groupIds)
-  //       .then(article => {
-  //         articleId = article._id;
-  //       });
-  //     } else {
-  //       articleId = result._id;
-  //     }
-  //     Annotations.createAnnotation(user, body, articleId)
-  //     .then(annotation => {
-  //       res.json({ annotation });
-  //     });
-  //   })
-  //   .catch(err => {
-  //     res.json({ err });
-  //   });
-  // } else {
-  //   res.status(401).end();
-  // }
-// });
-//
+
+// get annotations on an article
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -166,11 +153,11 @@ router.get('/api/article/:id/annotations', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
-
+// get specific annotation
 router.get('/api/annotation/:id', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -182,10 +169,11 @@ router.get('/api/annotation/:id', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
+// get replies to an annotation
 router.get('/api/annotation/:id/replies', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -197,10 +185,11 @@ router.get('/api/annotation/:id/replies', (req, res) => {
     res.json({ SUCCESS: result });
   })
   .catch(err => {
-    res.json({ ERROR: err });
+    res.json({ ERROR: serializeError(err) });
   });
 });
 
+// edit an annotation
 router.post('/api/annotation/:id/edit', (req, res) => {
   if (req.isAuthenticated()) {
     const userId = req.user._id;
@@ -212,13 +201,14 @@ router.post('/api/annotation/:id/edit', (req, res) => {
     .then(result => {
       if (result === null) {
         // either the annotation doesn't exist or wasn't written by this user
-        res.json({ ERROR: 'Annotation not found' });
+        const err = new Error('Annotation not found');
+        res.json({ ERROR: serializeError(err) });
       } else {
         res.json({ SUCCESS: result });
       }
     })
     .catch(err => {
-      res.json({ ERROR: err });
+      res.json({ ERROR: serializeError(err) });
     });
   } else {
     // send 401 unauthorized
@@ -235,9 +225,10 @@ router.post('/api/group', (req, res) => {
     Groups.createGroup(name, description, userId)
     .then(result => {
       if (result === null) {
-        res.json({ err: 'Group not created' });
+        const err = new Error('Group not created');
+        res.json({ ERROR: serializeError(err) });
       } else {
-        res.json({ created: result });
+        res.json({ SUCCESS: result });
       }
     });
   }
@@ -251,15 +242,14 @@ router.get('/api/group/:id', (req, res) => {
     Groups.getGroup(userId, groupId)
     .then(result => {
       if (result === null) {
-        res.json({ err: 'Group not found.' });
+        const err = new Error('Group not found');
+        res.json({ ERROR: serializeError(err) });
       } else {
-        res.json({ group: result });
-        // res.setHeader('Content-Type', 'application/json');
-        // res.send(groupJSON);
+        res.json({ SUCCESS: result });
       }
     })
     .catch(err => {
-      res.json({ err });
+      res.json({ ERROR: serializeError(err) });
     });
   } else {
     // send 401 unauthorized
