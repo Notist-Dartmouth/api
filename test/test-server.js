@@ -28,7 +28,7 @@ describe('Articles', function () {
     });
   });
   afterEach(function (done) {
-  /*  Article.collection.drop();*/
+    Article.collection.drop();
     done();
   });
 
@@ -38,16 +38,27 @@ describe('Articles', function () {
       .end(function (err, res) {
         res.should.have.status(200);
         res.should.be.json;
+        res.should.be.a('array');
+        res.body[0].should.have.property('_id');
+        res.body[0].should.have.property('groups');
+        res.body[0].should.have.property('uri');
+        res.body[0].uri.should.equal('www.thisisauri.com');
         done(); // TODO: ADD MORE HERE
       });
   });
   it('should add a single article on /api/articles POST', function (done) {
     chai.request(server.app)
       .post('/api/article')
-      .send({ 'uri': 'www.nytimes.com' })
+      .send({ 'uri': 'www.nytimes.com' })  // TO DO add group ?
       .end(function (err, res) {
         res.should.have.status(200);
         res.should.be.json;
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.should.be.a('object');
+        res.body.SUCCESS.should.have.property('_id');
+        res.body.SUCCESS.should.have.property('groups');
+        res.body.SUCCESS.should.have.property('uri');
+        res.body.SUCCESS.uri.should.equal('www.nytimes.com');
         done(); // TODO: Add more here
       });
   });
