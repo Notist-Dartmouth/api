@@ -18,7 +18,9 @@ describe('Articles', function () {
   /* Article.collection.drop();*/
 
   beforeEach(function (done) {
-    var newGroup;
+    // var newGroup = new Group({
+    //   name:
+    // });
     var newArticle = new Article({
       uri: 'www.thisisauri.com',
       group: '1234',
@@ -28,7 +30,7 @@ describe('Articles', function () {
     });
   });
   afterEach(function (done) {
-    Article.collection.drop();
+    /* Article.collection.drop();*/
     done();
   });
 
