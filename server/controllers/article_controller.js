@@ -1,8 +1,6 @@
 import Article from '../models/article';
 import * as Group from './group_controller';
 
-const ObjectId = require('mongoose').Types.ObjectId;
-
 export const createArticle = (uri, groupid) => {
   const article = new Article();
   article.uri = uri;
@@ -19,5 +17,5 @@ export const getAllArticles = () => {
 };
 
 export const getArticle = (id) => {
-  return Article.find({ _id: ObjectId(id) });
+  return Article.findById(id);
 };
