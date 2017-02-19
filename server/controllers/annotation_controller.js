@@ -30,7 +30,6 @@ export const createAnnotation = (user, body) => {
     // ensure user is allowed to *read* the parent annotation
     return getAnnotation(user, body.parentId)
       .then(parent => {
-        console.log(parent);
         // inherit properties from parent
         annotation.articleText = parent.articleText;
         annotation.articleId = parent.articleId;
@@ -51,15 +50,9 @@ export const createAnnotation = (user, body) => {
     annotation.isPublic = body.isPublic;
     annotation.groupIds = body.groupIds;
 
-    if (!body.isPublic) {
-      // check that there is exactly one group
-      if (body.groupIds.length === 0) {
-        const err = new Error('Must assign private annotation to a group');
-        return Promise.reject(err);
-      } else if (body.groupIds.length > 1) {
-        const err = new Error('Cannot assign private annotation to multiple groups');
-        return Promise.reject(err);
-      }
+    if (!body.isPublic && body.groupIds.length > 1) {
+      const err = new Error('Cannot assign private annotation to multiple groups');
+      return Promise.reject(err);
     }
 
     // check that user is allowed to post to the groups
