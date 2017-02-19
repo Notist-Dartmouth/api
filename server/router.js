@@ -80,7 +80,7 @@ router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
-    res.json({ 'SUCCESS': result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ 'ERROR': err });
@@ -146,6 +146,7 @@ router.post('/api/annotations', (req, res) => {
   // }
 // });
 
+/* get all annotations on a particular article */
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -155,7 +156,7 @@ router.get('/api/article/:id/annotations', (req, res) => {
   console.log(articleId);
   Annotations.getArticleAnnotations(user, articleId)
   .then(result => {
-    res.json({ 'SUCCESS': result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ 'ERROR': err });
@@ -163,6 +164,7 @@ router.get('/api/article/:id/annotations', (req, res) => {
 });
 
 
+/* get particular annotation with id */
 router.get('/api/annotation/:id', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -259,5 +261,4 @@ router.get('/api/group/:id', (req, res) => {
   }
 });
 
-
-export default router;
+// export default router;
