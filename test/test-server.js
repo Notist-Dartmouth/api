@@ -14,40 +14,41 @@ import Group from '../server/models/group';
 var should = chai.should();
 chai.use(chaiHttp);
 
-describe('Articles', function () {
-  /* Article.collection.drop();*/
+describe('Users', function () {
+  it('should create new user');
+});
 
-  beforeEach(function (done) {
-    // var newGroup = new Group({
-    //   name:
-    // });
+describe('Groups', function () {
+  it('should post new group');
+  it('should add user to group');
+});
+/* groups */
+
+describe('Articles', function () {
+  Article.collection.drop();
+
+  before(function (done) {
+    // TODO: figure out how to authenticate user
+    // before each test, create new group and add article
+    var newGroup = new Group({
+      name: 'FirstGroup',
+      description: 'this is a test group',
+    });
+
     var newArticle = new Article({
       uri: 'www.thisisauri.com',
       group: '1234',
     });
+
     newArticle.save(function (err) {
       done();
     });
   });
-  afterEach(function (done) {
-    /* Article.collection.drop();*/
+  after(function (done) {
+    Article.collection.drop();
     done();
   });
 
-  it('should list ALL articles on /api/articles GET', function (done) {
-    chai.request(server.app)
-      .get('/api/article')
-      .end(function (err, res) {
-        res.should.have.status(200);
-        res.should.be.json;
-        res.should.be.a('array');
-        res.body[0].should.have.property('_id');
-        res.body[0].should.have.property('groups');
-        res.body[0].should.have.property('uri');
-        res.body[0].uri.should.equal('www.thisisauri.com');
-        done(); // TODO: ADD MORE HERE
-      });
-  });
   it('should add a single article on /api/articles POST', function (done) {
     chai.request(server.app)
       .post('/api/article')
@@ -55,7 +56,7 @@ describe('Articles', function () {
       .end(function (err, res) {
         res.should.have.status(200);
         res.should.be.json;
-        res.body.should.have.property('SUCCESS');
+        res.body.should.have.property(SUCCESS);
         res.body.SUCCESS.should.be.a('object');
         res.body.SUCCESS.should.have.property('_id');
         res.body.SUCCESS.should.have.property('groups');
@@ -64,8 +65,40 @@ describe('Articles', function () {
         done(); // TODO: Add more here
       });
   });
+
+  it('should return error because try to add article to fake group');
+
+  // TODO: deprecated -- change to be getGroupArticles
+  it('should list all articles in group on /api/articles GET');
+  // function (done) {
+  //   chai.request(server.app)
+  //     .get('/api/article')
+  //     .end(function (err, res) {
+  //       res.should.have.status(200);
+  //       res.should.be.json;
+  //       res.should.be.a('array');
+  //       res.body[0].should.have.property('_id');
+  //       res.body[0].should.have.property('groups');
+  //       res.body[0].should.have.property('uri');
+  //       res.body[0].uri.should.equal('www.thisisauri.com');
+  //       done(); // TODO: ADD MORE HERE
+  //     });
+  // });
 });
 
-
 /* annotations */
-/* groups */
+describe('Annotations', function () {
+  describe('FirstAnnotation', function () {
+    it('should add annotation to new article in public group');
+    it('should add annotation to already existing article');
+    it('should add annotation to private and public group');
+    it('should return all annotations on particular article');
+  });
+
+  describe('AnnotationReplies', function () {
+    it('should post reply annotation in public group');
+    it('should post reply annotation in private group');
+    it('should list all replies on annotation for private group');
+    it('should list all replies on annotation for public group');
+  });
+});

@@ -55,7 +55,7 @@ export const createAnnotation = (user, body) => {
       return Promise.reject(err);
     }
 
-    // check that user is allowed to post to the groups
+      // check that user is allowed to post to the groups
     if (!user.isMemberOfAll(annotation.groupIds)) {
       const err = new Error('Not authorized to post to these groups');
       return Promise.reject(err);

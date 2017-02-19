@@ -1,20 +1,23 @@
 import Article from '../models/article';
 import Group from '../models/group';
+import * as Groups from '../controllers/group_controller';
 
 // Should only be called when creating annotations
 export const createArticle = (uri, groupIds) => {
   const article = new Article();
   article.uri = uri;
   article.groups.push(groupIds);
-  return article.save()
-  .then(result => {
-    Group.addGroupArticle(groupIds, result._id);
+  article.save().then(result => {
+    Groups.addGroupArticle(groupIds, result._id);
   });
 };
 
-// getUserArticles
 // getArticle
 // getGroupArticles
+export const getGroupArticles = (group) => {
+  Article.find;
+};
+
 export const getArticle = (id) => {
   return Article.findById(id);
 };

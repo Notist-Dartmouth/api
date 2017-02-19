@@ -42,29 +42,12 @@ router.get('/api/article', (req, res) => {
   Articles.getAllArticles()
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
-    res.json({ SUCCESS: result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
   });
 });
-
-// We should only create articles when creating annotations
-// router.post('/api/article', (req, res) => {
-//   if (req.isAuthenticated()) {
-//     const uri = req.body.uri;
-//     const groupIds = req.body.groupIds;
-//     Articles.createArticle(uri, groupIds)
-//     .then(result => {
-//       Groups.addGroupArticle(groupIds, result._id);
-//       res.json({ created: result });
-//     })
-//     .catch(err => {
-//       res.json({ error: err });
-//     });
-//   }
-//   Articles.createArticle(req, res);
-// });
 
 // create new article
 router.post('/api/article', (req, res) => {
