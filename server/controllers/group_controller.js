@@ -8,33 +8,26 @@ export const createGroup = (name, description, userId) => {
 
   group.createDate = Date.now();
   group.editDate = Date.now();
-  group.members.push(ObjectId(creator));   // TODO: make sure creator is a valid user ID
+  group.members.push(userId);   // TODO: make sure creator is a valid user ID
 
   return group.save(); // TODO: catch errors
 };
 
-export const addGroupMember = (groupid, memberid) => {
+export const addGroupMember = (groupIds, userId) => {
 // TODO: similar to addGroupArticle
-  Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
-    group.members.push(memberid); // TODO: validate member is a real member
-    return group.save();
-  });
+  for (let i = 0; i < groupIds.length; i++) {
+    const groupId = groupIds[i];
+    Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
+  }
 };
 
 // can this just be called on an array of groupids? yes
 export const addGroupArticle = (groupIds, articleId) => {
+  for (let i = 0; i < groupIds.length; i++) {
+    const groupId = groupIds[i];
 
-  // Group.findOne({ _id: groupid }, (err, group) => {
-  //   if (err) return;
-  //   group.articles.push(articleid);
-  //   group.save()
-  //     .then(result => {
-  //       return group;
-  //     })
-  //     .catch(error => {
-  //       return error;
-  //     });
-  // });
+    Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
+  }
 };
 
 export const getGroup = (userId, groupId) => {

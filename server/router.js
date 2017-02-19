@@ -87,7 +87,7 @@ router.get('/group/:id', (req, res) => {
   });
 });
 
-router.post('/api/annotations', (req, res) => {
+router.post('/api/annotation', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
     const user = req.user;
@@ -97,25 +97,30 @@ router.post('/api/annotations', (req, res) => {
     const groupIds = req.body.groupIds;
     const uri = req.body.uri;
 
-    return Articles.getArticle({ uri })
-    .then( article => {
+    Articles.getArticle({ uri })
+    .then(article => {
       if (article === null) {
-        return Articles.createArticle(uri, groupIds)
-        .then( new_article => {
-          articleId = new_article._id;
-          return createAnnotation(user, body, articleId)
-        })
+        Articles.createArticle(uri, groupIds)
+        .then(newArticle => {
+          articleId = newArticle._id;
+          Annotations.createAnnotation(user, body, articleId);
+        });
       } else {
         articleId = article._id;
-        return createAnnotation(user, body, articleId)
+        Annotations.createAnnotation(user, body, articleId);
       }
     })
-    .then( annotation => {
-      res.json({ 'SUCCESS': annotation });
+    .then(annotation => {
+      res.json({ SUCCESS: annotation });
     })
     .catch(err => {
-      res.json({ 'ERROR': err });
+      res.json({ ERROR: err });
     });
+  } else {
+    // send 401 unauthorized
+    res.status(401).end();
+  }
+});
     // LOGIC
     // if article already exists, get its ID
     // if article does not already exist, create it and get its ID
@@ -145,7 +150,7 @@ router.post('/api/annotations', (req, res) => {
   //   res.status(401).end();
   // }
 // });
-
+//
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -258,6 +263,5 @@ router.get('/api/group/:id', (req, res) => {
     res.status(401).end();
   }
 });
-
 
 export default router;
