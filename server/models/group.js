@@ -10,9 +10,8 @@ const GroupSchema = new Schema({
   editDate: { type: Date, default: Date.now },
   articles: [{ type: ObjectId, ref: 'Article' }],
   members: [{ type: ObjectId, ref: 'User' }],
-
-  publicRead: Boolean,
-  publicWrite: Boolean,
+// for now, all groups are private.
+// isPublic: Boolean,
 });
 
 const GroupModel = mongoose.model('Group', GroupSchema);

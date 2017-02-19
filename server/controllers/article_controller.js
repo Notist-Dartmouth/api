@@ -12,14 +12,9 @@ export const createArticle = (uri, groupIds) => {
   });
 };
 
-export const getArticle = (articleId) => {
-  Article.find({}, (err, articles) => {
-    // if (err) cb(err);
-    // cb(null, articles);
-  });
-  // find article and return it if it exists
-};
-
 // getUserArticles
 // getArticle
 // getGroupArticles
+export const getArticle = (id) => {
+  return Article.findById(id);
+};

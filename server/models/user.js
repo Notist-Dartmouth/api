@@ -18,6 +18,10 @@ userSchema.methods.isMemberOfAll = function isMemberOfAll(groupIds) {
   return groupIds.every(this.isMemberOf, this);
 };
 
+userSchema.methods.isMemberOfAny = function isMemberOfAny(groupIds) {
+  return groupIds.some(this.isMemberOf, this);
+};
+
 const UserModel = mongoose.model('User', userSchema);
 
 export default UserModel;
