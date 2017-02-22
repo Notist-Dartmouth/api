@@ -11,7 +11,7 @@ export const createArticle = (uri, groupIds) => {
   article.groups = groupIds;
   return article.save()
   .then(result => {
-    Groups.addGroupArticle(groupIds, result._id)
+    Groups.addGroupArticle(result._id, groupIds)
     .then(res => {
       return result;
     });

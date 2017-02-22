@@ -43,13 +43,11 @@ Input:
   articleId: String article ID
 Output: ??
 */
-export const addGroupArticle = (groupIds, articleId) => {
-// TODO: how the hell to do bulk update?
-// TODO: look at Promise.all() as a way to do this
-  for (let i = 0; i < groupIds.length; i++) {
-    const groupId = groupIds[i];
-    Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
-  }
+export const addGroupArticle = (articleId, groupIds) => {
+  const updates = groupIds.map(groupId => {
+    return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
+  });
+  return Promise.all(updates);
 };
 
 /*
