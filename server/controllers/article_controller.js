@@ -7,23 +7,19 @@ export const createArticle = (uri, groupIds) => {
   article.groups = groupIds;
   return article.save()
   .then(result => {
-    Groups.addGroupArticle(groupIds, result._id);
-    return result;
+    Groups.addGroupArticle(groupIds, result._id)
+    .then(res => {
+      return result;
+    });
   });
 };
 
 export const getArticle = (uri) => {
-  Article.findOne({ uri })
-  .then(result => {
-    return result;
-  });
+  return Article.findOne({ uri });
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {
-  Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } })
-  .then(result => {
-    return result;
-  });
+  return Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } });
 };
 
 // getUserArticles

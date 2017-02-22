@@ -80,6 +80,7 @@ export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
   return Annotation.find(conditions);
 };
 
+// TODO: Get one level of children down from this instead
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
 // Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
 // Returns a promise.

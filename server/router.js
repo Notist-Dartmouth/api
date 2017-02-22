@@ -10,6 +10,7 @@ import path from 'path';
 const router = Router();
 
 // TODO: Deal with errors like goddamn adults instead of ignoring them
+// TODO: Make style more consistent across all the endpoints
 
 // navigate to login page
 router.get('/login', (req, res) => {
@@ -37,7 +38,8 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-// retrieve all articles
+
+// TODO: Rewrite this endpoint; getAllArticles is no longer a function
 router.get('/api/article', (req, res) => {
   Articles.getAllArticles()
   .then(result => {
@@ -49,7 +51,13 @@ router.get('/api/article', (req, res) => {
   });
 });
 
-// create new article
+/*
+Create a new article.
+Input:
+  req.body.uri: String uri of the article
+  req.body.groupIds: Array of String group IDs to which article belongs
+Output: Returns json file with the created article or error.
+*/
 router.post('/api/article', (req, res) => {
   Articles.createArticle(req.body.uri, req.body.groupIds)
   .then(result => {
@@ -60,12 +68,20 @@ router.post('/api/article', (req, res) => {
   });
 });
 
-// TODO: are we using this?
+// TODO: Decide what to do with users
 router.route('/api/user')
       .post(Users.createUser)
       .get(Users.getUsers);
 
-// create new group
+/*
+Create a new group.
+Input:
+  req.body.name: String name of the group
+  req.body.description: String description of the group
+  req.body.creator: String user ID of the group creator
+Output: Returns json file with the created group or error.
+*/
+// TODO: Check for user authentication
 router.post('/api/group', (req, res) => {
   Groups.createGroup(req.body.name, req.body.description, req.body.creator)
   .then(result => {
@@ -77,7 +93,14 @@ router.post('/api/group', (req, res) => {
   });
 });
 
-// get specific group
+/*
+Get a specific group.
+Input:
+  req.params.id: String ID of the group
+Output: Returns json file with the group information or error.
+*/
+// TODO: Clarify the point of this endpoint, should it get all the articles or
+// annotations, or be like a history/info about the group?
 router.get('/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
@@ -89,7 +112,19 @@ router.get('/group/:id', (req, res) => {
   });
 });
 
-// create new annotation
+
+/*
+Create a new annotation.
+Input:
+  req.body.groupIds: Array of String group IDs
+  req.body.uri: String uri of the annotation's article
+  req.body.articleText: String of the article's relevant text
+  req.body.parentId: null or String of the parent's annotation ID
+  req.body.isPublic: boolean of whether the annotation will be publicly visible
+Output: Returns json file of the new annotation or error.
+*/
+// TODO: Should createAnnotation take in body or better to parse out all the params here?
+// TODO: Parents should keep track of children in the level directly below
 router.post('/api/annotation', (req, res) => {
   // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
@@ -128,15 +163,14 @@ router.post('/api/annotation', (req, res) => {
   }
 });
 
-    // LOGIC
-    // if article already exists, get its ID
-    // if article does not already exist, create it and get its ID
-    // create the annotation with the article ID passed in
-    // race two promises:
-      // 1. article exists, get the ID
-      // 2. article doesn't exist, create and get the ID
+// TODO: endpoint to get top level annotations & level 1 child
 
-// get annotations on an article
+/*
+Get annotations of an article
+Input:
+  req.params.id: String article ID
+Output: Returns json file of the article's annotations or error.
+*/
 router.get('/api/article/:id/annotations', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -152,7 +186,12 @@ router.get('/api/article/:id/annotations', (req, res) => {
   });
 });
 
-// get specific annotation
+/*
+Get specific annotation.
+Input:
+  req.params.id: String annotation ID
+Output: Returns json file of the annotation or error.
+*/
 router.get('/api/annotation/:id', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -168,7 +207,12 @@ router.get('/api/annotation/:id', (req, res) => {
   });
 });
 
-// get replies to an annotation
+/*
+Get replies to an annotation
+Input:
+  req.params.id: String annotation ID
+Output: Returns json file of the annotation's replies or error.
+*/
 router.get('/api/annotation/:id/replies', (req, res) => {
   let user = null;
   if (req.isAuthenticated()) {
@@ -184,13 +228,16 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   });
 });
 
-// edit an annotation
+/*
+Edit specific annotation.
+Input:
+  req.params.id: String annotation ID
+Output: Returns json file of the edited annotation or error.
+*/
 router.post('/api/annotation/:id/edit', (req, res) => {
   if (req.isAuthenticated()) {
     const userId = req.user._id;
     const annotationId = req.params.id;
-    // for some reason only works with x-www-form-urlencoded body on postman
-    // otherwise gets "undefined"
     const updateText = req.body.text;
     Annotations.editAnnotation(userId, annotationId, updateText)
     .then(result => {
@@ -211,6 +258,13 @@ router.post('/api/annotation/:id/edit', (req, res) => {
   }
 });
 
+/*
+Create a new group.
+Input:
+  req.body.name: String name of the group
+  req.body.description: String description of the group
+Output: Returns json file of the new group or error.
+*/
 router.post('/api/group', (req, res) => {
   if (req.isAuthenticated()) {
     const name = req.body.name;
@@ -228,6 +282,12 @@ router.post('/api/group', (req, res) => {
   }
 });
 
+/*
+Create a new group.
+Input:
+  req.params.groupId: String group ID
+Output: Returns json file of the group or error.
+*/
 router.get('/api/group/:id', (req, res) => {
   if (req.isAuthenticated()) {
     const groupId = req.params.id;
