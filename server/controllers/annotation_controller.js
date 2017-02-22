@@ -64,6 +64,8 @@ export const createAnnotation = (user, body) => {
   }
 };
 
+// TODO: Add filtering, return in order
+// TODO: move to article controller
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.

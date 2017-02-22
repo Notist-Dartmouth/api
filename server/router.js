@@ -11,6 +11,14 @@ const router = Router();
 
 // TODO: Deal with errors like goddamn adults instead of ignoring them
 // TODO: Make style more consistent across all the endpoints
+// TODO: More validation of things existing before adding/doing stuff with them
+// TODO: How to do context stuff
+
+/* RESPONSES
+  POST -> {success: {stuff just posted}}
+  GET -> {stuff requested}
+  DELETE -> {success}
+*/
 
 // navigate to login page
 router.get('/login', (req, res) => {

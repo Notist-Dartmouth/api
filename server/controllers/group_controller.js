@@ -1,5 +1,9 @@
 import Group from '../models/group';
 
+// TODO: getGroupsFiltered (get groups filtered by some thing, returned ordered)
+// TODO: getGroupUsers (get users of a group)
+// TODO: getGroupArticles (get articles of a given group)
+
 /*
 Create a new group.
 Input:
