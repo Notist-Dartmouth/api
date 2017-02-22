@@ -21,7 +21,7 @@ export const addGroupMember = (groupIds, userId) => {
   }
 };
 
-export const addArticleToGroups = (groupIds, articleId) => {
+export const addArticleToGroups = (articleId, groupIds) => {
   const updates = groupIds.map(groupId => {
     return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
   });
