@@ -144,6 +144,7 @@ router.post('/api/annotation', (req, res) => {
           return Annotations.createAnnotation(user, body, articleId);
         });
       } else {
+        // TODO: if article already exists, it needs to be added to a group
         articleId = article._id;
         return Annotations.createAnnotation(user, body, articleId);
       }

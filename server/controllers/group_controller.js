@@ -1,5 +1,13 @@
 import Group from '../models/group';
 
+/*
+Create a new group.
+Input:
+  name: String name of the group
+  description: String description of the groupIds
+  creator: String user ID
+Output: Returns json file with the updated group.
+*/
 export const createGroup = (name, description, userId) => {
   const group = new Group();
   group.name = name;
@@ -13,14 +21,24 @@ export const createGroup = (name, description, userId) => {
   return group.save();
 };
 
-// TODO: this is unnecessary, not the same as below
-export const addGroupMember = (groupIds, userId) => {
-  for (let i = 0; i < groupIds.length; i++) {
-    const groupId = groupIds[i];
-    Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
-  }
+/*
+Add a member to a specific group
+Input:
+  groupId: String group ID
+  userId: String user ID
+Output: Returns json file with the updated group.
+*/
+export const addGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
 };
 
+/*
+Add an article to multiple groups
+Input:
+  groupIds: Array of String group IDs
+  articleId: String article ID
+Output: ??
+*/
 export const addGroupArticle = (groupIds, articleId) => {
 // TODO: how the hell to do bulk update?
 // TODO: look at Promise.all() as a way to do this
@@ -30,7 +48,12 @@ export const addGroupArticle = (groupIds, articleId) => {
   }
 };
 
-export const getGroup = (userId, groupId) => {
-// TODO: util to check for the second part isPublic/user is member?
-  return Group.find({ $and: [{ _id: groupId }, { $or: [{ isPublic: true }, { members: { $in: userId } }] }] });
+/*
+Get the document of a particular group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of the group.
+*/
+export const getGroup = (groupId) => {
+  return Group.find({ _id: groupId });
 };
