@@ -7,7 +7,7 @@ export const createArticle = (uri, groupIds) => {
   article.groups = groupIds;
   return article.save()
   .then(result => {
-    Groups.addGroupArticle(groupIds, result._id)
+    Groups.addArticleToGroups(result._id, groupIds)
     .then(res => {
       return result;
     });
