@@ -1,4 +1,4 @@
-var config = {};
+const config = {};
 
 config.mongoURI = {
   development: 'mongodb://localhost/notist',

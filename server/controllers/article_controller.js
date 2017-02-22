@@ -1,21 +1,27 @@
 import Article from '../models/article';
-import * as Group from './group_controller';
+import * as Groups from './group_controller';
 
-export const createArticle = (uri, groupid) => {
+// TODO: getArticleGroups: Get all the groups of a given article
+// TODO: getArticlesFiltered: Get articles ordered, filtered by ____
+
+
+export const createArticle = (uri, groupIds) => {
   const article = new Article();
   article.uri = uri;
-  article.groups.push(groupid);
-  console.log(groupid);
+  article.groups = groupIds;
   return article.save()
-      .then(result => {
-        Group.addGroupArticle(groupid, article._id);
-      });
+  .then(result => {
+    Groups.addGroupArticle(result._id, groupIds)
+    .then(res => {
+      return result;
+    });
+  });
 };
 
-export const getAllArticles = () => {
-  return Article.find({});
+export const getArticle = (uri) => {
+  return Article.findOne({ uri });
 };
 
-export const getArticle = (id) => {
-  return Article.findById(id);
+export const addArticleAnnotation = (articleId, annotationId) => {
+  return Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } });
 };

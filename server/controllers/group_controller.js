@@ -1,37 +1,61 @@
 import Group from '../models/group';
 
-const ObjectId = require('mongoose').Types.ObjectId;
+// TODO: getGroupsFiltered (get groups filtered by some thing, returned ordered)
+// TODO: getGroupUsers (get users of a group)
+// TODO: getGroupArticles (get articles of a given group)
 
-export const createGroup = (name, description, creator) => {
-  // TODO: error check on names, descriptions and creators?
+/*
+Create a new group.
+Input:
+  name: String name of the group
+  description: String description of the groupIds
+  creator: String user ID
+Output: Returns json file with the updated group.
+*/
+export const createGroup = (name, description, userId) => {
   const group = new Group();
   group.name = name;
   group.description = description;
-  group.creator = creator; // TODO: @ploomis how to get authenticated user ??
+  group.creator = userId;
+
   group.createDate = Date.now();
   group.editDate = Date.now();
-  group.members.push(ObjectId(creator));   // TODO: make sure creator is a valid user ID
+  group.members.push(userId);
 
-  return group.save(); // TODO: catch errors
+  return group.save();
 };
 
-export const addGroupMember = (groupid, memberid) => {
-// TODO: similar to addGroupArticle
-  Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
-    group.members.push(memberid); // TODO: validate member is a real member
-    return group.save();
+/*
+Add a member to a specific group
+Input:
+  groupId: String group ID
+  userId: String user ID
+Output: Returns json file with the updated group.
+*/
+export const addGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
+};
+
+/*
+Add an article to multiple groups
+Input:
+  groupIds: Array of String group IDs
+  articleId: String article ID
+Output: ??
+*/
+export const addGroupArticle = (articleId, groupIds) => {
+  const updates = groupIds.map(groupId => {
+    return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
   });
+  return Promise.all(updates);
 };
 
-export const addGroupArticle = (groupid, articleid) => {
-  Group.findOne({ _id: ObjectId(groupid) }, (err, group) => {
-    // if (err) return; TODO: figure out how to actually catch errors
-    group.articles.push(articleid);
-    return group.save();
-  });
-};
-
-export const getGroup = (id) => {
-  return Group.findOne({ _id: ObjectId(id) })
-              .populate('articles');
+/*
+Get the document of a particular group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of the group.
+*/
+export const getGroup = (groupId) => {
+  return Group.find({ _id: groupId });
 };

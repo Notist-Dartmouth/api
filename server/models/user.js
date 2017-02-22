@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema({
   // TODO: Some of these need to be required fields
+  // TODO: articles, people i'm following field
   googleId: String,
   facebookId: String,
   name: String,
