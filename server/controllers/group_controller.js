@@ -21,17 +21,14 @@ export const addGroupMember = (groupIds, userId) => {
   }
 };
 
-// can this just be called on an array of groupids? yes
 export const addGroupArticle = (groupIds, articleId) => {
   for (let i = 0; i < groupIds.length; i++) {
     const groupId = groupIds[i];
-
     Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
   }
 };
 
 export const getGroup = (userId, groupId) => {
-  // need to check if user is in the group OR the group is public
-  return Group.findOne({ _id: groupId });
-    // .populate('articles');
+  // TODO: need to check if user is in the group OR the group is public
+  return Group.find({ $and: [{ _id: userId }, { $or: [{ isPublic: true }, { members: { $in: userId } }] }] });
 };

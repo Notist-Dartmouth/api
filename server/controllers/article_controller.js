@@ -1,7 +1,6 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
 
-// Should only be called when creating annotations
 export const createArticle = (uri, groupIds) => {
   const article = new Article();
   article.uri = uri;
@@ -14,12 +13,17 @@ export const createArticle = (uri, groupIds) => {
 };
 
 export const getArticle = (uri) => {
-  return Article.findOne({ uri });
-  // find article and return it if it exists
+  Article.findOne({ uri })
+  .then(result => {
+    return result;
+  });
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {
-  return Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } });
+  Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } })
+  .then(result => {
+    return result;
+  });
 };
 
 // getUserArticles
