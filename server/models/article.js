@@ -1,4 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
+import { mongoose } from '../_config';
+import { Schema } from 'mongoose';
 
 // TODO: Add field to keep track of number of users who have commented, number of comments
 
