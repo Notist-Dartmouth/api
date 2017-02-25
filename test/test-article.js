@@ -8,10 +8,12 @@ import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
 // import Group from '../server/models/group';
 
-const should = chai.should();
+chai.should();
 chai.use(chaiHttp);
+// eslint comment:
+/* global describe it:true */
 
-describe('Articles', function () {
+describe('Articles', () => {
   /* Article.collection.drop();*/
 
   // beforeEach(function (done) {
@@ -29,12 +31,12 @@ describe('Articles', function () {
   //   done();
   // });
 
-  it('should add a single article on /api/articles POST', function (done) {
+  it('should add a single article on /api/articles POST', (done) => {
     const testURI = 'www.nytimes.com';
     chai.request(app)
       .post('/api/article')
       .send({ uri: testURI, groupIds: [] })
-      .end(function (err, res) {
+      .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
         res.should.have.property('body');
