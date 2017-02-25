@@ -109,7 +109,7 @@ Output: Returns json file with the group information or error.
 */
 // TODO: Clarify the point of this endpoint, should it get all the articles or
 // annotations, or be like a history/info about the group?
-router.get('/group/:id', (req, res) => {
+router.get('/api/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
     res.setHeader('Content-Type', 'application/json');
