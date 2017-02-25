@@ -93,7 +93,6 @@ Output: Returns json file with the created group or error.
 router.post('/api/group', (req, res) => {
   Groups.createGroup(req.body.name, req.body.description, req.body.creator)
   .then(result => {
-    res.setHeader('Content-Type', 'application/json');
     res.json({ SUCCESS: result });
   })
   .catch(err => {
@@ -109,10 +108,9 @@ Output: Returns json file with the group information or error.
 */
 // TODO: Clarify the point of this endpoint, should it get all the articles or
 // annotations, or be like a history/info about the group?
-router.get('/group/:id', (req, res) => {
+router.get('/api/group/:id', (req, res) => {
   Groups.getGroup(req.params.id)
   .then(result => {
-    res.setHeader('Content-Type', 'application/json');
     res.json({ SUCCESS: result });
   })
   .catch(err => {
@@ -120,6 +118,24 @@ router.get('/group/:id', (req, res) => {
   });
 });
 
+/*
+Add a user to a specific group as a member.
+Input:
+  req.params.groupId: String group ID
+  req.params.userId: String user ID to be added to the group.
+Output: Returns json file with the updated group information.
+*/
+// TODO: Clarify the point of this endpoint, should it get all the articles or
+// annotations, or be like a history/info about the group?
+router.post('/api/group/:groupId/user/:userId', (req, res) => {
+  Groups.addGroupMember(req.params.groupId, req.params.userId)
+  .then(result => {
+    res.json({ SUCCESS: result });
+  })
+  .catch(err => {
+    res.json({ ERROR: serializeError(err) });
+  });
+});
 
 /*
 Create a new annotation.

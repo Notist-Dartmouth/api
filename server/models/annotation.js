@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const ObjectId = Schema.Types.ObjectId;
 
+// TODO: change names of fields to not have "Id" in them
 const annotationSchema = new Schema({
   authorId: { type: ObjectId, ref: 'User' },
   articleId: { type: ObjectId, ref: 'Article' },

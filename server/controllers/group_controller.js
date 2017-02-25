@@ -57,5 +57,5 @@ Input:
 Output: Returns json file of the group.
 */
 export const getGroup = (groupId) => {
-  return Group.find({ _id: groupId });
+  return Group.findOne({ _id: groupId });
 };
