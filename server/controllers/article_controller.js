@@ -4,7 +4,6 @@ import * as Groups from './group_controller';
 // TODO: getArticleGroups: Get all the groups of a given article
 // TODO: getArticlesFiltered: Get articles ordered, filtered by ____
 
-
 export const createArticle = (uri, groupIds) => {
   const article = new Article();
   article.uri = uri;

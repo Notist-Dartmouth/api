@@ -12,8 +12,6 @@ import Article from '../server/models/article';
 chai.use(chaiHttp);
 
 describe('Articles', function () {
-  /* Article.collection.drop();*/
-
   beforeEach(function (done) {
     var newGroup;
     var newArticle = new Article({
