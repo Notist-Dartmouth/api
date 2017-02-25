@@ -1,5 +1,4 @@
-import { mongoose } from '../_config';
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const ObjectId = Schema.Types.ObjectId;
 

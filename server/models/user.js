@@ -1,5 +1,4 @@
-import { mongoose } from '../_config';
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new Schema({
   // TODO: Some of these need to be required fields
