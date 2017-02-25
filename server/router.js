@@ -144,6 +144,7 @@ Output: Returns json file with the updated group information.
 router.post('/api/group/:groupId/user/:userId', (req, res) => {
   Groups.addGroupMember(req.params.groupId, req.params.userId)
   .then(result => {
+    console.log(result);
     res.json({ SUCCESS: result });
   })
   .catch(err => {

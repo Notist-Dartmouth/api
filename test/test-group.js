@@ -8,16 +8,20 @@ const chaiHttp = require('chai-http');
 // const server = require('../_config/app');
 
 import { app } from '../server/app';
-import Article from '../server/models/article';
-import Annotation from '../server/models/annotation';
+// import Article from '../server/models/article';
+// import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
 
-var should = chai.should();
+chai.should();
 chai.use(chaiHttp);
 
-describe('Groups', function () {
-  var newGroup;
-  beforeEach(function (done) {
+// eslint comment:
+/* global describe it beforeEach afterEach:true */
+
+
+describe('Groups', () => {
+  let newGroup;
+  beforeEach(done => {
     newGroup = new Group({
       name: 'test group name',
       description: 'test group description',
@@ -31,20 +35,20 @@ describe('Groups', function () {
     });
   });
 
-  afterEach(function (done) {
+  afterEach(done => {
     Group.collection.drop();
     done();
   });
 
-  it('should create a group on /api/group POST', function (done) {
+  it('should create a group on /api/group POST', done => {
     chai.request(app)
       .post('/api/group')
       .send({
-        'name': 'test group 2 name',
-        'description': 'test group 2 description',
-        'creator': '345634563456345634563456',
+        name: 'test group 2 name',
+        description: 'test group 2 description',
+        creator: '345634563456345634563456',
       })
-      .end(function (err, res) {
+      .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
         res.body.should.have.property('SUCCESS');
@@ -66,10 +70,10 @@ describe('Groups', function () {
       });
   });
 
-  it('should get a specific group on /api/group/:id GET', function (done) {
+  it('should get a specific group on /api/group/:id GET', done => {
     chai.request(app)
-      .get('/api/group/' + newGroup._id)
-      .end(function (err, res) {
+      .get(`/api/group/${newGroup._id}`)
+      .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
         res.body.should.have.property('SUCCESS');
@@ -91,17 +95,28 @@ describe('Groups', function () {
       });
   });
 
-  it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', function (done) {
+  it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', done => {
     chai.request(app)
-      .post('/api/group/' + newGroup._id + '/user/345634563456345634563456')
-      .end(function (err, res) {
+      .post(`/api/group/${newGroup._id}/user/345634563456345634563456`)
+      .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.should.have.property('_id');
+        res.body.SUCCESS.should.have.property('name');
+        res.body.SUCCESS.should.have.property('description');
+        res.body.SUCCESS.should.have.property('creator');
+        res.body.SUCCESS.should.have.property('createDate');
+        res.body.SUCCESS.should.have.property('editDate');
+        res.body.SUCCESS.should.have.property('articles');
+        res.body.SUCCESS.should.have.property('members');
+        res.body.SUCCESS._id.should.equal(String(newGroup._id));
+        res.body.SUCCESS.name.should.equal('test group name');
+        res.body.SUCCESS.description.should.equal('test group description');
+        res.body.SUCCESS.creator.should.equal('123412341234123412341234');
+        res.body.SUCCESS.articles.should.eql(['111111111111111111111111', '222222222222222222222222']);
+        res.body.SUCCESS.members.should.eql(['123412341234123412341234', '234523452345234523452345', '345634563456345634563456']);
         done();
-      })
+      });
   });
 });
-
-
-/* annotations */
-/* groups */

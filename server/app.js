@@ -1,15 +1,29 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import config from './_config';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import passport from 'passport';
 import router from './router';
 import authInit from './authentication';
-import { app, mongoose } from './_config'; // *** config file *** //
 import session from 'express-session';
 
 const MongoStore = require('connect-mongo')(session);
 
+const app = express();
+module.exports.app = app;
+
 // load environment variables
 require('dotenv').load();
+
+mongoose.connect(config.mongoURI[app.settings.env], (err, res) => {
+  if (err) {
+    console.log(`Error connecting to the database: ${err}`);
+  } else {
+    console.log(`Connected to Database: ${config.mongoURI[app.settings.env]}`);
+  }
+});
+mongoose.Promise = global.Promise;
 
 // passport google oauth initialization
 app.use(session({

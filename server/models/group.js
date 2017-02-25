@@ -1,5 +1,5 @@
-import { mongoose } from '../_config';
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
 
