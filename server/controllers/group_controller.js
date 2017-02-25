@@ -41,7 +41,7 @@ Add an article to multiple groups
 Input:
   groupIds: Array of String group IDs
   articleId: String article ID
-Output: ??
+Output: Returns a promise that resolves with array of results of updating groups.
 */
 export const addGroupArticle = (articleId, groupIds) => {
   const updates = groupIds.map(groupId => {
