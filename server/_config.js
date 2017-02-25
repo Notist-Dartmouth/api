@@ -1,8 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import session from 'express-session';
 
-const MongoStore = require('connect-mongo')(session);
 const app = express();
 
 const config = {};
@@ -25,4 +23,4 @@ mongoose.connect(config.mongoURI[app.settings.env], (err, res) => {
 // set mongoose promises to es6 default
 mongoose.Promise = global.Promise;
 
-export { app, MongoStore, mongoose };
+export { app, mongoose };

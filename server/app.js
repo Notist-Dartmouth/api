@@ -1,10 +1,12 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import passport from 'passport';
-import session from 'express-session';
 import router from './router';
 import authInit from './authentication';
-import { app, MongoStore, mongoose } from './_config'; // *** config file *** //
+import { app, mongoose } from './_config'; // *** config file *** //
+import session from 'express-session';
+
+const MongoStore = require('connect-mongo')(session);
 
 // load environment variables
 require('dotenv').load();
