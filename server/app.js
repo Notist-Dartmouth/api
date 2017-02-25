@@ -46,4 +46,6 @@ app.use('/', router);
 const port = process.env.PORT;
 app.listen(port);
 
+export { app };
+
 console.log(`listening on: ${port}`);

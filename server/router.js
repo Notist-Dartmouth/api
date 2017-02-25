@@ -48,16 +48,16 @@ router.get('/logout', (req, res) => {
 
 
 // TODO: Rewrite this endpoint; getAllArticles is no longer a function
-router.get('/api/article', (req, res) => {
-  Articles.getAllArticles()
-  .then(result => {
-    res.setHeader('Content-Type', 'application/json');
-    res.json({ SUCCESS: result });
-  })
-  .catch(err => {
-    res.json({ ERROR: serializeError(err) });
-  });
-});
+// router.get('/api/article', (req, res) => {
+//   Articles.getAllArticles()
+//   .then(result => {
+//     res.setHeader('Content-Type', 'application/json');
+//     res.json({ SUCCESS: result });
+//   })
+//   .catch(err => {
+//     res.json({ ERROR: serializeError(err) });
+//   });
+// });
 
 /*
 Create a new article.
