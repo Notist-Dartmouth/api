@@ -17,16 +17,6 @@ chai.use(chaiHttp);
 describe('Groups', function () {
   /* Group.collection.drop();*/
 
-  // beforeEach(function (done) {
-  //   var newGroup;
-  //   var newArticle = new Article({
-  //     uri: 'www.thisisauri.com',
-  //     group: '1234',
-  //   });
-  //   newArticle.save(function (err) {
-  //     done();
-  //   });
-  // });
   beforeEach(function (done) {
     var newGroup = new Group({
       name: 'test group name',
