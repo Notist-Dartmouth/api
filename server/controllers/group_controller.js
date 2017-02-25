@@ -33,7 +33,7 @@ Input:
 Output: Returns json file with the updated group.
 */
 export const addGroupMember = (groupId, userId) => {
-  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
+  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } }, { new: true });
 };
 
 /*
@@ -41,7 +41,7 @@ Add an article to multiple groups
 Input:
   groupIds: Array of String group IDs
   articleId: String article ID
-Output: ??
+Output: Returns a promise that resolves with array of results of updating groups.
 */
 export const addGroupArticle = (articleId, groupIds) => {
   const updates = groupIds.map(groupId => {
