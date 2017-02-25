@@ -1,38 +1,61 @@
 import Group from '../models/group';
 
+// TODO: getGroupsFiltered (get groups filtered by some thing, returned ordered)
+// TODO: getGroupUsers (get users of a group)
+// TODO: getGroupArticles (get articles of a given group)
+
+/*
+Create a new group.
+Input:
+  name: String name of the group
+  description: String description of the groupIds
+  creator: String user ID
+Output: Returns json file with the updated group.
+*/
 export const createGroup = (name, description, userId) => {
   const group = new Group();
   group.name = name;
   group.description = description;
-  group.creator = userId; // how to get authenticated user ??
+  group.creator = userId;
 
   group.createDate = Date.now();
   group.editDate = Date.now();
-  group.members.push(userId);   // TODO: make sure creator is a valid user ID
+  group.members.push(userId);
 
-  return group.save(); // TODO: catch errors
+  return group.save();
 };
 
-export const addGroupMember = (groupIds, userId) => {
-// TODO: similar to addGroupArticle
-  for (let i = 0; i < groupIds.length; i++) {
-    const groupId = groupIds[i];
-    Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
-  }
+/*
+Add a member to a specific group
+Input:
+  groupId: String group ID
+  userId: String user ID
+Output: Returns json file with the updated group.
+*/
+export const addGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
 };
 
-// can this just be called on an array of groupids? yes
-export const addGroupArticle = (groupIds, articleId) => {
-  for (let i = 0; i < groupIds.length; i++) {
-    const groupId = groupIds[i];
-
-    Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
-  }
+/*
+Add an article to multiple groups
+Input:
+  groupIds: Array of String group IDs
+  articleId: String article ID
+Output: ??
+*/
+export const addGroupArticle = (articleId, groupIds) => {
+  const updates = groupIds.map(groupId => {
+    return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
+  });
+  return Promise.all(updates);
 };
 
-export const getGroup = (userId, groupId) => {
-  // need to check if user is in the group OR the group is public
-  return Group.findOne({ _id: groupId });
-    // .populate('articles');
-
+/*
+Get the document of a particular group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of the group.
+*/
+export const getGroup = (groupId) => {
+  return Group.find({ _id: groupId });
 };
