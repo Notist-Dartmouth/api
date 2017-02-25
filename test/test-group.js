@@ -16,7 +16,6 @@ var should = chai.should();
 chai.use(chaiHttp);
 
 describe('Groups', function () {
-  /* Group.collection.drop();*/
   var newGroup;
   beforeEach(function (done) {
     newGroup = new Group({
@@ -26,7 +25,8 @@ describe('Groups', function () {
       articles: ['111111111111111111111111', '222222222222222222222222'],
       members: ['123412341234123412341234', '234523452345234523452345'],
     });
-    newGroup.save(function (err) {
+    newGroup.save()
+    .then(result => {
       done();
     });
   });
@@ -63,7 +63,7 @@ describe('Groups', function () {
         res.body.SUCCESS.articles.should.eql([]);
         res.body.SUCCESS.members.should.eql(['345634563456345634563456']);
         done();
-      })
+      });
   });
 
   it('should get a specific group on /api/group/:id GET', function (done) {
@@ -88,10 +88,18 @@ describe('Groups', function () {
         res.body.SUCCESS.articles.should.eql(['111111111111111111111111', '222222222222222222222222']);
         res.body.SUCCESS.members.should.eql(['123412341234123412341234', '234523452345234523452345']);
         done();
-      })
+      });
   });
 
-  it('should add a single member to specified group');
+  it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', function (done) {
+    chai.request(app)
+      .post('/api/group/' + newGroup._id + '/user/345634563456345634563456')
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.should.be.json;
+        done();
+      })
+  });
 });
 
 
