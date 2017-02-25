@@ -46,7 +46,7 @@ describe('Annotations', function () {
       .post('/api/annotation')
       .send({
         'uri': 'www.nytimes/com/articleB',
-        'groupIds': GroupA.id,
+        'groupIds': [GroupA.id],
         'articleText': 'This is a New Article',
         'isPublic': true,
       })
