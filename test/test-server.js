@@ -4,9 +4,10 @@ process.env.NODE_ENV = 'test';
 // import chai from
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const mongoose = require('mongoose');
-const server = require('../server/app');
+// const mongoose = require('mongoose');
+// const server = require('../_config/app');
 
+import { app, mongoose } from '../server/_config';
 import Article from '../server/models/article';
 import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
@@ -33,7 +34,7 @@ describe('Articles', function () {
   });
 
   it('should list ALL articles on /api/articles GET', function (done) {
-    chai.request(server.app)
+    chai.request(app)
       .get('/api/article')
       .end(function (err, res) {
         res.should.have.status(200);
@@ -42,7 +43,7 @@ describe('Articles', function () {
       });
   });
   it('should add a single article on /api/articles POST', function (done) {
-    chai.request(server.app)
+    chai.request(app)
       .post('/api/article')
       .send({ 'uri': 'www.nytimes.com' })
       .end(function (err, res) {
