@@ -67,13 +67,27 @@ Input:
 Output: Returns json file with the created article or error.
 */
 router.post('/api/article', (req, res) => {
-  Articles.createArticle(req.body.uri, req.body.groupIds)
-  .then(result => {
-    res.json({ SUCCESS: result });
-  })
-  .catch(err => {
-    res.json({ ERROR: serializeError(err) });
-  });
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const uri = req.body.uri;
+    const groupIds = req.body.groupIds;
+
+    if (!user.isMemberOfAll(groupIds)) {
+      const err = new Error('User not authorized to add article to one or more groups');
+      res.json({ ERROR: serializeError(err) });
+    }
+
+    Articles.createArticle(user, uri, groupIds)
+    .then(result => {
+      res.json({ SUCCESS: result });
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
+  } else {
+    // send 401 unauthorized
+    res.status(401).end();
+  }
 });
 
 // TODO: Decide what to do with users
@@ -158,6 +172,11 @@ router.post('/api/annotation', (req, res) => {
     let articleId;
     const groupIds = req.body.groupIds;
     const uri = req.body.uri;
+
+    if (!user.isMemberOfAll(groupIds)) {
+      const err = new Error('User not authorized to add annotation to one or more groups');
+      res.json({ ERROR: serializeError(err) });
+    }
 
     Articles.getArticle(uri)
     .then(article => {

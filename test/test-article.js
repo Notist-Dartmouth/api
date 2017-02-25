@@ -6,32 +6,25 @@ import chaiHttp from 'chai-http';
 import { app } from '../server/app';
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
-// import Group from '../server/models/group';
+import Group from '../server/models/group';
 
 chai.should();
 chai.use(chaiHttp);
 // eslint comment:
-/* global describe it:true */
+/* global describe it beforeEach afterEach:true */
 
 describe('Articles', () => {
-  /* Article.collection.drop();*/
+  beforeEach(done => {
+    done();
+  });
 
-  // beforeEach(function (done) {
-  //   var newGroup;
-  //   var newArticle = new Article({
-  //     uri: 'www.thisisauri.com',
-  //     groups: ['123412341234123412341234'],
-  //   });
-  //   newArticle.save(function (err) {
-  //     done();
-  //   });
-  // });
-  // afterEach(function (done) {
-  // /*  Article.collection.drop();*/
-  //   done();
-  // });
+  afterEach(done => {
+    Article.collection.drop();
+    Group.collection.drop();
+    done();
+  });
 
-  it('should add a single article on /api/articles POST', (done) => {
+  it('should add a single article with no groups on /api/articles POST', done => {
     const testURI = 'www.nytimes.com';
     chai.request(app)
       .post('/api/article')
@@ -47,7 +40,10 @@ describe('Articles', () => {
         res.body.SUCCESS.groups.should.be.empty;
         res.body.SUCCESS.should.have.property('annotations');
         res.body.SUCCESS.annotations.should.be.empty;
-        done(); // TODO: Add more here
+        done();
       });
   });
+
+  it('should return error because try to add article to fake group');
+  it('should add article to group with proper references in both documents');
 });
