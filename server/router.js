@@ -144,7 +144,6 @@ Output: Returns json file with the updated group information.
 router.post('/api/group/:groupId/user/:userId', (req, res) => {
   Groups.addGroupMember(req.params.groupId, req.params.userId)
   .then(result => {
-    console.log(result);
     res.json({ SUCCESS: result });
   })
   .catch(err => {
@@ -174,6 +173,7 @@ router.post('/api/annotation', (req, res) => {
     const groupIds = req.body.groupIds;
     const uri = req.body.uri;
 
+    // TO DO what if groupIds is empty because not posting to any group but just publicly ?
     if (!user.isMemberOfAll(groupIds)) {
       const err = new Error('User not authorized to add annotation to one or more groups');
       res.json({ ERROR: serializeError(err) });

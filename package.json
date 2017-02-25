@@ -31,6 +31,7 @@
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth2": "^0.1.6",
+    "passport-stub": "^1.1.1",
     "path": "^0.12.7",
     "serialize-error": "^2.1.0"
   },

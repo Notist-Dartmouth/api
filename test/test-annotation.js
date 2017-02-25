@@ -2,22 +2,27 @@ process.env.NODE_ENV = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import passportStub from 'passport-stub';
 import { app } from '../server/app';
 
 import Article from '../server/models/article';
 import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
+import User from '../server/models/user';
 
 var should = chai.should();
-chai.use(chaiHttp);
 
-app.request.isAuthenticated = function () {
-  return true;
-};
+chai.use(chaiHttp);
+passportStub.install(app);
+
+// app.request.isAuthenticated = function () {
+//   return true;
+// };
 
 describe('Annotations', function () {
   let GroupA;
   let ArticleA;
+  let user;
   before(function (done) {
     GroupA = new Group({
       name: 'GroupA',
@@ -32,6 +37,9 @@ describe('Annotations', function () {
         done();
       });
     });
+    const userParams = { username: 'cblanc', googleId: '12345678', groupIds: [GroupA.id] };
+    user = new User(userParams);
+    user.save();
   });
   after(function (done) {
     // Group.collection.drop();
@@ -41,12 +49,23 @@ describe('Annotations', function () {
   });
 
   describe('FirstAnnotation', function () {
+    it('should return 401 error for unathenticated user', function (done) {
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        'uri': 'hello.com',
+      })
+      .end(function (err, res) {
+        res.should.have.status(401);
+        done();
+      });
+    });
     it('should add annotation to new article in general group', function (done) {
+      passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
       .send({
         'uri': 'www.nytimes/com/articleB',
-        'groupIds': [GroupA.id],
         'articleText': 'This is a New Article',
         'isPublic': true,
       })
