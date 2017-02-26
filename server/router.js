@@ -75,6 +75,7 @@ router.post('/api/article', (req, res) => {
     if (!user.isMemberOfAll(groupIds)) {
       const err = new Error('User not authorized to add article to one or more groups');
       res.json({ ERROR: serializeError(err) });
+      return;
     }
 
     Articles.createArticle(uri, groupIds)
@@ -177,6 +178,7 @@ router.post('/api/annotation', (req, res) => {
     if (!user.isMemberOfAll(groupIds)) {
       const err = new Error('User not authorized to add annotation to one or more groups');
       res.json({ ERROR: serializeError(err) });
+      return;
     }
 
     Articles.getArticle(uri)
