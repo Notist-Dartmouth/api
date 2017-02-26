@@ -2,6 +2,19 @@ import Group from '../server/models/group';
 import User from '../server/models/user';
 import Article from '../server/models/article';
 
+// number of milliseconds to allow for the db to update
+const DB_UPDATE_WAIT = 50;
+
+exports.checkDatabase = function (delayedCallback) {
+  return new Promise((resolve, reject) => {
+    if (typeof delayedCallback !== 'function') {
+      reject(new TypeError('Invalid callback to checkDatabase'));
+    } else {
+      setTimeout(() => { delayedCallback(resolve); }, DB_UPDATE_WAIT);
+    }
+  });
+};
+
 exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = 'Group') {
   if (typeof nGroups !== 'number' || nGroups < 0 || typeof username !== 'string' || typeof groupName !== 'string') {
     throw new TypeError('Invalid argument(s)');
