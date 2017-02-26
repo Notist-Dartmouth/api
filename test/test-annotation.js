@@ -60,19 +60,28 @@ describe('Annotations', function () {
         done();
       });
     });
+
     it('should add annotation to new article in general group', function (done) {
+      const uri = 'www.nytimes.com/articleB';
+      const articleText = 'This is a new article';
+      const text = 'This is my annotation';
+      const isPublic = true;
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
       .send({
-        'uri': 'www.nytimes/com/articleB',
-        'articleText': 'This is a New Article',
-        'isPublic': true,
+        uri,
+        'groupIds': [],
+        articleText,
+        text,
+        isPublic,
       })
       .end(function (err, res) {
-        console.log(res);
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.text.should.equal(text);
+        res.body.SUCCESS.isPublic.should.be.true;
         done();
       });
     });
