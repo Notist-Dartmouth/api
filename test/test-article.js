@@ -3,7 +3,9 @@ process.env.NODE_ENV = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import passportStub from 'passport-stub';
 import { app } from '../server/app';
+
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
@@ -11,8 +13,9 @@ import User from '../server/models/user';
 
 import util from './util';
 
-chai.should();
+const should = chai.should();
 chai.use(chaiHttp);
+passportStub.install(app);
 // eslint comment:
 /* global describe it before beforeEach afterEach:true */
 
@@ -38,21 +41,25 @@ describe('Articles', function () {
   afterEach(function (done) {
     Article.collection.drop();
     Group.collection.drop();
+    passportStub.logout();
     done();
   });
 
   it('should add a single article with no groups on /api/articles POST', function (done) {
-    const testURI = 'www.nytimes.com';
+    const uri = 'www.nytimes.com';
+    passportStub.login(user);
     chai.request(app)
       .post('/api/article')
-      .send({ uri: testURI, groupIds: [] })
+      .send({ uri, groupIds: [] })
       .end((err, res) => {
+        should.not.exist(err);
+        should.exist(res);
         res.should.have.status(200);
         res.should.be.json;
         res.should.have.property('body');
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.should.have.property('uri');
-        res.body.SUCCESS.uri.should.equal(testURI);
+        res.body.SUCCESS.uri.should.equal(uri);
         res.body.SUCCESS.should.have.property('groups');
         res.body.SUCCESS.groups.should.be.empty;
         res.body.SUCCESS.should.have.property('annotations');

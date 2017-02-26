@@ -36,6 +36,7 @@ describe('Annotations', function () {
     // Group.collection.drop();
     // Article.collection.drop();
     // Annotation.collection.drop();
+    passportStub.logout();
     done();
   });
 

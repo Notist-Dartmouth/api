@@ -77,7 +77,7 @@ router.post('/api/article', (req, res) => {
       res.json({ ERROR: serializeError(err) });
     }
 
-    Articles.createArticle(user, uri, groupIds)
+    Articles.createArticle(uri, groupIds)
     .then(result => {
       res.json({ SUCCESS: result });
     })
