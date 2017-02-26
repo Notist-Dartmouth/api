@@ -3,7 +3,7 @@ import User from '../server/models/user';
 import Article from '../server/models/article';
 
 exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = 'Group') {
-  if (typeof nGroups !== 'number' || nGroups < 0 || typeof baseName !== 'string') {
+  if (typeof nGroups !== 'number' || nGroups < 0 || typeof username !== 'string' || typeof groupName !== 'string') {
     throw new TypeError('Invalid argument(s)');
   }
 
@@ -23,10 +23,9 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
       members: [user._id],
     });
   }
-
   user.groupIds = groups.map(group => { return group._id; });
-  user.save(err => { throw err; });
-  groups.map(group => { group.save(err => { throw err; }); return 0; });
+  user.save(err => { if (err) throw err; });
+  groups.map(group => { group.save(err => { if (err) throw err; }); return 0; });
 
   return { user, groups };
 };
@@ -45,7 +44,7 @@ exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
     uri,
     groups: groupIds,
   });
-  article.save(err => { throw err; });
+  article.save(err => { if (err) throw err; });
   return article;
 };
 

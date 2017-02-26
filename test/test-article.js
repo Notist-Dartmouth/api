@@ -25,7 +25,7 @@ describe('Articles', function () {
     Group.collection.drop();
     User.collection.drop();
 
-    const created = util.setupUserWithGroup('user', 'GroupA');
+    const created = util.addUserWithGroup('user', 'GroupA');
     groupA = created.group;
     user = created.user;
     done();

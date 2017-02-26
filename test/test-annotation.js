@@ -26,10 +26,11 @@ describe('Annotations', function () {
   let ArticleA;
   let user;
   before(function (done) {
-    const created = util.setupUserWithGroup('user', 'GroupA');
+    const created = util.addUserWithGroup('user', 'GroupA');
     GroupA = created.group;
     user = created.user;
     ArticleA = util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
+    done();
   });
   after(function (done) {
     // Group.collection.drop();
