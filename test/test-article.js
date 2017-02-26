@@ -7,24 +7,41 @@ import { app } from '../server/app';
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
+import User from '../server/models/user';
+
+import util from './util';
 
 chai.should();
 chai.use(chaiHttp);
 // eslint comment:
-/* global describe it beforeEach afterEach:true */
+/* global describe it before beforeEach afterEach:true */
 
-describe('Articles', () => {
-  beforeEach(done => {
+describe('Articles', function () {
+  let groupA = null;
+  let user = null;
+
+  before(function (done) {
+    Article.collection.drop();
+    Group.collection.drop();
+    User.collection.drop();
+
+    const created = util.setupUserWithGroup('user', 'GroupA');
+    groupA = created.group;
+    user = created.user;
     done();
   });
 
-  afterEach(done => {
+  beforeEach(function (done) {
+    done();
+  });
+
+  afterEach(function (done) {
     Article.collection.drop();
     Group.collection.drop();
     done();
   });
 
-  it('should add a single article with no groups on /api/articles POST', done => {
+  it('should add a single article with no groups on /api/articles POST', function (done) {
     const testURI = 'www.nytimes.com';
     chai.request(app)
       .post('/api/article')
