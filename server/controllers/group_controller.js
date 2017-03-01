@@ -50,6 +50,7 @@ export const addGroupArticle = (articleId, groupIds) => {
   return Promise.all(updates);
 };
 
+// TODO: Will eventually need to add authentication checking, and deal with public groups
 /*
 Get the document of a particular group, assuming access is already allowed.
 Input:

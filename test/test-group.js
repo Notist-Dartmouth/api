@@ -1,19 +1,18 @@
 // command: mocha --require babel-register
 process.env.NODE_ENV = 'test';
 
-// import chai from
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-// const mongoose = require('mongoose');
-// const server = require('../_config/app');
-
+import chai from 'chai';
+import chaiHttp from 'chai-http';
+import passportStub from 'passport-stub';
 import { app } from '../server/app';
-// import Article from '../server/models/article';
-// import Annotation from '../server/models/annotation';
+
 import Group from '../server/models/group';
+
+import util from './util';
 
 chai.should();
 chai.use(chaiHttp);
+passportStub.install(app);
 
 // eslint comment:
 /* global describe it beforeEach afterEach:true */
@@ -21,7 +20,9 @@ chai.use(chaiHttp);
 
 describe('Groups', () => {
   let newGroup;
+  let user;
   beforeEach(done => {
+    user = util.addUser('user');
     newGroup = new Group({
       name: 'test group name',
       description: 'test group description',
@@ -37,10 +38,12 @@ describe('Groups', () => {
 
   afterEach(done => {
     Group.collection.drop();
+    passportStub.logout();
     done();
   });
 
   it('should create a group on /api/group POST', done => {
+    passportStub.login(user);
     chai.request(app)
       .post('/api/group')
       .send({
@@ -71,6 +74,7 @@ describe('Groups', () => {
   });
 
   it('should get a specific group on /api/group/:id GET', done => {
+    passportStub.login(user);
     chai.request(app)
       .get(`/api/group/${newGroup._id}`)
       .end((err, res) => {
@@ -119,4 +123,8 @@ describe('Groups', () => {
         done();
       });
   });
+
+  it('should get users of a group');
+  it('should get articles of a group');
+  it('should get public groups (communities) search based on title/description');
 });

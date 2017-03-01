@@ -334,7 +334,7 @@ router.post('/api/group', (req, res) => {
 });
 
 /*
-Create a new group.
+Gets a particular group.
 Input:
   req.params.groupId: String group ID
 Output: Returns json file of the group or error.
