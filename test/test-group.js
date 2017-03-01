@@ -5,7 +5,6 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import passportStub from 'passport-stub';
 import { app } from '../server/app';
-
 import Group from '../server/models/group';
 
 import util from './util';
@@ -19,18 +18,19 @@ passportStub.install(app);
 
 
 describe('Groups', () => {
-  let newGroup;
+  let initialGroup;
+
   let user;
   beforeEach(done => {
     user = util.addUser('user');
-    newGroup = new Group({
+    initialGroup = new Group({
       name: 'test group name',
       description: 'test group description',
       creator: '123412341234123412341234',
       articles: ['111111111111111111111111', '222222222222222222222222'],
       members: ['123412341234123412341234', '234523452345234523452345'],
     });
-    newGroup.save()
+    initialGroup.save()
     .then(result => {
       done();
     });
@@ -43,13 +43,16 @@ describe('Groups', () => {
   });
 
   it('should create a group on /api/group POST', done => {
+    const name = 'test group 2 name';
+    const description = 'test group 2 description';
+    const creator = '345634563456345634563456';
     passportStub.login(user);
     chai.request(app)
       .post('/api/group')
       .send({
-        name: 'test group 2 name',
-        description: 'test group 2 description',
-        creator: '345634563456345634563456',
+        name,
+        description,
+        creator,
       })
       .end((err, res) => {
         res.should.have.status(200);
@@ -64,11 +67,11 @@ describe('Groups', () => {
         res.body.SUCCESS.should.have.property('editDate');
         res.body.SUCCESS.should.have.property('articles');
         res.body.SUCCESS.should.have.property('members');
-        res.body.SUCCESS.name.should.equal('test group 2 name');
-        res.body.SUCCESS.description.should.equal('test group 2 description');
-        res.body.SUCCESS.creator.should.equal('345634563456345634563456');
+        res.body.SUCCESS.name.should.equal(name);
+        res.body.SUCCESS.description.should.equal(description);
+        res.body.SUCCESS.creator.should.equal(creator);
         res.body.SUCCESS.articles.should.eql([]);
-        res.body.SUCCESS.members.should.eql(['345634563456345634563456']);
+        res.body.SUCCESS.members.should.eql([creator]);
         done();
       });
   });
@@ -76,7 +79,7 @@ describe('Groups', () => {
   it('should get a specific group on /api/group/:id GET', done => {
     passportStub.login(user);
     chai.request(app)
-      .get(`/api/group/${newGroup._id}`)
+      .get(`/api/group/${initialGroup._id}`)
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -89,19 +92,21 @@ describe('Groups', () => {
         res.body.SUCCESS.should.have.property('editDate');
         res.body.SUCCESS.should.have.property('articles');
         res.body.SUCCESS.should.have.property('members');
-        res.body.SUCCESS._id.should.equal(String(newGroup._id));
-        res.body.SUCCESS.name.should.equal('test group name');
-        res.body.SUCCESS.description.should.equal('test group description');
-        res.body.SUCCESS.creator.should.equal('123412341234123412341234');
-        res.body.SUCCESS.articles.should.eql(['111111111111111111111111', '222222222222222222222222']);
-        res.body.SUCCESS.members.should.eql(['123412341234123412341234', '234523452345234523452345']);
+        res.body.SUCCESS._id.should.equal(String(initialGroup._id));
+        res.body.SUCCESS.name.should.equal(initialGroup.name);
+        res.body.SUCCESS.description.should.equal(initialGroup.description);
+        res.body.SUCCESS.creator.should.equal(String(initialGroup.creator));
+        res.body.SUCCESS.articles.should.eql(initialGroup.articles.map(String));
+        res.body.SUCCESS.members.should.eql(initialGroup.members.map(String));
         done();
       });
   });
 
   it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', done => {
+    const newMembers = initialGroup.members.map(String);
+    newMembers.push('345634563456345634563456');
     chai.request(app)
-      .post(`/api/group/${newGroup._id}/user/345634563456345634563456`)
+      .post(`/api/group/${initialGroup._id}/user/345634563456345634563456`)
       .end((err, res) => {
         res.should.have.status(200);
         res.should.be.json;
@@ -114,17 +119,37 @@ describe('Groups', () => {
         res.body.SUCCESS.should.have.property('editDate');
         res.body.SUCCESS.should.have.property('articles');
         res.body.SUCCESS.should.have.property('members');
-        res.body.SUCCESS._id.should.equal(String(newGroup._id));
-        res.body.SUCCESS.name.should.equal('test group name');
-        res.body.SUCCESS.description.should.equal('test group description');
-        res.body.SUCCESS.creator.should.equal('123412341234123412341234');
-        res.body.SUCCESS.articles.should.eql(['111111111111111111111111', '222222222222222222222222']);
-        res.body.SUCCESS.members.should.eql(['123412341234123412341234', '234523452345234523452345', '345634563456345634563456']);
+        res.body.SUCCESS._id.should.equal(String(initialGroup._id));
+        res.body.SUCCESS.name.should.equal(initialGroup.name);
+        res.body.SUCCESS.description.should.equal(initialGroup.description);
+        res.body.SUCCESS.creator.should.equal(String(initialGroup.creator));
+        res.body.SUCCESS.articles.should.eql(initialGroup.articles.map(String));
+        res.body.SUCCESS.members.should.eql(newMembers);
         done();
       });
   });
 
-  it('should get users of a group');
-  it('should get articles of a group');
+  // it('should get users of a group', done => {
+  //   chai.request(app)
+  //     .get(`/api/group/${initialGroup._id}/users`)
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       res.should.be.json;
+  //       res.body.should.have.property('users');
+  //       res.body.users.should.equal(['111111111111111111111111', '222222222222222222222222']);
+  //       done();
+  //     });
+  // });
+  //
+  // it('should get articles of a group', done => {
+  //   chai.request(app)
+  //     .get(`/api/group/${initialGroup._id}/articles`)
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       res.should.be.json;
+  //       res.should.have.property('articles');
+  //       res.body.articles.should.equal(['123412341234123412341234', '234523452345234523452345', '345634563456345634563456']);
+  //     });
+  // });
   it('should get public groups (communities) search based on title/description');
 });
