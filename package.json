@@ -1,24 +1,23 @@
 {
-  "name": "notist-frontend",
+  "name": "notist-feed-view",
   "version": "1.0.0",
-  "description": "frontend branch - not setup with backend at all",
+  "description": "not setup with backend at all",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node_modules/.bin/webpack-dev-server --inline --hot",
-    "build": "WEBPACK_ENV=production node_modules/.bin/webpack --optimize-minimize --progress --color",
-    "deploy": "npm run build; surge -p . -d notist.surge.sh"
+    "build": "WEBPACK_ENV=production node_modules/.bin/webpack --optimize-minimize --progress --color"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/notist/notist.git"
+    "url": "git+https://github.com/notist/feed-view.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/notist/notist/tree/frontend/issues"
+    "url": "https://github.com/notist/feed-view"
   },
-  "homepage": "https://github.com/notist/notist/tree/frontend",
+  "homepage": "https://github.com/notist/feed-view",
   "devDependencies": {
     "autoprefixer": "^6.3.7",
     "babel-core": "^6.10.4",
