@@ -9,3 +9,14 @@ Current problems with boilerplate:
 - Styling is in index.js instead of separate styles folder
 - Need drawers on both sides
 - For chat on the right side, just need an empty, collapsible drawer (will later integrate with socket.io)
+
+
+How to run:
+- `npm i`
+- `npm start`
+
+Currently looks like:
+
+![current](current.png)
+
+Also have `groupView.js` which has other basic (though non functioning components)
