@@ -129,18 +129,19 @@ describe('Groups', () => {
       });
   });
 
-  // it('should get users of a group', done => {
-  //   chai.request(app)
-  //     .get(`/api/group/${initialGroup._id}/users`)
-  //     .end((err, res) => {
-  //       res.should.have.status(200);
-  //       res.should.be.json;
-  //       res.body.should.have.property('users');
-  //       res.body.users.should.equal(['111111111111111111111111', '222222222222222222222222']);
-  //       done();
-  //     });
-  // });
-  //
+  it('should get members of a group', done => {
+    chai.request(app)
+      .get(`/api/group/${initialGroup._id}/members`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.json;
+        res.body.should.have.property('members');
+        res.body.members.should.eql(initialGroup.members.map(String));
+        done();
+      });
+  });
+
+
   // it('should get articles of a group', done => {
   //   chai.request(app)
   //     .get(`/api/group/${initialGroup._id}/articles`)
@@ -148,7 +149,7 @@ describe('Groups', () => {
   //       res.should.have.status(200);
   //       res.should.be.json;
   //       res.should.have.property('articles');
-  //       res.body.articles.should.equal(['123412341234123412341234', '234523452345234523452345', '345634563456345634563456']);
+  //       res.body.articles.should.eql(initialGroup.articles.map(String));
   //     });
   // });
   it('should get public groups (communities) search based on title/description');

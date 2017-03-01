@@ -144,12 +144,26 @@ Input:
   req.params.userId: String user ID to be added to the group.
 Output: Returns json file with the updated group information.
 */
-// TODO: Clarify the point of this endpoint, should it get all the articles or
-// annotations, or be like a history/info about the group?
 router.post('/api/group/:groupId/user/:userId', (req, res) => {
   Groups.addGroupMember(req.params.groupId, req.params.userId)
   .then(result => {
     res.json({ SUCCESS: result });
+  })
+  .catch(err => {
+    res.json({ ERROR: serializeError(err) });
+  });
+});
+
+/*
+Get the members of a group.
+Input:
+  req.params.groupId: String group ID
+Output: Returns json list of members of the group.
+*/
+router.get('/api/group/:groupId/members', (req, res) => {
+  Groups.getMembers(req.params.groupId)
+  .then(result => {
+    res.json(result);
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
