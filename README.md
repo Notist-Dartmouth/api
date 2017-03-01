@@ -1,5 +1,7 @@
 Want to make a static version of the feed mockup using React components
 
+![mockup](https://github.com/Notist/feed-view/blob/master/feed_view.png)
+
 Ideally hookup with database by Tuesday
 
 Current problems with boilerplate:
