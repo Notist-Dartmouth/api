@@ -15,10 +15,6 @@ var should = chai.should();
 chai.use(chaiHttp);
 passportStub.install(app);
 
-// app.request.isAuthenticated = function () {
-//   return true;
-// };
-
 describe('Annotations', function () {
   let GroupA;
   let ArticleA;
@@ -42,9 +38,9 @@ describe('Annotations', function () {
     user.save();
   });
   after(function (done) {
-    // Group.collection.drop();
-    // Article.collection.drop();
-    // Annotation.collection.drop();
+    Group.collection.drop();
+    Article.collection.drop();
+    Annotation.collection.drop();
     done();
   });
 
@@ -87,9 +83,10 @@ describe('Annotations', function () {
     });
 
     it('should add annotation to new article in a public group');
-    it('should add annotation to already existing article');
-    it('should add annotation to private and public group');
-    it('should return all annotations on particular article');
+    it('should add annotation to articleA');
+    it('should add annotation in private and public group to articleA');
+    it('should return all public annotations on articleA');
+    it('should return annotations in groupA on articleA');
   });
 
   describe('AnnotationReplies', function () {
