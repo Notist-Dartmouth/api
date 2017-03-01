@@ -105,13 +105,15 @@ Output: Returns json file with the created group or error.
 */
 // TODO: Check for user authentication
 router.post('/api/group', (req, res) => {
-  Groups.createGroup(req.body.name, req.body.description, req.body.creator)
-  .then(result => {
-    res.json({ SUCCESS: result });
-  })
-  .catch(err => {
-    res.json({ ERROR: serializeError(err) });
-  });
+  if (req.isAuthenticated()) {
+    Groups.createGroup(req.body.name, req.body.description, req.body.creator)
+    .then(result => {
+      res.json({ SUCCESS: result });
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
+  }
 });
 
 /*
@@ -123,13 +125,15 @@ Output: Returns json file with the group information or error.
 // TODO: Clarify the point of this endpoint, should it get all the articles or
 // annotations, or be like a history/info about the group?
 router.get('/api/group/:id', (req, res) => {
-  Groups.getGroup(req.params.id)
-  .then(result => {
-    res.json({ SUCCESS: result });
-  })
-  .catch(err => {
-    res.json({ ERROR: serializeError(err) });
-  });
+  if (req.isAuthenticated()) {
+    Groups.getGroup(req.params.id)
+    .then(result => {
+      res.json({ SUCCESS: result });
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
+  }
 });
 
 /*
