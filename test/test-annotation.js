@@ -10,6 +10,8 @@ import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
 import User from '../server/models/user';
 
+import util from './util';
+
 var should = chai.should();
 
 chai.use(chaiHttp);
@@ -24,27 +26,17 @@ describe('Annotations', function () {
   let ArticleA;
   let user;
   before(function (done) {
-    GroupA = new Group({
-      name: 'GroupA',
-      description: 'Description A',
-    });
-    const ArticleA = new Article({
-      uri: 'www.nytimes.com/articleA',
-    });
-    GroupA.save(function (err) {
-      ArticleA.group = GroupA.id;
-      ArticleA.save(function (err) {
-        done();
-      });
-    });
-    const userParams = { username: 'cblanc', googleId: '12345678', groupIds: [GroupA.id] };
-    user = new User(userParams);
-    user.save();
+    const created = util.addUserWithGroup('user', 'GroupA');
+    GroupA = created.group;
+    user = created.user;
+    ArticleA = util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
+    done();
   });
   after(function (done) {
     // Group.collection.drop();
     // Article.collection.drop();
     // Annotation.collection.drop();
+    passportStub.logout();
     done();
   });
 
