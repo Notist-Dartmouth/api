@@ -50,12 +50,35 @@ export const addGroupArticle = (articleId, groupIds) => {
   return Promise.all(updates);
 };
 
+// TODO: Will eventually need to add authentication checking, and deal with public groups
 /*
 Get the document of a particular group, assuming access is already allowed.
 Input:
   groupId: String of group ID
 Output: Returns json file of the group.
 */
+// TODO: Clarify the point of this endpoint, should it get all the articles or
+// annotations, or be like a history/info about the group?
 export const getGroup = (groupId) => {
   return Group.findOne({ _id: groupId });
+};
+
+/*
+Get the members of a group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of members array of the group.
+*/
+export const getMembers = (groupId) => {
+  return Group.findOne({ _id: groupId }).select('members -_id');
+};
+
+/*
+Get the articles of a group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of articles array of the group.
+*/
+export const getArticles = (groupId) => {
+  return Group.findOne({ _id: groupId }).select('articles -_id');
 };

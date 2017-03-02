@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
+import mongodb from 'mongodb';
 
 const userSchema = new Schema({
   // TODO: Some of these need to be required fields
@@ -12,8 +13,14 @@ const userSchema = new Schema({
   groupIds: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
 });
 
-userSchema.methods.isMemberOf = function isMemberOf(groupId) {
-  return this.groupIds.includes(groupId);
+userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
+  let groupId = groupIdIn;
+  if (typeof groupId !== 'object') {
+    groupId = new mongodb.ObjectId(groupIdIn);
+  }
+  return this.groupIds.some(someId => {
+    return someId.equals(groupId);
+  });
 };
 
 userSchema.methods.isMemberOfAll = function isMemberOfAll(groupIds) {

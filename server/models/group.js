@@ -12,8 +12,8 @@ const GroupSchema = new Schema({
   articles: [{ type: ObjectId, ref: 'Article' }],
   members: [{ type: ObjectId, ref: 'User' }],
 
-// for now, all groups are private.
-// isPublic: Boolean,
+  // TODO: begin handling public groups, i.e. communities
+  // isPublic: Boolean
 });
 
 const GroupModel = mongoose.model('Group', GroupSchema);

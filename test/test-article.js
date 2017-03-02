@@ -84,8 +84,7 @@ describe('Articles', function () {
           should.exist(res);
           res.should.have.status(200);
           res.should.be.json;
-          res.should.have.property('body');
-          res.body.should.have.property('SUCCESS');
+          res.should.have.deep.property('body.SUCCESS');
           res.body.SUCCESS.should.have.property('uri', uri);
           res.body.SUCCESS.should.have.property('groups').that.is.empty;
           res.body.SUCCESS.should.have.property('annotations').that.is.empty;
@@ -125,6 +124,38 @@ describe('Articles', function () {
       });
     });
 
-    it('should add article to group with proper references in both documents');
+    it('should add article to group with proper references in both documents', function () {
+      const uri = 'www.oneGroupURI.com';
+      passportStub.login(user);
+      chai.request(app)
+        .post('/api/article')
+        .send({ uri, groupIds: [groupA._id] })
+        .end((err, res) => {
+          should.not.exist(err);
+          should.exist(res);
+          res.should.have.status(200);
+          res.should.be.json;
+          res.should.have.deep.property('body.SUCCESS');
+          res.body.SUCCESS.should.have.property('uri', uri);
+          res.body.SUCCESS.should.have.property('annotations').that.is.empty;
+          res.body.SUCCESS.should.have.property('groups').with.members([groupA._id.toString()]);
+        });
+
+      return util.checkDatabase((resolve) => {
+        const articleQuery = Article.findOne({ uri });
+        const groupQuery = Group.findById(groupA._id);
+        resolve(Promise.all([
+          articleQuery.should.eventually.have.property('uri', uri),
+          articleQuery.should.eventually.have.property('annotations').that.is.empty,
+          articleQuery.then(article => {
+            article.groups.map(String).should.have.members([groupA._id.toString()]);
+            const articleId = article._id;
+            return groupQuery.then(group => {
+              group.articles.map(String).should.have.members([articleId.toString()]);
+            });
+          }),
+        ]));
+      });
+    });
   });
 });
