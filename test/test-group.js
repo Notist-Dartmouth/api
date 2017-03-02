@@ -6,6 +6,7 @@ import chaiHttp from 'chai-http';
 import passportStub from 'passport-stub';
 import { app } from '../server/app';
 import Group from '../server/models/group';
+import User from '../server/models/user';
 
 import util from './util';
 
@@ -19,7 +20,6 @@ passportStub.install(app);
 
 describe('Groups', () => {
   let initialGroup;
-
   let user;
   beforeEach(done => {
     user = util.addUser('user');
@@ -38,6 +38,7 @@ describe('Groups', () => {
 
   afterEach(done => {
     Group.collection.drop();
+    User.collection.drop();
     passportStub.logout();
     done();
   });
