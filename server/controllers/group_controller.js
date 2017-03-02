@@ -72,3 +72,13 @@ Output: Returns json file of members array of the group.
 export const getMembers = (groupId) => {
   return Group.findOne({ _id: groupId }).select('members -_id');
 };
+
+/*
+Get the articles of a group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of articles array of the group.
+*/
+export const getArticles = (groupId) => {
+  return Group.findOne({ _id: groupId }).select('articles -_id');
+};

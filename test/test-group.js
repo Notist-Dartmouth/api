@@ -142,15 +142,17 @@ describe('Groups', () => {
   });
 
 
-  // it('should get articles of a group', done => {
-  //   chai.request(app)
-  //     .get(`/api/group/${initialGroup._id}/articles`)
-  //     .end((err, res) => {
-  //       res.should.have.status(200);
-  //       res.should.be.json;
-  //       res.should.have.property('articles');
-  //       res.body.articles.should.eql(initialGroup.articles.map(String));
-  //     });
-  // });
+  it('should get articles of a group', done => {
+    chai.request(app)
+      .get(`/api/group/${initialGroup._id}/articles`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.json;
+        res.body.should.have.property('articles');
+        res.body.articles.should.eql(initialGroup.articles.map(String));
+        done();
+      });
+  });
+
   it('should get public groups (communities) search based on title/description');
 });
