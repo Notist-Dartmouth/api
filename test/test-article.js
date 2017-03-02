@@ -26,6 +26,7 @@ describe('Articles', function () {
   let user = null;
 
   before(function beforeCB(done) {
+    // ETHAN YOU DON'T NEED TO DO THIS SILLY MAN.
     Article.collection.drop();
     Group.collection.drop();
     User.collection.drop();

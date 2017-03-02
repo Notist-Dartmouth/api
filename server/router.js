@@ -226,7 +226,7 @@ router.get('/api/article/:id/annotations', (req, res) => {
   const articleId = req.params.id;
   Annotations.getArticleAnnotations(user, articleId)
   .then(result => {
-    res.json({ SUCCESS: result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
