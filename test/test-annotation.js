@@ -25,7 +25,6 @@ describe('Annotations', function () {
     const created = util.addUserWithGroup('user', 'GroupA');
     GroupA = created.group;
     user = created.user;
-    console.log(user);
     ArticleA = util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
     done();
   });
@@ -123,9 +122,11 @@ describe('Annotations', function () {
       chai.request(app)
       .get(`/api/article/${ArticleA.id}/annotations`)
       .end(function (err, res) {
-        console.log(res);
         res.should.have.status(200);
-        res.should.be.a('array');
+        res.body.should.have.property('result');
+        res.body.result.should.be.a('array');
+        res.body.result[0].should.have.property('articleText');
+        res.body.result[0].should.have.property('text');
         done();
       });
     });

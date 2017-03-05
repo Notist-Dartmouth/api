@@ -1,4 +1,7 @@
 import Annotation from '../models/annotation';
+import Article from '../models/article';
+
+import mongodb from 'mongodb';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -22,7 +25,7 @@ export const getAnnotation = (user, annotationId) => {
 };
 
 // PRECONDITION: user is not null.
-export const createAnnotation = (user, body) => {
+export const createAnnotation = (user, body, articleId) => {
   const annotation = new Annotation();
   annotation.authorId = user._id;
   annotation.text = body.text;
@@ -45,7 +48,7 @@ export const createAnnotation = (user, body) => {
       });
   } else {
     annotation.articleText = body.articleText;
-    annotation.articleId = body.articleId;
+    annotation.articleId = articleId;
     annotation.ancestors = [];
     annotation.isPublic = body.isPublic;
     annotation.groupIds = body.groupIds;
@@ -70,7 +73,8 @@ export const createAnnotation = (user, body) => {
 // If user is null, return public annotations.
 // Returns a promise.
 export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
-  const conditions = { articleId };
+  const conditions = { 'articleId': new mongodb.ObjectId(articleId) };
+
   if (user === null) {
     conditions.isPublic = true;
   } else {
@@ -79,6 +83,18 @@ export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
     conditions.ancestors = { $size: 0 };
   }
+
+  // TODO: Would be amazing if we could get this way of fetching working
+  // return Article.findById(articleId)
+  //         .populate({
+  //           path: 'annotations',
+  //           // select: ['articleText', 'text'],
+  //           match: conditions })
+  //         .then((article) => {
+  //           // console.log('populated annotations: ' + annotations);
+  //           return article.annotations;
+  //         });
+
   return Annotation.find(conditions);
 };
 
