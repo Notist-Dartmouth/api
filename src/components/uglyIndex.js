@@ -189,38 +189,28 @@ const otherStyles = {
   },
 };
 
-class MyCard extends React.Component {
-  constructor(props) {
-    super(props);
-    this.title = props.title;
-  }
-
-  render() {
-    return (
-
-      <MuiThemeProvider muiTheme={muiTheme}>
-        <Card>
-          <CardHeader style= {styles.cardHeader}
-            title={this.title}
-            subtitle="“The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
-            actAsExpander={true}
-            showExpandableButton={true}
-          />
-          <CardActions>
-            <FlatButton label="Action1" />
-            <FlatButton label="Action2" />
-          </CardActions>
-          <CardText expandable={true}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
-            Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
-            Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
-          </CardText>
-        </Card>
-      </MuiThemeProvider>
-    );
-  }
-}
+const CardExampleExpandable = () => (
+  <MuiThemeProvider muiTheme={muiTheme}>
+    <Card>
+      <CardHeader style= {styles.cardHeader}
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        subtitle="“The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+        actAsExpander={true}
+        showExpandableButton={true}
+      />
+      <CardActions>
+        <FlatButton label="Action1" />
+        <FlatButton label="Action2" />
+      </CardActions>
+      <CardText expandable={true}>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
+        Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
+        Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
+      </CardText>
+    </Card>
+  </MuiThemeProvider>
+);
 
 class ChipExampleArray extends React.Component {
 
@@ -315,8 +305,8 @@ class RightSideBar extends Component {
 class MiddleContent extends Component {
   render() {
     return (
-      <div id="card1" style={styles.card}>
-        <MyCard title="Trump lol"/>
+      <div id="card" style={styles.card}>
+        <CardExampleExpandable />
       </div>
     );
   }
