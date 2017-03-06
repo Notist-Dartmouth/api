@@ -23,6 +23,7 @@ import Media from 'react-media';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
+import ArticleCard from './components/ArticleCard.js'
 
 const muiTheme = getMuiTheme({
   palette: {
@@ -138,12 +139,16 @@ const styles = {
     left: '0px',
   },
 
-  card: {
-    position: 'fixed',
-    height: '200px',
-    top: '100px',
-    left: '330px',
-    right: '410px',
+  // card: {
+  //   position: 'fixed',
+  //   height: '200px',
+  //   top: '100px',
+  //   left: '330px',
+  //   right: '410px',
+  // },
+
+  break: {
+    color: white,
   },
 
   cardHeader: {
@@ -193,6 +198,8 @@ class MyCard extends React.Component {
   constructor(props) {
     super(props);
     this.title = props.title;
+    this.subtitle = props.subtitle;
+    this.annotationContent = props.annotationContent;
   }
 
   render() {
@@ -202,20 +209,16 @@ class MyCard extends React.Component {
         <Card>
           <CardHeader style= {styles.cardHeader}
             title={this.title}
-            subtitle="“The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+            subtitle={this.subtitle}
             actAsExpander={true}
             showExpandableButton={true}
           />
-          <CardActions>
-            <FlatButton label="Action1" />
-            <FlatButton label="Action2" />
-          </CardActions>
-          <CardText expandable={true}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
-            Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
-            Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
+          <CardText expandable={false}>
+            {this.annotationContent}
           </CardText>
+          <CardActions>
+            <FlatButton label="See more" />
+          </CardActions>
         </Card>
       </MuiThemeProvider>
     );
@@ -301,12 +304,7 @@ class RightSideBar extends Component {
   render() {
     return (
       <div id="rightSidebar" style={styles.rightSidebar}>
-        <p style={styles.rightSidebarText}>At a glance:</p>
-        <div className="iframeContainer" style={styles.iframeContainer}>
-          <iframe src={ARTICLEURL} style={styles.iframe}></iframe>
-        </div>
-        <p style={styles.rightSidebarText}>Filters:</p>
-        <ChipExampleArray />
+        <p style={styles.rightSidebarText}>Will eventually be chat!</p>
       </div>
     );
   }
@@ -315,8 +313,18 @@ class RightSideBar extends Component {
 class MiddleContent extends Component {
   render() {
     return (
-      <div id="card1" style={styles.card}>
-        <MyCard title="Trump lol"/>
+      <div style={styles.card}>
+        <ArticleCard id="card1"
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+        annotationContent= "here goes the annotation content"
+        username= "cblanc"
+        points={16}
+        timeSince = "4 hours"
+        numUsers={8}
+        numAnnotations={6}
+        numReplies={4}
+        />
       </div>
     );
   }
@@ -329,9 +337,7 @@ class App extends Component {
     return (
       <div>
         <MuiThemeProvider>
-          <Media query="(min-width: 1200px)" render={() => (
-            <RightSideBar /> //  Only show if user's screen is big enough
-          )} />
+          <RightSideBar />
         </MuiThemeProvider>
         <MuiThemeProvider>
           <LeftSideBar />
