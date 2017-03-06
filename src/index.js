@@ -23,7 +23,7 @@ import Media from 'react-media';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
-import ArticleCard from './components/ArticleCard.js'
+import ArticleCard from './components/ArticleCard'
 
 const muiTheme = getMuiTheme({
   palette: {
@@ -307,47 +307,45 @@ class MiddleContent extends Component {
       <div style={styles.card}>
         <ArticleCard id="card1"
         title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
-        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
-        annotationContent= "here goes the annotation content"
-        username= "cblanc"
+        domain="theonion.com (satire)"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the first word, so we shortened it to simply read bomb"
+        annotationContent= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque mattis mollis elit, sit amet facilisis erat. Mauris condimentum ex vel neque cursus, eu bibendum velit eleifend. Praesent molestie odio eget interdum ultricies. Nullam vitae dictum sapien, condimentum ultrices elit."
+        image = "http://i.onionstatic.com/onion/5597/9/16x9/1600.jpg"
+        username= "merwin"
         points={16}
-        timeSince = "4 hours"
+        timeSince = "2 hours"
         numUsers={8}
         numAnnotations={6}
         numReplies={4}
+        currentVotes={2}
         />
         <ArticleCard id="card2"
-        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
-        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
-        annotationContent= "here goes the annotation content"
-        username= "cblanc"
-        points={16}
-        timeSince = "4 hours"
-        numUsers={8}
-        numAnnotations={6}
-        numReplies={4}
+        title="Immigration Agents Discover New Freedom to Deport Under Trump"
+        domain="nytimes.com"
+        subtitle="perhaps the biggest change was the erasing of the Obama administration’s hierarchy of priorities, which forced agents to concentrate on deporting gang members and other violent and serious criminals, and mostly leave everyone else alone"
+        annotationContent= "Prioritization is particularly important when we have limited resources, even more so when the matters are pressing (violent crime). I can foresee one unforseen consequence being less attention to violent criminals in favor of deporting lower hanging fruit. While Trump says he wants to hire a ludricous number of immigration officers, hiring and training them will likely be a long process."
+        image = "https://static01.nyt.com/images/2017/02/26/us/26ICEMASHUP/26ICEMASHUP-superJumbo.jpg"
+        username= "byrne"
+        points={8}
+        timeSince = "7 hours"
+        numUsers={12}
+        numAnnotations={4}
+        numReplies={6}
+        currentVotes={9}
         />
-        <ArticleCard id="card3"
-        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
-        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
-        annotationContent= "here goes the annotation content"
-        username= "cblanc"
-        points={16}
-        timeSince = "4 hours"
-        numUsers={8}
-        numAnnotations={6}
+        <ArticleCard id="card2"
+        title="Obama Signs Executive Order Banning The Pledge Of Allegiance In Schools Nationwide"
+        domain="abcnews.com.co (misleading)"
+        subtitle="The pledge excludes so many Americans who are vital to making this country what it is,” Obama said."
+        annotationContent= "This type of satire is extremely dangerous. It’s one thing to have a satire section on your site (e.g., Borowitz Report on New Yorker) and another thing to impersonate a news source with the intention of misleading. I’m glad Notist at least has a a misleading tag on the domain."
+        image = "http://abcnews.com.co/wp-content/uploads/2016/08/Obama-signing-Executive-Ord.png"
+        username= "weazel02"
+        points={22}
+        timeSince = "12 hours"
+        numUsers={5}
+        numAnnotations={94}
         numReplies={4}
-        />
-        <ArticleCard id="card4"
-        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
-        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
-        annotationContent= "here goes the annotation content"
-        username= "cblanc"
-        points={16}
-        timeSince = "4 hours"
-        numUsers={8}
-        numAnnotations={6}
-        numReplies={4}
+        currentVotes={5}
         />
       </div>
     );

@@ -17,6 +17,7 @@ How to run:
 
 Currently looks like:
 
-![current](current.png)
+![current1](current-1.png)
+![current2](current-2.png)
 
 Also have `groupView.js` which has other basic (though non functioning components)

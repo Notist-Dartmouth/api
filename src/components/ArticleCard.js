@@ -8,9 +8,10 @@ import {
   cyan500,
   white, darkBlack, fullBlack,
 } from 'material-ui/styles/colors';
-import FlatButton from 'material-ui/FlatButton';
-import {MdComment, MdCreate, MdForum, MdSettings, MdUnfoldMore, MdGroup} from 'react-icons/lib/md';
-// import RaisedButton from 'material-ui/RaisedButton';
+// import FlatButton from 'material-ui/FlatButton';
+import {MdComment, MdCreate, MdForum, MdSettings, MdGroup} from 'react-icons/lib/md';
+import RaisedButton from 'material-ui/RaisedButton';
+import Upvote from './Upvote';
 
 const styles = {
   overlayContainer: {
@@ -19,20 +20,22 @@ const styles = {
       },
 
   annotationTextStyle: {
-    position: 'relative',
+    // position: 'relative',
     fontSize: 14,
-    clear: 'both',
+    // clear: 'both',
+    padding: 5,
   },
 
   articleTitleTextStyle: {
+    fontWeight: 700,
     fontSize: 26,
     lineHeight: 1,
-    // bottomMargin: '500px', // not working
   },
 
   articleTextStyle: {
     fontSize: 15,
-    fontFamily: 'monospace',
+    fontStyle: 'italic',
+    fontWeight: 100,
     // fontFamily: "Roboto",
     // fontWeight: 400,
     // font: "Roboto Italic",
@@ -40,10 +43,15 @@ const styles = {
 
   cardHeaderStyle: {
     position: 'relative',
-    maxWidth: '70%',
-    marginRight: 0,
-    paddingRight: 0,
+    maxWidth: '65%',
+    paddingLeft: '3%',
+    top: 20,
     float: 'left',
+  },
+
+  domainTextStyle: {
+    fontSize: 10,
+    textDecoration: 'underline',
   },
 
   cardStyle: {
@@ -65,6 +73,10 @@ const styles = {
     float: 'right',
     paddingTop: '3%',
     paddingRight: '3%',
+  },
+
+  annotationAndInfo: {
+    paddingLeft: '5%',
   }
 
 }
@@ -73,6 +85,7 @@ class ArticleCard extends React.Component {
   constructor(props) {
     super(props);
     this.title = props.title;
+    this.domain = props.domain;
     this.subtitle = props.subtitle;
     this.annotationContent = props.annotationContent;
     this.numUsers = props.numUsers;
@@ -81,19 +94,28 @@ class ArticleCard extends React.Component {
     this.username = props.username;
     this.points = props.points;
     this.timeSince = props.timeSince;
+    this.currentVotes = props.currentVotes;
+    this.image = props.image;
   }
 
   render() {
     return (
       <Card style={styles.cardStyle}>
-        <CardHeader
-          style={styles.cardHeaderStyle}
-          titleStyle={styles.articleTitleTextStyle}
-          title={this.title}
-          subtitleStyle={styles.articleTextStyle}
-          subtitle={this.subtitle}
-
-        />
+      <div style={styles.cardHeaderStyle}>
+        <span style={styles.articleTitleTextStyle}>{this.title}</span>
+        <span style={styles.domainTextStyle}><br></br>{this.domain}</span>
+        <span style={styles.articleTextStyle}><br></br>"{this.subtitle}"</span>
+        <br style={{lineHeight: 2}}></br>
+        <div class="vote" style={{float: 'left'}}>
+          <Upvote beforeContent={this.currentVotes}/>
+        </div>
+        <div style={styles.annotationAndInfo}>
+          <span style={{fontWeight: 900, padding: 5}}>{this.username}</span>
+          <span style={{fontStyle: 'italic', padding: 5}}>{this.points} points</span>
+          <span> {this.timeSince} ago</span>
+          <span style={styles.annotationTextStyle}><br></br>{this.annotationContent}</span>
+        </div>
+      </div>
       <aside style={styles.articleInfoBar}>
         <span><MdGroup/> {"   " + this.numUsers} users  </span>
        <span><MdComment /> {"   " + this.numAnnotations} annotations  </span>
@@ -102,14 +124,11 @@ class ArticleCard extends React.Component {
         // overlayContainerStyle={styles.overlayContainer}
         // overlay={<CardTitle title="Overlay title" subtitle="Overlay subtitle" />}
         >
-        <img src="https://www.bennadel.com/images/header/photos/pascal_precht.jpg" />
+        <img src={this.image} />
         </CardMedia>
       </aside>
-        <CardText expandable={false} style= {styles.annotationTextStyle}>
-          {this.annotationContent}
-        </CardText>
-        <CardActions>
-          <FlatButton label="See more" />
+        <CardActions style={{clear: 'both', left: '43%'}}>
+          <RaisedButton style={{top: '10%'}} label="See more"/>
         </CardActions>
       </Card>
     );
@@ -118,6 +137,7 @@ class ArticleCard extends React.Component {
 
 ArticleCard.propTypes = {
   title: React.PropTypes.string.isRequired,
+  domain: React.PropTypes.string.isRequired,
   subtitle: React.PropTypes.string.isRequired,
   annotationContent: React.PropTypes.string.isRequired,
   numUsers: React.PropTypes.number.isRequired,
@@ -126,6 +146,8 @@ ArticleCard.propTypes = {
   username: React.PropTypes.string.isRequired,
   points: React.PropTypes.number.isRequired,
   timeSince: React.PropTypes.string.isRequired,
+  image: React.PropTypes.string.isRequired,
+  currentVotes: React.PropTypes.number.isRequired,
 }
 
 export default ArticleCard;
