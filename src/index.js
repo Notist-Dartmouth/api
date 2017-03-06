@@ -104,19 +104,9 @@ const styles = {
 
   rightSidebar: {
     position: 'fixed',
-    backgroundColor: blueGrey700,
-    width: '380px',
-    minWidth: '380px',
-    height: '100%',
-    top: NAVBARHEIGHT,
-    right: '0px',
-  },
-
-  rightSidebar: {
-    position: 'fixed',
     backgroundColor: grey100,
-    width: '380px',
-    minWidth: '380px',
+    width: '23%',
+    minWidth: '23%',
     height: '100%',
     top: NAVBARHEIGHT,
     right: '0px',
@@ -132,8 +122,8 @@ const styles = {
   leftSidebar: {
     position: 'fixed',
     backgroundColor: blueGrey700,
-    width: '300px',
-    minWidth: '300px',
+    width: '18%',
+    minWidth: '18%',
     height: '100%',
     top: NAVBARHEIGHT,
     left: '0px',

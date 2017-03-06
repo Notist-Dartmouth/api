@@ -49,8 +49,8 @@ const styles = {
   cardStyle: {
     position: 'relative',
     top: 80,
-    left: 310,
-    maxWidth: 930,
+    left: '18%',
+    width: '56%',
     marginTop: 20,
     marginBottom: 20,
     marginRight: 20,
@@ -117,8 +117,15 @@ class ArticleCard extends React.Component {
 }
 
 ArticleCard.propTypes = {
-  username: React.PropTypes.string.isRequired,
+  title: React.PropTypes.string.isRequired,
+  subtitle: React.PropTypes.string.isRequired,
+  annotationContent: React.PropTypes.string.isRequired,
   numUsers: React.PropTypes.number.isRequired,
+  numAnnotations: React.PropTypes.number.isRequired,
+  numReplies: React.PropTypes.number.isRequired,
+  username: React.PropTypes.string.isRequired,
+  points: React.PropTypes.number.isRequired,
+  timeSince: React.PropTypes.string.isRequired,
 }
 
 export default ArticleCard;
