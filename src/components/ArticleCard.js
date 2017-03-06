@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
 import {Card, CardActions, CardHeader, CardText, CardMedia, CardTitle} from 'material-ui/Card';
-import {
-  yellow200,
-} from 'material-ui/styles/colors';
-// import FlatButton from 'material-ui/FlatButton';
+import { yellow200 } from 'material-ui/styles/colors';
 import {MdComment, MdCreate, MdForum, MdSettings, MdGroup} from 'react-icons/lib/md';
 import RaisedButton from 'material-ui/RaisedButton';
 import Upvote from './Upvote';
@@ -17,7 +14,6 @@ const styles = {
   annotationTextStyle: {
     position: 'relative',
     fontSize: 14,
-    // clear: 'both',
     left: "2%",
   },
 
@@ -32,17 +28,14 @@ const styles = {
     fontStyle: 'italic',
     fontWeight: 100,
     backgroundColor: yellow200,
-    // fontFamily: "Roboto",
-    // fontWeight: 400,
-    // font: "Roboto Italic",
   },
 
   cardHeaderStyle: {
     position: 'relative',
+    float: 'left',
     maxWidth: '65%',
     paddingLeft: '3%',
     top: 20,
-    float: 'left',
   },
 
   domainTextStyle: {
