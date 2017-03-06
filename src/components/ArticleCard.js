@@ -1,12 +1,7 @@
 import React, {Component} from 'react';
 import {Card, CardActions, CardHeader, CardText, CardMedia, CardTitle} from 'material-ui/Card';
 import {
-  deepOrange400,
-  blueGrey700,
-  teal200,
-  grey100, grey300, grey400, grey500, grey900,
-  cyan500,
-  white, darkBlack, fullBlack,
+  yellow200,
 } from 'material-ui/styles/colors';
 // import FlatButton from 'material-ui/FlatButton';
 import {MdComment, MdCreate, MdForum, MdSettings, MdGroup} from 'react-icons/lib/md';
@@ -20,10 +15,10 @@ const styles = {
       },
 
   annotationTextStyle: {
-    // position: 'relative',
+    position: 'relative',
     fontSize: 14,
     // clear: 'both',
-    padding: 5,
+    left: "2%",
   },
 
   articleTitleTextStyle: {
@@ -36,6 +31,7 @@ const styles = {
     fontSize: 15,
     fontStyle: 'italic',
     fontWeight: 100,
+    backgroundColor: yellow200,
     // fontFamily: "Roboto",
     // fontWeight: 400,
     // font: "Roboto Italic",
@@ -110,8 +106,8 @@ class ArticleCard extends React.Component {
           <Upvote beforeContent={this.currentVotes}/>
         </div>
         <div style={styles.annotationAndInfo}>
-          <span style={{fontWeight: 900, padding: 5}}>{this.username}</span>
-          <span style={{fontStyle: 'italic', padding: 5}}>{this.points} points</span>
+          <span style={{fontWeight: 900, padding: 10}}>{this.username}</span>
+          <span style={{fontStyle: 'italic', padding: 10}}>{this.points} points</span>
           <span> {this.timeSince} ago</span>
           <span style={styles.annotationTextStyle}><br></br>{this.annotationContent}</span>
         </div>
@@ -127,7 +123,7 @@ class ArticleCard extends React.Component {
         <img src={this.image} />
         </CardMedia>
       </aside>
-        <CardActions style={{clear: 'both', left: '43%'}}>
+        <CardActions style={{clear: 'both', position: 'relative', left: '41%', padding: '3%'}}>
           <RaisedButton style={{top: '10%'}} label="See more"/>
         </CardActions>
       </Card>
