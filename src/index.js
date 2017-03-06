@@ -74,6 +74,7 @@ const styles = {
     width: '100%',
     height: NAVBARHEIGHT,
     position: 'fixed',
+    zIndex: 200,
     backgroundColor: deepOrange400,
     top: '0px',
     left: '0px',
@@ -305,6 +306,39 @@ class MiddleContent extends Component {
     return (
       <div style={styles.card}>
         <ArticleCard id="card1"
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+        annotationContent= "here goes the annotation content"
+        username= "cblanc"
+        points={16}
+        timeSince = "4 hours"
+        numUsers={8}
+        numAnnotations={6}
+        numReplies={4}
+        />
+        <ArticleCard id="card2"
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+        annotationContent= "here goes the annotation content"
+        username= "cblanc"
+        points={16}
+        timeSince = "4 hours"
+        numUsers={8}
+        numAnnotations={6}
+        numReplies={4}
+        />
+        <ArticleCard id="card3"
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
+        annotationContent= "here goes the annotation content"
+        username= "cblanc"
+        points={16}
+        timeSince = "4 hours"
+        numUsers={8}
+        numAnnotations={6}
+        numReplies={4}
+        />
+        <ArticleCard id="card4"
         title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
         subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the"
         annotationContent= "here goes the annotation content"
