@@ -9,6 +9,7 @@ exports.checkDatabase = function (delayedCallback) {
     if (typeof delayedCallback !== 'function') {
       reject(new TypeError('Invalid callback to checkDatabase'));
     } else {
+      // let callback function resolve the promise after waiting
       setTimeout(() => { delayedCallback(resolve); }, DB_UPDATE_WAIT);
     }
   });
@@ -35,7 +36,13 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
       members: [user._id],
     });
   }
-  user.groupIds = groups.map(group => { return group._id; });
+  user.groups = groups.map(group => {
+    return {
+      _id: group._id,
+      name: group.name,
+      isPersonal: group.isPersonal,
+    };
+  });
   user.save(err => { if (err) throw err; });
   groups.map(group => { group.save(err => { if (err) throw err; }); return 0; });
 
@@ -51,10 +58,11 @@ exports.addUser = function (username = 'user') {
   return exports.addUserWithNGroups(0, username).user;
 };
 
-exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
+exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
   const article = new Article({
     uri,
-    groups: groupIds,
+    title: `Article at ${uri}`,
+    groups,
   });
   article.save(err => { if (err) throw err; });
   return article;

@@ -22,28 +22,24 @@ passportStub.install(app);
 /* global describe it before after beforeEach afterEach:true */
 
 describe('Articles', function () {
-  let groupA = null;
+  let group0 = null;
   let user = null;
 
   before(function beforeCB(done) {
-    Article.collection.drop();
-    Group.collection.drop();
-    User.collection.drop();
-
-    const created = util.addUserWithGroup('user', 'GroupA');
-    groupA = created.group;
+    const created = util.addUserWithGroup();
+    group0 = created.group;
     user = created.user;
-
-    passportStub.logout();
     done();
   });
 
   after(function afterCB(done) {
-    Article.collection.drop(err => {});
-    Group.collection.drop(err => {});
-    User.collection.drop(err => {});
-    passportStub.logout();
-    done();
+    setTimeout(() => {
+      Article.collection.drop(err => {});
+      Group.collection.drop(err => {});
+      User.collection.drop(err => {});
+      passportStub.logout();
+      done();
+    }, 50);
   });
 
   beforeEach(function beforeEachCB(done) {
@@ -58,9 +54,11 @@ describe('Articles', function () {
   describe('POST /api/articles', function () {
     it('should return 401 error for unauthenticated user', function () {
       const uri = 'www.unauthenticatedURI.com';
+      const nURI = Article.normalizeURI(uri);
+      const title = 'Unauthenticated';
       chai.request(app)
         .post('/api/article')
-        .send({ uri, groupIds: [] })
+        .send({ uri, title, groups: [] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
@@ -68,32 +66,36 @@ describe('Articles', function () {
         });
 
       return util.checkDatabase((resolve) => {
-        resolve(Article.findOne({ uri }).should.eventually.equal.null);
+        resolve(Article.findOne({ uri: nURI }).should.eventually.equal.null);
       });
     });
 
     it('should add a single article with no groups', function () {
       const uri = 'www.noGroupURI.com';
+      const nURI = Article.normalizeURI(uri);
+      const title = 'No Groups';
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, groupIds: [] })
+        .send({ uri, title, groups: [] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
           res.should.have.status(200);
           res.should.be.json;
           res.should.have.deep.property('body.SUCCESS');
-          res.body.SUCCESS.should.have.property('uri', uri);
+          res.body.SUCCESS.should.have.property('uri', nURI);
+          res.body.SUCCESS.should.have.property('title', title);
           res.body.SUCCESS.should.have.property('groups').that.is.empty;
           res.body.SUCCESS.should.have.property('annotations').that.is.empty;
         });
 
       return util.checkDatabase((resolve) => {
-        const articleQuery = Article.findOne({ uri });
+        const articleQuery = Article.findOne({ uri: nURI });
         resolve(Promise.all([
           articleQuery.should.eventually.have.property('groups').that.is.empty,
-          articleQuery.should.eventually.have.property('uri', uri),
+          articleQuery.should.eventually.have.property('uri', nURI),
+          articleQuery.should.eventually.have.property('title', title),
           articleQuery.should.eventually.have.property('annotations').that.is.empty,
         ]));
       });
@@ -101,11 +103,12 @@ describe('Articles', function () {
 
     it('should return error because try to add article to fake group', function () {
       const uri = 'www.fakeGroupURI.com';
+      const title = 'Fake Group';
       const groupId = '123412341234123412341234';
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, groupIds: [groupId] })
+        .send({ uri, title, groups: [groupId] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
@@ -125,29 +128,33 @@ describe('Articles', function () {
 
     it('should add article to group with proper references in both documents', function () {
       const uri = 'www.oneGroupURI.com';
+      const title = 'One Group';
+      const nURI = Article.normalizeURI(uri);
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, groupIds: [groupA._id] })
+        .send({ uri, title, groups: [group0._id] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
           res.should.have.status(200);
           res.should.be.json;
           res.should.have.deep.property('body.SUCCESS');
-          res.body.SUCCESS.should.have.property('uri', uri);
+          res.body.SUCCESS.should.have.property('uri', nURI);
+          res.body.SUCCESS.should.have.property('title', title);
           res.body.SUCCESS.should.have.property('annotations').that.is.empty;
-          res.body.SUCCESS.should.have.property('groups').with.members([groupA._id.toString()]);
+          res.body.SUCCESS.should.have.property('groups').with.members([group0._id.toString()]);
         });
 
       return util.checkDatabase((resolve) => {
-        const articleQuery = Article.findOne({ uri });
-        const groupQuery = Group.findById(groupA._id);
+        const articleQuery = Article.findOne({ uri: nURI });
+        const groupQuery = Group.findById(group0._id);
         resolve(Promise.all([
-          articleQuery.should.eventually.have.property('uri', uri),
+          articleQuery.should.eventually.have.property('uri', nURI),
+          articleQuery.should.eventually.have.property('title', title),
           articleQuery.should.eventually.have.property('annotations').that.is.empty,
           articleQuery.then(article => {
-            article.groups.map(String).should.have.members([groupA._id.toString()]);
+            article.groups.map(String).should.have.members([group0._id.toString()]);
             const articleId = article._id;
             return groupQuery.then(group => {
               group.articles.map(String).should.have.members([articleId.toString()]);
