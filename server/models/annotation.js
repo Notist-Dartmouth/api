@@ -5,31 +5,38 @@ const ObjectId = Schema.Types.ObjectId;
 
 // TODO: change names of fields to not have "Id" in them
 const annotationSchema = new Schema({
-  authorId: { type: ObjectId, ref: 'User' },
-  articleId: { type: ObjectId, ref: 'Article' },
+  author: { type: ObjectId, ref: 'User' },
+  username: String,
+  article: { type: ObjectId, ref: 'Article' },
   // ancestors = [parent.ancestors parent._id] if has parent, else []
   ancestors: [{ type: ObjectId, ref: 'Annotation' }],
+  groups: [{ type: ObjectId, ref: 'Group' }],
+  isPublic: { type: Boolean, default: true },
 
   text: { type: String, trim: true },
   articleText: String,
-
-  groupIds: [{ type: ObjectId, ref: 'Group' }],
-  isPublic: { type: Boolean, default: true },
+  // TODO: implement system for locating article text robustly
+  points: { type: Number, default: 0 },
 
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
+  deleted: { type: Boolean, default: false },
 });
 
 // Enforce that private annotations have exactly one group.
 annotationSchema.pre('save', function preSave(next) {
-  if (!this.isPublic && this.groupIds.length > 1) {
+  if (!this.isPublic && this.groups.length > 1) {
     const err = new Error('Cannot assign private annotation to multiple groups');
     next(err);
   } else {
     next();
   }
 });
+
+annotationSchema.methods.isTopLevel = function isTopLevel() {
+  return this.ancestors.length === 0;
+};
 
 // TODO: we could maybe use virtual columns to deal with object id stuff?
 // annotationSchema.virtual('id').get(function () {
@@ -44,7 +51,6 @@ annotationSchema.pre('save', function preSave(next) {
 // annotationSchema.virtual('authorId').get(function () {
 //   return this.author_id.toString();
 // });
-
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 
