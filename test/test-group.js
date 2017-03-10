@@ -70,9 +70,9 @@ describe('Groups', () => {
         res.body.SUCCESS.should.have.property('members');
         res.body.SUCCESS.name.should.equal(name);
         res.body.SUCCESS.description.should.equal(description);
-        res.body.SUCCESS.creator.should.equal(creator);
+        res.body.SUCCESS.creator.should.equal(creator); // TODO: fails here! because creator isn't a real ID
         res.body.SUCCESS.articles.should.eql([]);
-        res.body.SUCCESS.members.should.eql([creator]);
+        res.body.SUCCESS.members.should.eql([creator]); // TODO: fails here as well!
         done();
       });
   });

@@ -167,15 +167,9 @@ describe('Annotations', function () {
       });
     });
     it('should post reply annotation a public group'); // TODO: we dont have this yet do we? is it any different than a group?
-    it('should post reply annotation in private group', function (done) {
-      done();
-    });
-    it('should list all replies on annotation in general group', function (done) {
-      done();
-    });
-    it('should list all replies on annotation in private group', function (done) {
-      done();
-    });
+    it('should post reply annotation in private group');
+    it('should list all replies on annotation in general group');
+    it('should list all replies on annotation in private group');
   });
 });
 
