@@ -25,25 +25,27 @@ describe('Articles', function () {
   let group0 = null;
   let user = null;
 
-  before(function beforeCB(done) {
-    const created = util.addUserWithGroup();
-    group0 = created.group;
-
-    Article.collection.drop();
-    Group.collection.drop();
-    User.collection.drop();
-
-    user = created.user;
-    done();
+  before(function beforeCB() {
+    return util.addUserWithGroup()
+    .then(created => {
+      group0 = created.group;
+      user = created.user;
+    });
   });
 
   after(function afterCB(done) {
+    passportStub.logout();
     setTimeout(() => {
-      Article.collection.drop(err => {});
-      Group.collection.drop(err => {});
-      User.collection.drop(err => {});
-      passportStub.logout();
-      done();
+      Promise.all([
+        Article.collection.drop(),
+        Group.collection.drop(),
+        User.collection.drop(),
+      ]).then(res => {
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
     }, 50);
   });
 
@@ -78,11 +80,10 @@ describe('Articles', function () {
     it('should add a single article with no groups', function () {
       const uri = 'www.noGroupURI.com';
       const nURI = Article.normalizeURI(uri);
-      const title = 'No Groups';
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, title, groups: [] })
+        .send({ uri, groups: [] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
@@ -90,7 +91,7 @@ describe('Articles', function () {
           res.should.be.json;
           res.should.have.deep.property('body.SUCCESS');
           res.body.SUCCESS.should.have.property('uri', nURI); // TODO: something about this line errors !!
-          res.body.SUCCESS.should.have.property('title', title);
+          res.body.SUCCESS.should.have.property('title');
           res.body.SUCCESS.should.have.property('groups').that.is.empty;
           res.body.SUCCESS.should.have.property('annotations').that.is.empty;
         });
@@ -100,7 +101,7 @@ describe('Articles', function () {
         resolve(Promise.all([
           articleQuery.should.eventually.have.property('groups').that.is.empty,
           articleQuery.should.eventually.have.property('uri', nURI),
-          articleQuery.should.eventually.have.property('title', title),
+          articleQuery.should.eventually.have.property('title'),
           articleQuery.should.eventually.have.property('annotations').that.is.empty,
         ]));
       });
@@ -108,12 +109,11 @@ describe('Articles', function () {
 
     it('should return error because try to add article to fake group', function () {
       const uri = 'www.fakeGroupURI.com';
-      const title = 'Fake Group';
       const groupId = '123412341234123412341234';
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, title, groups: [groupId] })
+        .send({ uri, groups: [groupId] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
@@ -133,12 +133,11 @@ describe('Articles', function () {
 
     it('should add article to group with proper references in both documents', function () {
       const uri = 'www.oneGroupURI.com';
-      const title = 'One Group';
       const nURI = Article.normalizeURI(uri);
       passportStub.login(user);
       chai.request(app)
         .post('/api/article')
-        .send({ uri, title, groups: [group0._id] })
+        .send({ uri, groups: [group0._id] })
         .end((err, res) => {
           should.not.exist(err);
           should.exist(res);
@@ -146,7 +145,7 @@ describe('Articles', function () {
           res.should.be.json;
           res.should.have.deep.property('body.SUCCESS');
           res.body.SUCCESS.should.have.property('uri', nURI);
-          res.body.SUCCESS.should.have.property('title', title);
+          res.body.SUCCESS.should.have.property('title');
           res.body.SUCCESS.should.have.property('annotations').that.is.empty;
           res.body.SUCCESS.should.have.property('groups').with.members([group0._id.toString()]);
         });
@@ -156,7 +155,7 @@ describe('Articles', function () {
         const groupQuery = Group.findById(group0._id);
         resolve(Promise.all([
           articleQuery.should.eventually.have.property('uri', nURI),
-          articleQuery.should.eventually.have.property('title', title),
+          articleQuery.should.eventually.have.property('title'),
           articleQuery.should.eventually.have.property('annotations').that.is.empty,
           articleQuery.then(article => {
             article.groups.map(String).should.have.members([group0._id.toString()]);

@@ -13,7 +13,7 @@ const GroupSchema = new Schema({
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
 
-  isPublic: { type: Boolean, defualt: false }, // irrelevant for personal groups
+  isPublic: { type: Boolean, default: false }, // irrelevant for personal groups
   isPersonal: { type: Boolean, default: false },
 });
 

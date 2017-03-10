@@ -6,14 +6,14 @@ import * as Groups from './group_controller';
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
-export const createArticle = (body) => {
+export const createArticle = (uri, groups) => {
   const article = new Article();
-  article.uri = body.uri;
-  article.title = body.title;
-  article.groups = body.groups;
+  article.uri = uri;
+  article.title = `Article at ${uri}`;
+  article.groups = groups;
   return article.save()
   .then(result => {
-    return Groups.addGroupArticle(result._id, body.groups)
+    return Groups.addGroupArticle(result._id, groups)
     .then(res => {
       return result;
     });
@@ -26,7 +26,7 @@ export const getArticle = (uri) => {
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {
-  return Article.findByIdAndUpdate(articleId, { $push: { annotations: annotationId } });
+  return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
 };
 
 // TODO: Add filtering, return in order

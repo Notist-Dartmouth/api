@@ -63,7 +63,6 @@ router.get('/logout', (req, res) => {
 Create a new article.
 Input:
   req.body.uri: String uri of the article
-  req.body.title: Title of the article
   req.body.groups: Array of String group IDs to which article belongs
 Output: Returns json file with the created article or error.
 */
@@ -77,7 +76,7 @@ router.post('/api/article', (req, res) => {
       return;
     }
 
-    Articles.createArticle(req.body)
+    Articles.createArticle(req.body.uri, req.body.groups)
     .then(result => {
       res.json({ SUCCESS: result });
     })
@@ -134,13 +133,24 @@ Output: Returns json file with the group information or error.
 // annotations, or be like a history/info about the group?
 router.get('/api/group/:id', (req, res) => {
   if (req.isAuthenticated()) {
-    Groups.getGroup(req.params.id)
-    .then(result => {
-      res.json({ SUCCESS: result });
+    const user = req.user;
+    const groupId = req.params.id;
+    const isMember = user.isMemberOf(groupId);
+    Groups.getGroup(groupId)
+    .then(group => {
+      if (group === null) {
+        throw new Error('Group not found');
+      } else if (!isMember && !group.isPublic) {
+        throw new Error('Not a member of this private group');
+      } else {
+        res.json(group);
+      }
     })
     .catch(err => {
       res.json({ ERROR: serializeError(err) });
     });
+  } else {
+    res.status(401).end();
   }
 });
 
@@ -152,13 +162,19 @@ Input:
 Output: Returns json file with the updated group information.
 */
 router.post('/api/group/:groupId/user/:userId', (req, res) => {
-  Groups.addGroupMember(req.params.groupId, req.params.userId)
-  .then(result => {
-    res.json({ SUCCESS: result });
-  })
-  .catch(err => {
-    res.json({ ERROR: serializeError(err) });
-  });
+  const groupId = req.params.groupId;
+  const userId = req.params.userId;
+  if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
+    Groups.addGroupMember(groupId, userId)
+    .then(result => {
+      res.json({ SUCCESS: result });
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
+  } else {
+    res.status(401).end();
+  }
 });
 
 /*
@@ -200,23 +216,22 @@ Input:
   req.body.uri: String uri of the annotation's article
   req.body.articleText: String of the article's relevant text
   req.body.text: String of the annotation text
-  req.body.parent: null or String of the parent's annotation ID
+  req.body.parentId: null or String of the parent's annotation ID
   req.body.isPublic: boolean of whether the annotation will be publicly visible
 Output: Returns json file of the new annotation or error.
 */
 // TODO: Should createAnnotation take in body or better to parse out all the params here?
 // TODO: Parents should keep track of children in the level directly below
-// TODO: figure out how to actually get the title of the article
 router.post('/api/annotation', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const body = req.body;
-    if (body.parentId !== null) {
- // if annotation is a reply
+    if (body.parentId !== undefined && body.parentId !== null) {
+    // if annotation is a reply
 
-      return Annotations.createAnnotation(user, body)
+      Annotations.createAnnotation(user, body)
       .then(annotation => {
-        Articles.addArticleAnnotation(annotation.articleId, annotation._id)
+        Articles.addArticleAnnotation(annotation.article, annotation._id)
         .then(result => {
           res.json({ SUCCESS: annotation });
         });
@@ -225,10 +240,9 @@ router.post('/api/annotation', (req, res) => {
         res.json({ ERROR: serializeError(err) });
       });
     } else {
- // else annotation is not a reply
-
+    // else annotation is not a reply
       const uri = req.body.uri;
-      const groups = req.body.groupIds;
+      const groups = req.body.groups;
 
       if (!user.isMemberOfAll(groups)) {  // make sure that user can post in group
         const err = new Error('User not authorized to add annotation to one or more groups');
@@ -237,22 +251,22 @@ router.post('/api/annotation', (req, res) => {
       }
 
       // if article not yet annotated
-      return Articles.getArticle(uri)
+      Articles.getArticle(uri)
       .then(article => {
         if (article === null) {
-          return Articles.createArticle(uri, groupIds)
+          return Articles.createArticle(uri, groups)
           .then(newArticle => {
-            articleId = newArticle._id;
+            const articleId = newArticle._id;
             return Annotations.createAnnotation(user, body, articleId);
           });
         } else { // else add annotation to article
           // TODO: if article already exists, it needs to be added to a group
-          articleId = article._id;
+          const articleId = article._id;
           return Annotations.createAnnotation(user, body, articleId);
         }
       })
       .then(annotation => {
-        Articles.addArticleAnnotation(articleId, annotation._id)
+        return Articles.addArticleAnnotation(annotation.article, annotation._id)
         .then(result => {
           res.json({ SUCCESS: annotation });
         });
@@ -282,7 +296,7 @@ router.get('/api/article/annotations', (req, res) => {
   const articleURI = req.query.uri;
   Articles.getArticleAnnotations(user, articleURI)
   .then(result => {
-    res.json({ result });
+    res.json(result);
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });

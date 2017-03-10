@@ -36,7 +36,7 @@ Input:
 Output: Returns json file with the updated group.
 */
 export const addGroupMember = (groupId, userId) => {
-  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } }, { new: true });
+  return Group.findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { new: true });
 };
 
 /*

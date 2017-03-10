@@ -39,26 +39,33 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
       members: [user._id],
     });
   }
-  user.groups = groups.map(group => {
-    return {
-      _id: group._id,
-      name: group.name,
-      isPersonal: group.isPersonal,
-    };
-  });
-  user.save(err => { if (err) throw err; });
-  groups.map(group => { group.save(err => { if (err) throw err; }); return 0; });
 
-  return { user, groups };
+  return Promise.all(groups.map(group => { return group.save(); }))
+  .then((savedGroups) => {
+    user.groups = savedGroups.map(group => {
+      return {
+        _id: group._id,
+        name: group.name,
+        isPersonal: group.isPersonal,
+      };
+    });
+    return user.save()
+    .then(savedUser => {
+      return { user: savedUser, groups: savedGroups };
+    });
+  });
 };
 
 exports.addUserWithGroup = function (username = 'user', groupName = 'Group') {
-  const res = exports.addUserWithNGroups(1, username, groupName);
-  return { user: res.user, group: res.groups[0] };
+  return exports.addUserWithNGroups(1, username, groupName).then(res => {
+    return { user: res.user, group: res.groups[0] };
+  });
 };
 
 exports.addUser = function (username = 'user') {
-  return exports.addUserWithNGroups(0, username).user;
+  return exports.addUserWithNGroups(0, username).then(res => {
+    return res.user;
+  });
 };
 
 exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
@@ -67,8 +74,9 @@ exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
     title: `Article at ${uri}`,
     groups,
   });
-  article.save(err => { if (err) throw err; });
-  return article;
+  return article.save().then(savedArticle => {
+    return savedArticle;
+  });
 };
 
 exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
@@ -83,6 +91,7 @@ exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a t
     text: 'This is a test.',
     isPublic,
   });
-  annotation.save(err => { if (err) throw err; });
-  return annotation;
+  annotation.save().then(savedAnnotation => {
+    return savedAnnotation;
+  });
 };
