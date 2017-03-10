@@ -48,8 +48,8 @@ export const createAnnotation = (user, body, articleId) => {
     annotation.parent = null;
     annotation.article = articleId;
     annotation.isPublic = body.isPublic;
-    annotation.groups = body.groups;
-    if (!body.isPublic && body.groups.length > 1) {
+    annotation.groups = body.groups || [];
+    if (!annotation.isPublic && annotation.groups.length > 1) {
       const err = new Error('Cannot assign private annotation to multiple groups');
       return Promise.reject(err);
     }

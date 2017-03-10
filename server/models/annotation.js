@@ -35,7 +35,7 @@ annotationSchema.pre('save', function preSave(next) {
 });
 
 annotationSchema.methods.isTopLevel = function isTopLevel() {
-  return this.ancestors.length === 0;
+  return this.parent === undefined; // TODO: make sure this works
 };
 
 // TODO: we could maybe use virtual columns to deal with object id stuff?

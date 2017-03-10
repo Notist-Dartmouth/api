@@ -44,7 +44,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
                       { author: user._id }];
   }
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-    conditions.ancestors = { $size: 0 };
+    conditions.ancestors = { $size: 0 }; // TODO: change this
   }
 
   return getArticle(uri)

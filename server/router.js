@@ -211,7 +211,6 @@ router.post('/api/annotation', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const body = req.body;
-<<<<<<< HEAD
     if (body.parentId !== null) {
  // if annotation is a reply
 

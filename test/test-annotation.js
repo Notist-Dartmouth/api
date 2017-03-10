@@ -20,14 +20,14 @@ passportStub.install(app);
 /* global describe it before after:true */
 
 describe('Annotations', function () {
-  let Group0;
+  let GroupA;
   let ArticleA;
   let user;
   before(function (done) {
     const created = util.addUserWithGroup();
-    Group0 = created.group;
+    GroupA = created.group;
     user = created.user;
-    ArticleA = util.addArticleInGroup(Group0._id, 'www.nytimes.com/articleA');
+    ArticleA = util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
     done();
   });
   after(function (done) {
@@ -125,8 +125,9 @@ describe('Annotations', function () {
     it('should return all public annotations on articleA', function (done) {
       passportStub.login(user);
       chai.request(app)
-      .get(`/api/article/${ArticleA.id}/annotations`)
+      .get(`/api/article/annotations?uri=${ArticleA.uri}`)
       .end(function (err, res) {
+        console.log('article id: ' + ArticleA.id);
         res.should.have.status(200);
         res.body.should.have.property('result');
         res.body.result.should.be.a('array');
