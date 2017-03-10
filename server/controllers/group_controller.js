@@ -12,7 +12,7 @@ Input:
   creator: String user ID
 Output: Returns json file with the updated group.
 */
-export const createGroup = (name, description, userId) => {
+export const createGroup = (name, description, userId, isPersonal, isPublic) => {
   const group = new Group();
   group.name = name;
   group.description = description;
@@ -21,6 +21,9 @@ export const createGroup = (name, description, userId) => {
   group.createDate = Date.now();
   group.editDate = Date.now();
   group.members.push(userId);
+
+  group.isPublic = isPublic;
+  group.isPersonal = isPersonal;
 
   return group.save();
 };
@@ -45,7 +48,7 @@ Output: Returns a promise that resolves with array of results of updating groups
 */
 export const addGroupArticle = (articleId, groupIds) => {
   const updates = groupIds.map(groupId => {
-    return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
+    return Group.findByIdAndUpdate(groupId, { $addToSet: { articles: articleId } });
   });
   return Promise.all(updates);
 };

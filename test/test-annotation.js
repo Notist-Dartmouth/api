@@ -6,34 +6,38 @@ import passportStub from 'passport-stub';
 import { app } from '../server/app';
 
 import Article from '../server/models/article';
-import Annotation from '../server/models/annotation';
+// import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
 import User from '../server/models/user';
 
 import util from './util';
 
-var should = chai.should();
+chai.should();
 
 chai.use(chaiHttp);
 passportStub.install(app);
+// eslint comment:
+/* global describe it before after:true */
 
 describe('Annotations', function () {
-  let GroupA;
+  let Group0;
   let ArticleA;
   let user;
   before(function (done) {
-    const created = util.addUserWithGroup('user', 'GroupA');
-    GroupA = created.group;
+    const created = util.addUserWithGroup();
+    Group0 = created.group;
     user = created.user;
-    ArticleA = util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
+    ArticleA = util.addArticleInGroup(Group0._id, 'www.nytimes.com/articleA');
     done();
   });
   after(function (done) {
-    // Group.collection.drop();
-    // Article.collection.drop();
-    // Annotation.collection.drop();
-    passportStub.logout();
-    done();
+    setTimeout(() => {
+      Article.collection.drop(err => {});
+      Group.collection.drop(err => {});
+      User.collection.drop(err => {});
+      passportStub.logout();
+      done();
+    }, 50);
   });
 
   describe('FirstAnnotation', function () {
@@ -41,7 +45,7 @@ describe('Annotations', function () {
       chai.request(app)
       .post('/api/annotation')
       .send({
-        'uri': 'hello.com',
+        uri: 'hello.com',
       })
       .end(function (err, res) {
         res.should.have.status(401);
@@ -59,7 +63,7 @@ describe('Annotations', function () {
       .post('/api/annotation')
       .send({
         uri,
-        'groupIds': [],
+        groups: [],
         articleText,
         text,
         isPublic,
