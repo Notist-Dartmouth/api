@@ -28,6 +28,11 @@ describe('Articles', function () {
   before(function beforeCB(done) {
     const created = util.addUserWithGroup();
     group0 = created.group;
+
+    Article.collection.drop();
+    Group.collection.drop();
+    User.collection.drop();
+
     user = created.user;
     done();
   });

@@ -19,10 +19,6 @@ passportStub.install(app);
 // eslint comment:
 /* global describe it before after:true */
 
-// app.request.isAuthenticated = function () {
-//   return true;
-// };
-
 describe('Annotations', function () {
   let Group0;
   let ArticleA;
@@ -83,9 +79,62 @@ describe('Annotations', function () {
     });
 
     it('should add annotation to new article in a public group');
-    it('should add annotation to already existing article');
-    it('should add annotation to private and public group');
-    it('should return all annotations on particular article');
+    it('should add annotation to articleA in groupA', function (done) {
+      const articleText = 'This is another article';
+      const text = 'This is annotationA for articleA';
+      const isPublic = false;
+      passportStub.login(user);
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        'uri': ArticleA.uri,
+        'groupIds': [GroupA.id],
+        articleText,
+        text,
+        isPublic,
+      }).end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.text.should.equal(text);
+        done();
+      });
+    });
+    it('should add annotation in private and public group to articleA', function (done) {
+      const articleText = 'ArticleA is more interesting than ArticleB';
+      const text = 'This is annotationB for articleA';
+      const isPublic = true;
+      passportStub.login(user);
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        'uri': ArticleA.uri,
+        'groupIds': [GroupA.id],
+        articleText,
+        text,
+        isPublic,
+      }).end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.text.should.equal(text);
+        done();
+      }); // INSTEAD OF DONE, we should make sure its in db ?
+    });
+    it('should return all public annotations on articleA', function (done) {
+      passportStub.login(user);
+      chai.request(app)
+      .get(`/api/article/${ArticleA.id}/annotations`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('result');
+        res.body.result.should.be.a('array');
+        res.body.result[0].should.have.property('articleText');
+        res.body.result[0].should.have.property('text');
+        done();
+      });
+    });
+    it('should return annotations in groupA on articleA');
   });
 
   describe('AnnotationReplies', function () {

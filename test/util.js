@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 import Group from '../server/models/group';
 import User from '../server/models/user';
 import Article from '../server/models/article';

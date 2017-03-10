@@ -38,6 +38,20 @@ annotationSchema.methods.isTopLevel = function isTopLevel() {
   return this.ancestors.length === 0;
 };
 
+// TODO: we could maybe use virtual columns to deal with object id stuff?
+// annotationSchema.virtual('id').get(function () {
+//   return this._id.toString();
+// });
+//
+// annotationSchema.virtual('articleId')
+//   .get(function () { return this.article_id.toString(); })
+//   .set(function (articleId) { this.article_id = new ObjectId(articleId); });
+//
+//
+// annotationSchema.virtual('authorId').get(function () {
+//   return this.author_id.toString();
+// });
+
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 
 export default AnnotationModel;
