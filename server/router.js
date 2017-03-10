@@ -199,47 +199,61 @@ Output: Returns json file of the new annotation or error.
 // TODO: Should createAnnotation take in body or better to parse out all the params here?
 // TODO: Parents should keep track of children in the level directly below
 router.post('/api/annotation', (req, res) => {
-  // Assumption: if isAuthenticated, user !== NULL
   if (req.isAuthenticated()) {
     const user = req.user;
     const body = req.body;
-    // check if article exists, articleID
-    let articleId;
-    const groupIds = req.body.groupIds;
-    const uri = req.body.uri;
 
-    // TO DO what if groupIds is empty because not posting to any group but just publicly ?
-    if (!user.isMemberOfAll(groupIds)) {
-      const err = new Error('User not authorized to add annotation to one or more groups');
-      res.json({ ERROR: serializeError(err) });
-      return;
-    }
+    if (body.parentId !== null) {
+ // if annotation is a reply
 
-    Articles.getArticle(uri)
-    .then(article => {
-      if (article === null) {
-        return Articles.createArticle(uri, groupIds)
-        .then(newArticle => {
-          articleId = newArticle._id;
-          return Annotations.createAnnotation(user, body, articleId);
+      return Annotations.createAnnotation(user, body)
+      .then(annotation => {
+        Articles.addArticleAnnotation(annotation.articleId, annotation._id)
+        .then(result => {
+          res.json({ SUCCESS: annotation });
         });
-      } else {
-        // TODO: if article already exists, it needs to be added to a group
-        articleId = article._id;
-        return Annotations.createAnnotation(user, body, articleId);
-      }
-    })
-    .then(annotation => {
-      Articles.addArticleAnnotation(articleId, annotation._id)
-      .then(result => {
-        res.json({ SUCCESS: annotation });
+      })
+      .catch(err => {
+        res.json({ ERROR: serializeError(err) });
       });
-    })
-    .catch(err => {
-      res.json({ ERROR: serializeError(err) });
-    });
-  } else {
-    // send 401 unauthorized
+    } else {
+ // else annotation is not a reply
+
+      const uri = req.body.uri;
+      const groups = req.body.groupIds;
+
+      if (!user.isMemberOfAll(groups)) {  // make sure that user can post in group
+        const err = new Error('User not authorized to add annotation to one or more groups');
+        res.json({ ERROR: serializeError(err) });
+        return;
+      }
+
+      // if article not yet annotated
+      return Articles.getArticle(uri)
+      .then(article => {
+        if (article === null) {
+          return Articles.createArticle(uri, groupIds)
+          .then(newArticle => {
+            articleId = newArticle._id;
+            return Annotations.createAnnotation(user, body, articleId);
+          });
+        } else { // else add annotation to article
+          // TODO: if article already exists, it needs to be added to a group
+          articleId = article._id;
+          return Annotations.createAnnotation(user, body, articleId);
+        }
+      })
+      .then(annotation => {
+        Articles.addArticleAnnotation(articleId, annotation._id)
+        .then(result => {
+          res.json({ SUCCESS: annotation });
+        });
+      })
+      .catch(err => {
+        res.json({ ERROR: serializeError(err) });
+      });
+    }
+  } else { // req unathenticated so send 401 error
     res.status(401).end();
   }
 });
