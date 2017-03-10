@@ -7,8 +7,7 @@ const ObjectId = Schema.Types.ObjectId;
 const annotationSchema = new Schema({
   authorId: { type: ObjectId, ref: 'User' },
   articleId: { type: ObjectId, ref: 'Article' },
-  // ancestors = [parent.ancestors parent._id] if has parent, else []
-  ancestors: [{ type: ObjectId, ref: 'Annotation' }],
+  parent: { type: ObjectId, ref: 'Annotation' },
 
   text: { type: String, trim: true },
   articleText: String,

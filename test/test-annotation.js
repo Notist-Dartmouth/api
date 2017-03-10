@@ -37,7 +37,7 @@ describe('Annotations', function () {
   });
 
   describe('FirstAnnotation', function () {
-    it('should return 401 error for unathenticated user', function (done) {
+    it('should return 401 error for unathenticated user trying to submit annotation', function (done) {
       chai.request(app)
       .post('/api/annotation')
       .send({
@@ -74,6 +74,7 @@ describe('Annotations', function () {
       });
     });
 
+    // TODO: we don't yet have a conception of a public group do we?
     it('should add annotation to new article in a public group');
     it('should add annotation to articleA in groupA', function (done) {
       const articleText = 'This is another article';
@@ -115,7 +116,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.articleText.should.equal(articleText);
         res.body.SUCCESS.text.should.equal(text);
         done();
-      }); // INSTEAD OF DONE, we should make sure its in db ?
+      });
     });
     it('should return all public annotations on articleA', function (done) {
       passportStub.login(user);
@@ -125,20 +126,51 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('result');
         res.body.result.should.be.a('array');
-        res.body.result[0].should.have.property('articleText');
-        res.body.result[0].should.have.property('text');
+      //  res.body.result[0].should.have.property('articleText');
+      //  res.body.result[0].should.have.property('text');
         done();
       });
     });
-    it('should return annotations in groupA on articleA');
   });
 
   describe('AnnotationReplies', function () {
-    it('should post reply annotatin the general group');
-    it('should post reply annotatin a public group');
-    it('should post reply annotation in private group');
-    it('should list all replies on annotation in public group');
-    it('should list all replies on annotation in private group');
+    let AnnotationA;
+    let AnnotationB;
+    before(function (done) {
+      AnnotationA = util.addArticleAnnotation(ArticleA._id, GroupA._id);
+      AnnotationB = util.addArticleAnnotation(ArticleA._id, GroupA._id, 'Test B', false);
+      done();
+    });
+    it('should post reply annotation in the general group', function (done) {
+      const replyText = 'This annotation makes an interesting point.';
+      passportStub.login(user);
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        'uri': ArticleA.uri,
+        'text': replyText,
+        'parentId': AnnotationA._id,
+      })
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.articleText.should.equal(AnnotationA.articleText);
+        res.body.SUCCESS.should.have.property('parent');
+        res.body.SUCCESS.parent.should.equal(AnnotationA._id.toString());
+        res.body.SUCCESS.text.should.equal(replyText);
+        done();
+      });
+    });
+    it('should post reply annotation a public group'); // TODO: we dont have this yet do we? is it any different than a group?
+    it('should post reply annotation in private group', function (done) {
+      done();
+    });
+    it('should list all replies on annotation in general group', function (done) {
+      done();
+    });
+    it('should list all replies on annotation in private group', function (done) {
+      done();
+    });
   });
 });
 

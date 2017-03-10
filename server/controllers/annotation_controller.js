@@ -32,12 +32,11 @@ export const createAnnotation = (user, body, articleId) => {
   if (body.parentId) {
     // ensure user is allowed to *read* the parent annotation
     return getAnnotation(user, body.parentId)
-      .then(parent => {
-        // inherit properties from parent
+      .then(parent => { // inherit properties from parent
+        annotation.parent = parent._id;
         annotation.articleText = parent.articleText;
         annotation.articleId = parent.articleId;
         annotation.groupIds = parent.groupIds;
-        annotation.ancestors = parent.ancestors.concat([parent._id]);
         annotation.isPublic = parent.isPublic;
         return annotation.save();
       })
@@ -49,7 +48,7 @@ export const createAnnotation = (user, body, articleId) => {
   } else {
     annotation.articleText = body.articleText;
     annotation.articleId = articleId;
-    annotation.ancestors = [];
+    annotation.parent = null;
     annotation.isPublic = body.isPublic;
     annotation.groupIds = body.groupIds;
 
@@ -81,7 +80,7 @@ export const getArticleAnnotations = (user, articleId, toplevelOnly) => {
     conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
   }
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-    conditions.ancestors = { $size: 0 };
+    conditions.parent = null;
   }
 
   // TODO: Would be amazing if we could get this way of fetching working
@@ -110,7 +109,7 @@ export const getTopLevelAnnotations = (user, articleId) => {
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
-  const conditions = { ancestors: { $in: [parentId] } };
+  const conditions = { ancestors: { $in: [new mongo.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
   if (user === null) {
     conditions.isPublic = true;
   } else {

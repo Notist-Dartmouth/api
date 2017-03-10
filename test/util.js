@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 import Group from '../server/models/group';
 import User from '../server/models/user';
 import Article from '../server/models/article';
+import Annotation from '../server/models/annotation';
 
 exports.checkDatabase = function (delayedCallback) {
   // number of milliseconds to allow for the db to update
@@ -64,4 +65,16 @@ exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
 
 exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
+};
+
+exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true) {
+  const annotation = new Annotation({
+    articleId,
+    groupId,
+    articleText: 'Article makes an interesting point.',
+    text: 'This is a test.',
+    isPublic,
+  });
+  annotation.save(err => { if (err) throw err; });
+  return annotation;
 };
