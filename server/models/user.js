@@ -1,19 +1,31 @@
-import { mongoose } from '../_config';
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+mongoose.Promise = global.Promise;
+import mongodb from 'mongodb';
 
 const userSchema = new Schema({
-  // TODO: Some of these need to be required fields
-  // TODO: articles, people i'm following field
+  // TODO: articles field
   googleId: String,
   facebookId: String,
-  name: String,
-  username: { type: String, unique: true },
-  email: String,
-  groupIds: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
+  name: { type: String, required: true },
+  username: { type: String, unique: true, required: true },
+  email: { type: String, unique: true, required: true },
+  groups: [{ _id: { type: Schema.Types.ObjectId, ref: 'Group' },
+             name: String,
+             isPersonal: Boolean }],
+  usersIFollow: [{ _id: { type: Schema.Types.ObjectId, ref: 'User' },
+                   username: String }],
+  usersFollowingMe: [{ _id: { type: Schema.Types.ObjectId, ref: 'User' },
+                      username: String }],
 });
 
-userSchema.methods.isMemberOf = function isMemberOf(groupId) {
-  return this.groupIds.includes(groupId);
+userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
+  let groupId = groupIdIn;
+  if (typeof groupId !== 'object') {
+    groupId = new mongodb.ObjectId(groupIdIn);
+  }
+  return this.groups.some(someGroup => {
+    return someGroup._id.equals(groupId);
+  });
 };
 
 userSchema.methods.isMemberOfAll = function isMemberOfAll(groupIds) {

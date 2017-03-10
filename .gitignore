@@ -4,3 +4,4 @@ config.js
 npm-debug.log
 dist
 .DS_Store
+test/mocha.opts

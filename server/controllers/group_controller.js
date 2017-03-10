@@ -12,7 +12,7 @@ Input:
   creator: String user ID
 Output: Returns json file with the updated group.
 */
-export const createGroup = (name, description, userId) => {
+export const createGroup = (name, description, userId, isPersonal, isPublic) => {
   const group = new Group();
   group.name = name;
   group.description = description;
@@ -21,6 +21,9 @@ export const createGroup = (name, description, userId) => {
   group.createDate = Date.now();
   group.editDate = Date.now();
   group.members.push(userId);
+
+  group.isPublic = isPublic;
+  group.isPersonal = isPersonal;
 
   return group.save();
 };
@@ -33,7 +36,7 @@ Input:
 Output: Returns json file with the updated group.
 */
 export const addGroupMember = (groupId, userId) => {
-  return Group.findByIdAndUpdate(groupId, { $push: { members: userId } });
+  return Group.findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { new: true });
 };
 
 /*
@@ -41,21 +44,44 @@ Add an article to multiple groups
 Input:
   groupIds: Array of String group IDs
   articleId: String article ID
-Output: ??
+Output: Returns a promise that resolves with array of results of updating groups.
 */
 export const addGroupArticle = (articleId, groupIds) => {
   const updates = groupIds.map(groupId => {
-    return Group.findByIdAndUpdate(groupId, { $push: { articles: articleId } });
+    return Group.findByIdAndUpdate(groupId, { $addToSet: { articles: articleId } });
   });
   return Promise.all(updates);
 };
 
+// TODO: Will eventually need to add authentication checking, and deal with public groups
 /*
 Get the document of a particular group, assuming access is already allowed.
 Input:
   groupId: String of group ID
 Output: Returns json file of the group.
 */
+// TODO: Clarify the point of this endpoint, should it get all the articles or
+// annotations, or be like a history/info about the group?
 export const getGroup = (groupId) => {
-  return Group.find({ _id: groupId });
+  return Group.findOne({ _id: groupId });
+};
+
+/*
+Get the members of a group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of members array of the group.
+*/
+export const getMembers = (groupId) => {
+  return Group.findOne({ _id: groupId }).select('members -_id');
+};
+
+/*
+Get the articles of a group, assuming access is already allowed.
+Input:
+  groupId: String of group ID
+Output: Returns json file of articles array of the group.
+*/
+export const getArticles = (groupId) => {
+  return Group.findOne({ _id: groupId }).select('articles -_id');
 };
