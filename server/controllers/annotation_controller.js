@@ -46,6 +46,7 @@ export const createAnnotation = (user, body, articleId) => {
       });
   } else {
     annotation.articleText = body.articleText;
+    annotation.ranges = body.ranges;
     annotation.parent = null;
     annotation.article = articleId;
     annotation.isPublic = body.isPublic;
