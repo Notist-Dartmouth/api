@@ -15,12 +15,7 @@ const annotationSchema = new Schema({
 
   text: { type: String, trim: true },
   articleText: String,
-  ranges: [{
-    start: String,
-    startOffset: Number,
-    end: String,
-    endOffset: Number,
-  }],
+  ranges: { type: Array, default: [] },
   // TODO: implement system for locating article text robustly
   points: { type: Number, default: 0 },
 

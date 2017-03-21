@@ -71,6 +71,12 @@ describe('Annotations', function () {
       const articleText = 'This is a new article';
       const text = 'This is my annotation';
       const isPublic = true;
+      const ranges = [{
+        end: '/div[2]/section[1]/div[1]/div[1]/div[2]/div[1]/p[1]',
+        endOffset: 64,
+        start: '/div[2]/section[1]/div[1]/div[1]/div[2]/div[1]/p[1]',
+        startOffset: 50,
+      }];
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
@@ -78,6 +84,7 @@ describe('Annotations', function () {
         uri,
         groups: [],
         articleText,
+        ranges,
         text,
         isPublic,
         parentId: null,
@@ -86,6 +93,7 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
         res.body.SUCCESS.isPublic.should.be.true;
       });
@@ -101,6 +109,12 @@ describe('Annotations', function () {
       const articleText = 'This is another article';
       const text = 'This is annotationA for articleA';
       const isPublic = false;
+      const ranges = [{
+        end: '/p[69]/span/span',
+        endOffset: 120,
+        start: '/p[70]/span/span',
+        startOffset: 0,
+      }];
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
@@ -108,6 +122,7 @@ describe('Annotations', function () {
         uri: ArticleA.uri,
         groups: [GroupA.id],
         articleText,
+        ranges,
         text,
         isPublic,
         parentId: null,
@@ -116,6 +131,7 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
       });
 
@@ -128,6 +144,12 @@ describe('Annotations', function () {
       const articleText = 'ArticleA is more interesting than ArticleB';
       const text = 'This is annotationB for articleA';
       const isPublic = true;
+      const ranges = [{
+        end: '/p[69]/span/span',
+        endOffset: 12,
+        start: '/p[70]/span/span',
+        startOffset: 1,
+      }];
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
@@ -135,6 +157,7 @@ describe('Annotations', function () {
         uri: ArticleA.uri,
         groups: [GroupA.id],
         articleText,
+        ranges,
         text,
         isPublic,
       })
@@ -142,6 +165,7 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);
+        res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
