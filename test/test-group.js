@@ -1,5 +1,4 @@
-// command: mocha --require babel-register
-process.env.NODE_ENV = 'test';
+app.settings.env = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
