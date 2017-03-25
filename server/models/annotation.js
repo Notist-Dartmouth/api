@@ -3,6 +3,14 @@ mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
 
+// sub-schema for "ranges" entries
+const rangeSchema = new Schema({
+  start: String,
+  end: String,
+  startOffset: Number,
+  endOffset: Number,
+}, { _id: false });
+
 // TODO: change names of fields to not have "Id" in them
 const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
@@ -15,7 +23,7 @@ const annotationSchema = new Schema({
 
   text: { type: String, trim: true },
   articleText: String,
-  ranges: { type: Array, default: [] },
+  ranges: [rangeSchema],
   // TODO: implement system for locating article text robustly
   points: { type: Number, default: 0 },
 
