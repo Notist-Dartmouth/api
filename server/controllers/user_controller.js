@@ -1,7 +1,8 @@
 import User from '../models/user';
 
 // TODO: addFollowing (add a user to the list of user's i am following)
-// TODO: getUserArticles: Get all the articles of a give user
+// TODO: getUserArticles: Get all the articles of a given user
+// TODO: getUserAnnotations: Get all the annotations made by a given user
 
 // export const createUser = (req, res) => {
 //   const user = new User();

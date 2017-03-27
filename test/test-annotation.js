@@ -1,4 +1,4 @@
-process.env.NODE_ENV = 'test';
+app.settings.env = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
@@ -193,7 +193,7 @@ describe('Annotations', function () {
   });
 
   describe('AnnotationReplies', function () {
-    it('should post reply annotatin the general group');
+    it('should post reply annotation the general group');
     it('should post reply annotatin a public group');
     it('should post reply annotation in private group');
     it('should list all replies on annotation in public group');
