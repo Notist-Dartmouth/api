@@ -89,10 +89,13 @@ router.post('/api/article', (req, res) => {
   }
 });
 
-// TODO: Decide what to do with users
-router.route('/api/user')
-//      .post(Users.createUser)
-      .get(Users.getUsers);
+router.get('/api/user', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json(req.user);
+  } else {
+    res.status(401).end();
+  }
+});
 
 /*
 Create a new group.
