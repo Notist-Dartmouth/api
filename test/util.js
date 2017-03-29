@@ -68,11 +68,11 @@ exports.addUser = function (username = 'user') {
   });
 };
 
-exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
+exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
   const article = new Article({
     uri,
     title: `Article at ${uri}`,
-    groups,
+    groups: groupIds,
   });
   return article.save().then(savedArticle => {
     return savedArticle;
@@ -81,6 +81,10 @@ exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
 
 exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
+};
+
+exports.addArticle = function (uri = 'www.testuri.com') {
+  return exports.addArticleInGroups([], uri);
 };
 
 exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true) {

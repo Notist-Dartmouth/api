@@ -1,7 +1,6 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
 
-// TODO: getArticleGroups: Get all the groups of a given article
 // TODO: getArticlesFiltered: Get articles ordered, filtered by ____
 
 // Precondition: this action is authorized
@@ -80,4 +79,25 @@ Output: Returns a promise that resolves with result of updating article.
 */
 export const addArticleGroups = (articleId, groupIds) => {
   return Article.findByIdAndUpdate(articleId, { $addToSet: { groups: { $each: groupIds } } });
+};
+
+/*
+Get an array of the groups an article belongs to
+Input:
+  articleId: String article ID
+Output: Returns a promise that rejects if the article is not found
+ and otherwise resolves to an array of the group objects the article belongs to.
+*/
+export const getArticleGroups = (articleId) => {
+  return Article.findById(articleId)
+  .populate({ path: 'groups' })
+  .exec()
+  .then(article => {
+    if (article === null) {
+      // reject since this shouldn't be an expected situation, if we have an articleId
+      return Promise.reject(new Error('Article not found'));
+    } else {
+      return article.groups;
+    }
+  });
 };

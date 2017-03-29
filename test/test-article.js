@@ -1,15 +1,17 @@
+import { app } from '../server/app';
 app.settings.env = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
 import passportStub from 'passport-stub';
-import { app } from '../server/app';
 
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
 import Group from '../server/models/group';
 import User from '../server/models/user';
+
+import * as Articles from '../server/controllers/article_controller';
 
 import util from './util';
 
@@ -22,12 +24,14 @@ passportStub.install(app);
 
 describe('Articles', function () {
   let group0 = null;
+  let group1 = null;
   let user = null;
 
   before(function () {
-    return util.addUserWithGroup()
+    return util.addUserWithNGroups(2)
     .then(created => {
-      group0 = created.group;
+      group0 = created.groups[0];
+      group1 = created.groups[1];
       user = created.user;
     });
   });
@@ -99,9 +103,43 @@ describe('Articles', function () {
     });
 
     describe('getArticleGroups', function () {
-      it('should throw error on invalid input');
-      it('should return rejecting promise if article does not exist');
-      it('should resolve to array of groups article belongs to');
+      let myArticle = null;
+      before(function () {
+        // add article we need for the tests
+        return util.addArticleInGroups([group0._id, group1._id])
+        .then(article => {
+          myArticle = article;
+        });
+      });
+
+      after(function () {
+        return Article.collection.drop();
+      });
+
+      it('should reject on invalid input', function () {
+        return Promise.all([
+          Articles.getArticleGroups().should.eventually.be.rejected,
+          Articles.getArticleGroups(123).should.eventually.be.rejected,
+          Articles.getArticleGroups('notObjectId').should.eventually.be.rejected,
+          Articles.getArticleGroups('123412341234123412341234').should.eventually.be.rejected,
+        ]);
+      });
+
+      it('should resolve to array of groups article belongs to', function () {
+        return Articles.getArticleGroups(myArticle._id)
+        .then(groups => {
+          groups.should.have.lengthOf(2);
+          for (let i = 0; i < 2; i++) {
+            groups[i].should.have.property('name').match(/Group/);
+            groups[i].should.have.property('description');
+            groups[i].should.have.property('members').include(user.id);
+            groups[i].should.have.property('creator');
+            groups[i].creator.toString().should.equal(user.id);
+          }
+          groups[0].id.should.equal(groups[0].id); // control
+          groups[0].id.should.not.equal(groups[1].id);
+        });
+      });
     });
   });
 
