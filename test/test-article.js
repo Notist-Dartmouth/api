@@ -26,6 +26,7 @@ describe('Articles', function () {
   let group0 = null;
   let group1 = null;
   let user = null;
+  const fakeObjectId = '123412341234123412341234';
 
   before(function () {
     return util.addUserWithNGroups(2)
@@ -121,7 +122,7 @@ describe('Articles', function () {
           Articles.getArticleGroups().should.eventually.be.rejected,
           Articles.getArticleGroups(123).should.eventually.be.rejected,
           Articles.getArticleGroups('notObjectId').should.eventually.be.rejected,
-          Articles.getArticleGroups('123412341234123412341234').should.eventually.be.rejected,
+          Articles.getArticleGroups(fakeObjectId).should.eventually.be.rejected,
         ]);
       });
 
@@ -136,7 +137,6 @@ describe('Articles', function () {
             groups[i].should.have.property('creator');
             groups[i].creator.toString().should.equal(user.id);
           }
-          groups[0].id.should.equal(groups[0].id); // control
           groups[0].id.should.not.equal(groups[1].id);
         });
       });

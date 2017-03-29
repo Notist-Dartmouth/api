@@ -1,8 +1,6 @@
 import Group from '../models/group';
 
 // TODO: getGroupsFiltered (get groups filtered by some thing, returned ordered)
-// TODO: getGroupUsers (get users of a group)
-// TODO: getGroupArticles (get articles of a given group)
 
 /*
 Create a new group.
@@ -70,18 +68,42 @@ export const getGroup = (groupId) => {
 Get the members of a group, assuming access is already allowed.
 Input:
   groupId: String of group ID
-Output: Returns json file of members array of the group.
+Output: Rejects if groupId is not found;
+otherwise resolves to array of user objects that are members of the group.
 */
-export const getMembers = (groupId) => {
-  return Group.findOne({ _id: groupId }).select('members -_id');
+export const getGroupMembers = (groupId) => {
+  return Group.findById(groupId)
+  .populate('members')
+  .select('members')
+  .exec()
+  .then(group => {
+    if (group === null) {
+      // reject since this shouldn't be an expected situation, if we have a groupId
+      throw new Error('Group not found');
+    } else {
+      return group.members;
+    }
+  });
 };
 
 /*
 Get the articles of a group, assuming access is already allowed.
 Input:
   groupId: String of group ID
-Output: Returns json file of articles array of the group.
+Output: Rejects if groupId is not found;
+otherwise resolves to array of article objects that are in the group.
 */
-export const getArticles = (groupId) => {
-  return Group.findOne({ _id: groupId }).select('articles -_id');
+export const getGroupArticles = (groupId) => {
+  return Group.findById(groupId)
+  .populate('articles')
+  .select('articles')
+  .exec()
+  .then(group => {
+    if (group === null) {
+      // reject since this shouldn't be an expected situation, if we have a groupId
+      throw new Error('Group not found');
+    } else {
+      return group.articles;
+    }
+  });
 };

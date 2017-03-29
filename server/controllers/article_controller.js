@@ -51,6 +51,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
     path: 'annotations',
     match: conditions,
   })
+  .select('annotations')
   .exec()
   .then(article => {
     if (article === null) {
@@ -90,12 +91,13 @@ Output: Returns a promise that rejects if the article is not found
 */
 export const getArticleGroups = (articleId) => {
   return Article.findById(articleId)
-  .populate({ path: 'groups' })
+  .populate('groups')
+  .select('groups')
   .exec()
   .then(article => {
     if (article === null) {
       // reject since this shouldn't be an expected situation, if we have an articleId
-      return Promise.reject(new Error('Article not found'));
+      throw new Error('Article not found');
     } else {
       return article.groups;
     }
