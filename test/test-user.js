@@ -90,7 +90,6 @@ describe('Users', function () {
             res.body.should.have.property('googleId', 'test_user1');
 
             res.body.should.have.property('groups').with.lengthOf(2);
-            console.log(res.body.groups);
             res.body.groups[0].id.should.not.equal(res.body.groups[1].id);
             for (let i = 0; i < 2; i++) {
               const group = res.body.groups[i];
