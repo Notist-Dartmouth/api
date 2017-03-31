@@ -9,13 +9,9 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   username: { type: String, unique: true, required: true },
   email: { type: String, unique: true, required: true },
-  groups: [{ _id: { type: Schema.Types.ObjectId, ref: 'Group' },
-             name: String,
-             isPersonal: Boolean }],
-  usersIFollow: [{ _id: { type: Schema.Types.ObjectId, ref: 'User' },
-                   username: String }],
-  usersFollowingMe: [{ _id: { type: Schema.Types.ObjectId, ref: 'User' },
-                      username: String }],
+  groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
+  usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
 userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
@@ -24,7 +20,7 @@ userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
     groupId = new mongodb.ObjectId(groupIdIn);
   }
   return this.groups.some(someGroup => {
-    return someGroup._id.equals(groupId);
+    return someGroup.equals(groupId);
   });
 };
 

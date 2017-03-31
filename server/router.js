@@ -109,7 +109,7 @@ router.post('/api/group', (req, res) => {
     const isPublic = !isPersonal && (req.body.isPublic || false);
     Groups.createGroup(req.body.name, req.body.description, req.user._id, isPersonal, isPublic)
     .then(createdGroup => {
-      Users.addUserGroup(req.user._id, createdGroup)
+      return Users.addUserGroup(req.user._id, createdGroup._id)
       .then(updateResult => {
         res.json({ SUCCESS: createdGroup });
       });
