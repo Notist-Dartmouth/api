@@ -29,7 +29,7 @@ describe('Annotations', function () {
     .then(created => {
       GroupA = created.group;
       user = created.user;
-      return util.addArticleInGroup(GroupA._id, 'www.nytimes.com/articleA');
+      return util.addArticleInGroup(null, 'www.nytimes.com/articleA');
     })
     .then(newArticle => {
       ArticleA = newArticle;
@@ -136,7 +136,10 @@ describe('Annotations', function () {
       });
 
       return util.checkDatabase(resolve => {
-        resolve(true);
+        const articleQuery = Article.findOne({ uri: ArticleA.uri });
+        resolve(Promise.all([
+          articleQuery.should.eventually.have.property('groups', GroupA._id),
+        ]));
       });
     });
 
