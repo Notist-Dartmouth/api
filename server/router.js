@@ -165,9 +165,12 @@ router.post('/api/group/:groupId/user/:userId', (req, res) => {
   const groupId = req.params.groupId;
   const userId = req.params.userId;
   if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
-    Groups.addGroupMember(groupId, userId)
-    .then(result => {
-      res.json({ SUCCESS: result });
+    Users.addUserGroup(userId, groupId)
+    .then(updatedUser => {
+      return Groups.addGroupMember(groupId, userId);
+    })
+    .then(updatedGroup => {
+      res.json({ SUCCESS: updatedGroup });
     })
     .catch(err => {
       res.json({ ERROR: serializeError(err) });
