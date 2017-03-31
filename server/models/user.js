@@ -16,6 +16,7 @@ const userSchema = new Schema({
                    username: String }],
   usersFollowingMe: [{ _id: { type: Schema.Types.ObjectId, ref: 'User' },
                       username: String }],
+  articles: [{ type: ObjectId, ref: 'Article' }],
 });
 
 userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {

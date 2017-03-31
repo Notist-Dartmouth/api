@@ -11,7 +11,6 @@ const rangeSchema = new Schema({
   endOffset: Number,
 }, { _id: false });
 
-// TODO: change names of fields to not have "Id" in them
 const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   username: String,
