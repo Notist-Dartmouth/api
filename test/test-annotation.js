@@ -192,7 +192,21 @@ describe('Annotations', function () {
         resolve(true);
       });
     });
+
     it('should return annotations in groupA on articleA');
+    it('should delete annotation with no replies' function() {
+      passportStub.login(user);
+      chai.request(app)
+      .delete(`/api/annotation/${AnnotationA.id}`)
+      .end(function(err, res) {
+        res.should.have.status(200);
+      });
+
+      return util.checkDatabase(resolve => {
+        resolve(true);
+      });
+    });
+    
   });
 
   describe('AnnotationReplies', function () {

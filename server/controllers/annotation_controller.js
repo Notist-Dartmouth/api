@@ -61,9 +61,10 @@ export const createAnnotation = (user, body, articleId) => {
     if (!user.isMemberOfAll(annotation.groups)) {
       const err = new Error('Not authorized to post to these groups');
       return Promise.reject(err);
-    } else {
-      Articles.addArticleGroups(annotation.article, annotation.groups);
     }
+    // TODO: this doesn't seem to be working ?
+    Articles.addArticleGroups(annotation.article, annotation.groups);
+
     return annotation.save();
   }
 };
@@ -72,7 +73,7 @@ export const createAnnotation = (user, body, articleId) => {
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
-  const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
+  const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } };
   if (user === null) {
     conditions.isPublic = true;
   } else {
@@ -86,4 +87,14 @@ export const editAnnotation = (userId, annotationId, updateText) => {
   const conditions = { _id: annotationId, authorId: userId };
   const update = { $set: { text: updateText, editDate: Date.now(), edited: true } };
   return Annotation.findOneAndUpdate(conditions, update, { new: true });
+};
+
+export const deleteAnnotation = (annotationId) => {
+  const replies = Annotation.find({ parent: annotationId, deleted: false });
+  if (replies.length == 0) {
+    return Annotation.deleteOne({ _id: annotationId });
+  } else {
+    const update = { $set: { deleted: true } };
+    return Annotation.findOneAndUpdate({ _id: annotationId }, update, { returnNewDocument: true });
+  }
 };
