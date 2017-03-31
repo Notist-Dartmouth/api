@@ -1,4 +1,5 @@
 import Annotation from '../models/annotation';
+import * as Articles from './article_controller';
 import mongodb from 'mongodb';
 
 // direct access to a specific annotation
@@ -60,6 +61,8 @@ export const createAnnotation = (user, body, articleId) => {
     if (!user.isMemberOfAll(annotation.groups)) {
       const err = new Error('Not authorized to post to these groups');
       return Promise.reject(err);
+    } else {
+      Articles.addArticleGroups(annotation.article, annotation.groups);
     }
     return annotation.save();
   }
