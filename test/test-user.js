@@ -90,10 +90,10 @@ describe('Users', function () {
             res.body.should.have.property('googleId', 'test_user1');
 
             res.body.should.have.property('groups').with.lengthOf(2);
-            res.body.groups[0].id.should.not.equal(res.body.groups[1].id);
+            res.body.groups[0]._id.toString().should.not.equal(res.body.groups[1]._id.toString());
             for (let i = 0; i < 2; i++) {
               const group = res.body.groups[i];
-              group.name.should.match(/Group [1-2]/);
+              group.name.should.match(/Group [0-1]/);
               group.description.should.equal(`Description of ${group.name}`);
               group.creator.toString().should.equal(user1.id);
             }

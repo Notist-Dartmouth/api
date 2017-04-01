@@ -91,7 +91,15 @@ router.post('/api/article', (req, res) => {
 
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
-    res.json(req.user);
+    // populate the user's groups
+    req.user.populate('groups')
+    .execPopulate()
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
   } else {
     res.status(401).end();
   }
