@@ -78,6 +78,8 @@ describe('Hype', function () {
       .then(anno3 => {
         console.log('in util: anno3');
         console.log(anno3);
+        const anno1Children = [annotation2._id, annotation3._id];
+        return Annotation.update({ _id: annotation1._id }, { $push: { childAnnotations: anno1Children } });
       })
       .catch(err => {
         console.log(err);
@@ -85,28 +87,28 @@ describe('Hype', function () {
     });
   });
 
-  after(function (done) {
-    passportStub.logout();
-    setTimeout(() => {
-      Promise.all([
-        Annotation.collection.drop(),
-        Article.collection.drop(),
-        Group.collection.drop(),
-        User.collection.drop(),
-      ]).then(res => {
-        done();
-      })
-      .catch(err => {
-        done(err);
-      });
-    }, 1000);
-  });
+  // after(function (done) {
+  //   passportStub.logout();
+  //   setTimeout(() => {
+  //     Promise.all([
+  //       Annotation.collection.drop(),
+  //       Article.collection.drop(),
+  //       Group.collection.drop(),
+  //       User.collection.drop(),
+  //     ]).then(res => {
+  //       done();
+  //     })
+  //     .catch(err => {
+  //       done(err);
+  //     });
+  //   }, 1000);
+  // });
 
   describe('getArticleAnnotations', function () {
     it('should come back with a chain of things, please for the love of god', function () {
       passportStub.login(user);
       chai.request(app)
-        .get(`/api/article/annotations?uri=${article.uri}`)
+        .get('/api/article/annotations?uri=http://testuri.com')
         .end(function (err, res) {
           console.log('in the actual unit test');
           console.log(res.body);
@@ -115,6 +117,9 @@ describe('Hype', function () {
           res.body[0].should.have.property('articleText');
           res.body[0].should.have.property('text');
         });
+      return util.checkDatabase(resolve => {
+        resolve(true);
+      });
     });
     it('should come back with a tree of annotations');
   });
