@@ -42,11 +42,44 @@ const styles = StyleSheet.create({
   },
 });
 
+const groupList = [
+  {
+    id: 'abcd190d',
+    groupName: 'Group 1',
+    groupLink: 'url',
+    icon: 'iconName'
+  },
+  {
+    id: 'bacd190d',
+    groupName: 'Group 2',
+    groupLink: 'url',
+    icon: 'iconName'
+  },
+  {
+    id: 'dacd190d',
+    groupName: 'Group 3',
+    groupLink: 'url',
+    icon: 'iconName'
+  }
+]
+
 const App = ({ children }) => (
   <div className={css(styles.root)}>
     <Helmet title="Notist" titleTemplate="%s - Annotate Everything" />
-    <LeftNav />
-    <TopNav />
+    <LeftNav
+      groupList={groupList}
+    />
+  {/*
+    personalList={personalList}
+    exploreList={exploreList}
+    followingList={followingList}
+    */}
+    <TopNav
+      currentFeedName="Name of the group"
+      subscribed={false}
+      numFeedMembers={8}
+      numNotifications={9}
+    />
     <MuiThemeProvider>
       <ArticleCard id="card1"
         title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"

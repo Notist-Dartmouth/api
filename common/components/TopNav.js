@@ -59,26 +59,35 @@ export default class TopNav extends React.Component {
     this.state = {
       value: 2,
     };
+    this.currentFeedName = props.currentFeedName || "No feed name given";
+    this.subscribed = props.subscribed || false;
+    this.numFeedMembers = props.numFeedMembers || 0;
+    this.numNotifications = props.numNotifications || 0;
   }
 
   handleChange = (event, index, value) => this.setState({ value });
 
   render() {
+    let subButton = null;
+    if (this.subscribed) {
+      subButton = <RaisedButton label="unsubscribe" backgroundColor={red700} style={{ margin: 20, marginTop: -20 }} />
+    } else {
+      subButton = <RaisedButton label="subscribe" backgroundColor={yellow400} labelColor={grey900} style={{ marginBottom: 20, marginTop: -20 }} />
+    }
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <Toolbar style={{ height: 90, top: 0, left: 0, width: '100%', position: 'fixed', zIndex: 200, color: white, fontFamily: 'Roboto, sans-serif' }}>
           <ToolbarGroup>
-            <span className={css(styles.feedName)}>Name of the group</span>
-            <RaisedButton label="unsubscribe" backgroundColor={red700} style={{ margin: 20, marginTop: -20 }} />
-            <RaisedButton label="subscribe" backgroundColor={yellow400} labelColor={grey900} style={{ marginBottom: 20, marginTop: -20 }} />
+            <span className={css(styles.feedName)}>{this.currentFeedName}</span>
+            {subButton}
             <PeopleIcon style={{ marginTop: -40 }} />
-            <span className={css(styles.numMembers)}>8 members</span>
+            <span className={css(styles.numMembers)}>{this.numFeedMembers} members</span>
             {/* need to turn 8 into a prop */}
             {/* <p className={css(styles.feedDescription)}>Description for the group</p> */}
           </ToolbarGroup>
           <ToolbarGroup>
             <NotificationsDialog
-              numNotifications={7}
+              numNotifications={this.numNotifications}
             />
             <SettingsDialog />
             <ToolbarSeparator />
