@@ -46,7 +46,8 @@ describe('Hype', function () {
         isTopLevel: true,
         parent: null,
       });
-      annotation1.save().then(anno1 => {
+      annotation1.save()
+      .then(anno1 => {
         console.log('in util: anno1');
         console.log(anno1);
         annotation2 = new Annotation({
@@ -56,13 +57,13 @@ describe('Hype', function () {
           text: 'Annotation B',
           isPublic: true,
           isTopLevel: true,
-          parent: anno1._id,
+          parent: annotation1._id,
         });
-        annotation2.save()
-        .then(anno2 => {
-          console.log('in util: anno2');
-          console.log(anno2);
-        });
+        return annotation2.save();
+      })
+      .then(anno2 => {
+        console.log('in util: anno2');
+        console.log(anno2);
         annotation3 = new Annotation({
           articleId: article._id,
           groupId: group0._id,
@@ -70,33 +71,36 @@ describe('Hype', function () {
           text: 'Annotation C',
           isPublic: true,
           isTopLevel: true,
-          parent: anno1._id,
+          parent: annotation1._id,
         });
-        annotation3.save()
-        .then(anno3 => {
-          console.log('in util: anno3');
-          console.log(anno3);
-        });
+        return annotation3.save();
+      })
+      .then(anno3 => {
+        console.log('in util: anno3');
+        console.log(anno3);
+      })
+      .catch(err => {
+        console.log(err);
       });
     });
   });
 
-  // after(function (done) {
-  //   passportStub.logout();
-  //   setTimeout(() => {
-  //     Promise.all([
-  //       Annotation.collection.drop(),
-  //       Article.collection.drop(),
-  //       Group.collection.drop(),
-  //       User.collection.drop(),
-  //     ]).then(res => {
-  //       done();
-  //     })
-  //     .catch(err => {
-  //       done(err);
-  //     });
-  //   }, 1000);
-  // });
+  after(function (done) {
+    passportStub.logout();
+    setTimeout(() => {
+      Promise.all([
+        Annotation.collection.drop(),
+        Article.collection.drop(),
+        Group.collection.drop(),
+        User.collection.drop(),
+      ]).then(res => {
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+    }, 1000);
+  });
 
   describe('getArticleAnnotations', function () {
     it('should come back with a chain of things, please for the love of god', function () {
