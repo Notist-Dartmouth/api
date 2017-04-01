@@ -63,9 +63,9 @@ const styles = {
   },
 
   cardStyle: {
-    position: 'relative',
-    top: 80,
-    left: '18%',
+    // position: 'relative',
+    // top: 80,
+    // left: '22%',
     width: '56%',
     marginTop: 20,
     marginBottom: 20,
@@ -129,11 +129,7 @@ class ArticleCard extends React.Component {
               <span><MdGroup/> {"   " + this.numUsers} users  </span>
               <span><MdComment /> {"   " + this.numAnnotations} annotations  </span>
               <span><MdForum /> {"   " + this.numReplies} replies</span>
-              <CardMedia>
-          // overlayContainerStyle={styles.overlayContainer}
-          // overlay={<CardTitle title="Overlay title" subtitle="Overlay subtitle" />}
-                <img src={this.image} />
-              </CardMedia>
+              <img width={200} src={this.image} />
             </aside>
           <CardActions style={{clear: 'both', position: 'relative', left: '41%', padding: '3%'}}>
             <RaisedButton style={{top: '10%'}} label="See more"/>

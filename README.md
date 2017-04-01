@@ -7,3 +7,7 @@ Number 1 priority is common/routes/PostList/components/PostListItem
 How to run:
 - `npm i`
 - `npm start`
+
+[content serving from toy DB](current-1.png)
+
+[mockup](feed_view.png)

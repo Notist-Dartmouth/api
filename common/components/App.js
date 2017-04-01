@@ -4,7 +4,7 @@ import { StyleSheet, css } from 'aphrodite';
 import TopNav from './TopNav';
 import LeftNav from './LeftNav';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-// import ArticleCard from './ArticleCard';
+import ArticleCard from './ArticleCard';
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 
@@ -15,10 +15,13 @@ injectTapEventPlugin();
 
 const styles = StyleSheet.create({
   root: {
-    maxWidth: 700,
+    position: 'relative',
+    top: 90,
+    left: '22%',
     color: '#000',
     margin: '2rem auto',
     padding: '0 1rem',
+    // width: '70%'
   },
   title: {
     color: '#000',
@@ -43,32 +46,24 @@ const App = ({ children }) => (
     <Helmet title="Notist" titleTemplate="%s - Annotate Everything" />
     <LeftNav />
     <TopNav />
-    {children}
     <MuiThemeProvider>
-      <Card>
-        <CardHeader
-          title="URL Avatar"
-          subtitle="Subtitle"
-          avatar="https://avatars1.githubusercontent.com/u/226640?v=3&s=88"
-        />
-        <CardMedia
-          overlay={<CardTitle title="Overlay title" subtitle="Overlay subtitle" />}
-        >
-          <img src="https://i.imgur.com/6jivyjI.jpg" />
-        </CardMedia>
-        <CardTitle title="Card title" subtitle="Card subtitle" />
-        <CardText>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
-          Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
-          Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
-        </CardText>
-        <CardActions>
-          <FlatButton label="Action1" />
-          <FlatButton label="Action2" />
-        </CardActions>
-      </Card>
+      <ArticleCard id="card1"
+        title="Officials Struggling To Condense Trump’s Intelligence Briefing Down To One Word"
+        domain="theonion.com (satire)"
+        subtitle="The president tends to grow frustrated if crucial intelligence is not delivered within the first seven letters or so. We recently gave him a briefing that consisted only of the term ‘nuclear proliferation,’ but he clearly became distracted by the end of the first word, so we shortened it to simply read bomb"
+        annotationContent= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque mattis mollis elit, sit amet facilisis erat. Mauris condimentum ex vel neque cursus, eu bibendum velit eleifend. Praesent molestie odio eget interdum ultricies. Nullam vitae dictum sapien, condimentum ultrices elit."
+        image = "http://i.onionstatic.com/onion/5597/9/16x9/1600.jpg"
+        username= "merwin"
+        points={16}
+        timeSince = "2 hours"
+        numUsers={8}
+        numAnnotations={6}
+        numReplies={4}
+        currentVotes={2}
+      />
     </MuiThemeProvider>
+    <p>Everything beneath the card on the 'Example Feed' page is rendered from server/fakeDB.js</p>
+    {children}
     <footer className={css(styles.footer)}>
       Copyright © 2017 <a className={css(styles.footerLink)} href="http://notist.io/" target="_blank" rel="noopener noreferrer">Notist</a>
     </footer>
