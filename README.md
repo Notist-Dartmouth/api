@@ -8,6 +8,6 @@ How to run:
 - `npm i`
 - `npm start`
 
-[content serving from toy DB](current-1.png)
+![content serving from toy DB](current-1.png)
 
-[mockup](feed_view.png)
+![mockup](feed_view.png)
