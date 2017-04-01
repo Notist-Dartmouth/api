@@ -29,9 +29,9 @@ export const createAnnotation = (user, body, articleId) => {
   annotation.author = user._id;
   annotation.username = user.username;
   annotation.text = body.text;
-  if (body.parentId) {
+  if (body.parent) {
     // ensure user is allowed to *read* the parent annotation
-    return getAnnotation(user, body.parentId)
+    return getAnnotation(user, body.parent)
       .then(parent => { // inherit properties from parent
         annotation.parent = parent._id;
         annotation.articleText = parent.articleText;
@@ -72,11 +72,12 @@ export const createAnnotation = (user, body, articleId) => {
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
-  const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
+  // const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
+  const conditions = { parent: { $in: [new mongodb.ObjectId(parentId)] } };
   if (user === null) {
     conditions.isPublic = true;
   } else {
-    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
+    conditions.$or = [{ groups: { $in: user.groups } }, { isPublic: true }];
   }
   return Annotation.find(conditions);
 };

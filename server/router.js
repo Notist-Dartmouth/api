@@ -338,7 +338,7 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
   .then(result => {
-    res.json({ SUCCESS: result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });

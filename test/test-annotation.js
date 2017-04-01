@@ -199,7 +199,7 @@ describe('Annotations', function () {
     let PublicAnnotation, PrivateAnnotation;
 
     before(function () {
-      util.addArticleAnnotation(ArticleA._id).then(newAnnotation => {
+      util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then(newAnnotation => {
         PublicAnnotation = newAnnotation;
       });
       util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
@@ -209,42 +209,76 @@ describe('Annotations', function () {
     });
 
     it('should post reply annotation the general group', function () {
+      const publicText = 'This is a public reply';
+
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
       .send({
         uri: ArticleA.uri,
         parent: PublicAnnotation._id,
+        text: publicText,
       })
       .end(function (err, res) {
-        console.log(res);
-        res.SUCCESS.isPublic.should.be.true;
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.isPublic.should.be.true;
+        res.body.SUCCESS.parent.should.eql(PublicAnnotation._id.toString());
+        res.body.SUCCESS.text.should.eql(publicText);
       });
 
       return util.checkDatabase(resolve => {
         resolve(true);
       });
     });
-    it('should post reply annotation in private group', function () {
+
+    it('should post reply annotation in private group', function (done) {
+      const privateText = 'This is a private reply';
       passportStub.login(user);
       chai.request(app)
       .post('/api/annotation')
       .send({
         uri: ArticleA.uri,
         parent: PrivateAnnotation._id,
+        text: privateText,
       })
       .end(function (err, res) {
-        // console.log(res);
-        res.SUCCESS.isPublic.should.be.false;
-        res.SUCCESS.groups.should.have(GroupA._id);
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.isPublic.should.be.false;
+        res.body.SUCCESS.groups.should.include(GroupA._id.toString());
+        res.body.SUCCESS.text.should.eql(privateText);
+        done();
       });
     });
-    it('should list all replies on annotation in public group', function () {
+
+    it('should list all replies on public annotation', function (done) {
       passportStub.login(user);
-      chai.reques(app)
-      .get('/api/annotation')
+      chai.request(app)
+      .get(`/api/annotation/${PublicAnnotation._id}/replies`)
       .end(function (err, res) {
-        // console.log(res);
+        res.should.have.status(200);
+        res.body.should.have.property('result');
+        res.body.result.should.be.an('array');
+        res.body.result.should.have.length(1);
+        res.body.result[0].isPublic.should.be.true;
+        done();
+      });
+    });
+
+    it('should list all replies on private annotation', function (done) {
+      passportStub.login(user);
+      chai.request(app)
+      .get(`/api/annotation/${PrivateAnnotation._id}/replies`)
+      .end(function (err, res) {
+        console.log(res);
+        res.should.have.status(200);
+        res.body.should.have.property('result');
+        res.body.result.should.be.an('array');
+        res.body.result.should.have.length(1);
+        res.body.result[0].isPublic.should.be.false;
+        res.body.result[0].groups.should.include(GroupA._id.toString());
+        done();
       });
     });
   });
