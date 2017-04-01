@@ -7,6 +7,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import ArticleCard from './ArticleCard';
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
+// import ReactVote from './ReactVote';
 
 // only for Card test
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
