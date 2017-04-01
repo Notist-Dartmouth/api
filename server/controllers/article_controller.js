@@ -1,8 +1,6 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
 
-// TODO: getArticlesFiltered: Get articles ordered, filtered by ____
-
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
 export const createArticle = (uri, groups) => {
@@ -22,6 +20,22 @@ export const createArticle = (uri, groups) => {
 export const getArticle = (uri) => {
   const nURI = Article.normalizeURI(uri);
   return Article.findOne({ uri: nURI });
+};
+
+/*
+Get a list of articles, filtered by some conditions.
+Input:
+  query: A mongodb query selector object
+Output: Resolves to a list of matching groups
+Example:
+  Articles.getArticlesFiltered({
+    title: /hamilton/i,
+    isSatire: false,
+    groups: someGroup._id,
+  });
+*/
+export const getArticlesFiltered = (query) => {
+  return Article.find(query);
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {

@@ -77,6 +77,12 @@ describe('Articles', function () {
       it('should work when input a non-normalized uri');
     });
 
+    describe('getArticlesFiltered', function () {
+      it('should throw error on invalid input');
+      it('should resolve to empty array when no articles match conditions');
+      it('should resolve to list of article objects that match conditions');
+    });
+
     describe('addArticleAnnotation', function () {
       it('should throw error on invalid input');
       it('should return rejecting promise if article does not exist');

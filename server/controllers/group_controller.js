@@ -1,7 +1,5 @@
 import Group from '../models/group';
 
-// TODO: getGroupsFiltered (get groups filtered by some thing, returned ordered)
-
 /*
 Create a new group.
 Input:
@@ -51,7 +49,6 @@ export const addGroupArticle = (articleId, groupIds) => {
   return Promise.all(updates);
 };
 
-// TODO: Will eventually need to add authentication checking, and deal with public groups
 /*
 Get the document of a particular group, assuming access is already allowed.
 Input:
@@ -61,7 +58,23 @@ Output: Returns json file of the group.
 // TODO: Clarify the point of this endpoint, should it get all the articles or
 // annotations, or be like a history/info about the group?
 export const getGroup = (groupId) => {
-  return Group.findOne({ _id: groupId });
+  return Group.findById(groupId);
+};
+
+/*
+Get a list of groups, filtered by some conditions.
+Input:
+  query: A mongodb query selector object
+Output: Resolves to a list of matching groups
+Example:
+  Groups.getGroupsFiltered({
+    members: user._id,
+    isPersonal: false,
+    articles: { $all: [article1ID, article2ID] },
+  });
+*/
+export const getGroupsFiltered = (query) => {
+  return Group.find(query);
 };
 
 /*
