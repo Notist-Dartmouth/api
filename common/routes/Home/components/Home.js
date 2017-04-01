@@ -29,7 +29,7 @@ const Home = (props) => (
   </div>
 )
 
-{/* I added padding so it doesn't go underneath nav */}
+{/* I added padding so it doesn't go underneath nav --Byrne */}
 const styles = StyleSheet.create({
   header: {
     fontSize: 28,
