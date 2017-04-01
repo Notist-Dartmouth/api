@@ -1,23 +1,9 @@
-Want to make a static version of the feed mockup using React components
+Having problems with consistent linting -- in my Atom editor, doing airbnb style but just doing standard when I run `npm start`
 
-![mockup](https://github.com/Notist/feed-view/blob/master/feed_view.png)
+Number 1 priority is common/routes/PostList/components/PostListItem
 
-Ideally hookup with database by Tuesday
-
-Current problems with boilerplate:
-- CSS instead of SCSS (or SASS)
-- Styling is in index.js instead of separate styles folder
-- Need drawers on both sides
 - For chat on the right side, just need an empty, collapsible drawer (will later integrate with socket.io)
-
 
 How to run:
 - `npm i`
 - `npm start`
-
-Currently looks like:
-
-![current1](current-1.png)
-![current2](current-2.png)
-
-Also have `groupView.js` which has other basic (though non functioning components)
