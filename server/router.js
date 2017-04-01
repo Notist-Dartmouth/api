@@ -219,7 +219,7 @@ Input:
   req.body.uri: String uri of the annotation's article
   req.body.articleText: String of the article's relevant text
   req.body.text: String of the annotation text
-  req.body.parentId: null or String of the parent's annotation ID
+  req.body.parent: null or String of the parent's annotation ID
   req.body.isPublic: boolean of whether the annotation will be publicly visible
 Output: Returns json file of the new annotation or error.
 */
@@ -229,7 +229,7 @@ router.post('/api/annotation', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const body = req.body;
-    if (body.parentId !== undefined && body.parentId !== null) {
+    if (body.parent !== undefined && body.parent !== null) {
     // if annotation is a reply
 
       Annotations.createAnnotation(user, body)
@@ -341,7 +341,7 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
   .then(result => {
-    res.json({ SUCCESS: result });
+    res.json({ result });
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
