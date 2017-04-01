@@ -1,3 +1,4 @@
+// app.settings.env = 'test';
 process.env.NODE_ENV = 'test';
 
 import Group from '../server/models/group';
@@ -83,7 +84,7 @@ exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
 };
 
-exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (articleId, groupId = null, text = 'This is a test', isPublic = true) {
   const annotation = new Annotation({
     articleId,
     groupId,
@@ -91,7 +92,5 @@ exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a t
     text: 'This is a test.',
     isPublic,
   });
-  annotation.save().then(savedAnnotation => {
-    return savedAnnotation;
-  });
+  return annotation.save();
 };

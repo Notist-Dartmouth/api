@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 app.settings.env = 'test';
 
 import chai from 'chai';
@@ -177,7 +178,7 @@ describe('Annotations', function () {
       });
     });
 
-    it('should return all public annotations on articleA', function () {
+    it('should return all annotations on articleA visible to user', function () {
       passportStub.login(user);
       chai.request(app)
       .get(`/api/article/annotations?uri=${ArticleA.uri}`)
@@ -192,15 +193,60 @@ describe('Annotations', function () {
         resolve(true);
       });
     });
-    it('should return annotations in groupA on articleA');
   });
 
   describe('AnnotationReplies', function () {
-    it('should post reply annotation the general group');
-    it('should post reply annotatin a public group');
-    it('should post reply annotation in private group');
-    it('should list all replies on annotation in public group');
-    it('should list all replies on annotation in private group');
+    let PublicAnnotation, PrivateAnnotation;
+
+    before(function () {
+      util.addArticleAnnotation(ArticleA._id).then(newAnnotation => {
+        PublicAnnotation = newAnnotation;
+      });
+      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
+      .then(newAnnotation => {
+        PrivateAnnotation = newAnnotation;
+      });
+    });
+
+    it('should post reply annotation the general group', function () {
+      passportStub.login(user);
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        uri: ArticleA.uri,
+        parent: PublicAnnotation._id,
+      })
+      .end(function (err, res) {
+        console.log(res);
+        res.SUCCESS.isPublic.should.be.true;
+      });
+
+      return util.checkDatabase(resolve => {
+        resolve(true);
+      });
+    });
+    it('should post reply annotation in private group', function () {
+      passportStub.login(user);
+      chai.request(app)
+      .post('/api/annotation')
+      .send({
+        uri: ArticleA.uri,
+        parent: PrivateAnnotation._id,
+      })
+      .end(function (err, res) {
+        // console.log(res);
+        res.SUCCESS.isPublic.should.be.false;
+        res.SUCCESS.groups.should.have(GroupA._id);
+      });
+    });
+    it('should list all replies on annotation in public group', function () {
+      passportStub.login(user);
+      chai.reques(app)
+      .get('/api/annotation')
+      .end(function (err, res) {
+        // console.log(res);
+      });
+    });
   });
 });
 
