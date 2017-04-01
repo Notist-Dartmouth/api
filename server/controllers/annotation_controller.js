@@ -1,5 +1,4 @@
 import Annotation from '../models/annotation';
-import mongodb from 'mongodb';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -69,11 +68,11 @@ export const createAnnotation = (user, body, articleId) => {
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
-  const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
+  const conditions = { parent: parentId };
   if (user === null) {
     conditions.isPublic = true;
   } else {
-    conditions.$or = [{ groupIds: { $in: user.groupIds } }, { isPublic: true }];
+    conditions.$or = [{ groups: { $in: user.groups } }, { isPublic: true }];
   }
   return Annotation.find(conditions);
 };
