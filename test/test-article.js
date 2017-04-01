@@ -26,6 +26,8 @@ describe('Articles', function () {
   let group0 = null;
   let group1 = null;
   let user = null;
+  let testArticle = null;
+  const testArticleURI = Article.normalizeURI('www.testArticle.com');
   const fakeObjectId = '123412341234123412341234';
 
   before(function () {
@@ -34,6 +36,11 @@ describe('Articles', function () {
       group0 = created.groups[0];
       group1 = created.groups[1];
       user = created.user;
+
+      return util.addArticle(testArticleURI);
+    })
+    .then(article => {
+      testArticle = article;
     });
   });
 
@@ -78,9 +85,25 @@ describe('Articles', function () {
     });
 
     describe('getArticlesFiltered', function () {
-      it('should throw error on invalid input');
-      it('should resolve to empty array when no articles match conditions');
-      it('should resolve to list of article objects that match conditions');
+      it('should throw error on invalid input', function () {
+        return Promise.all([
+          Articles.getArticlesFiltered().should.eventually.be.rejected,
+          Articles.getArticlesFiltered('notAnObject').should.eventually.be.rejected,
+        ]);
+      });
+
+      it('should resolve to empty array when no articles match conditions', function () {
+        return Articles.getArticlesFiltered({ uri: 'wronguri.com' }).should.eventually.be.empty;
+      });
+
+      it('should resolve to list of article objects that match conditions', function () {
+        return Articles.getArticlesFiltered({ uri: testArticleURI })
+        .then(result => {
+          result.should.have.lengthOf(1);
+          result[0].title.should.equal(`Article at ${testArticleURI}`);
+          result[0].id.should.equal(testArticle.id);
+        });
+      });
     });
 
     describe('addArticleAnnotation', function () {

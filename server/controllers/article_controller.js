@@ -35,6 +35,9 @@ Example:
   });
 */
 export const getArticlesFiltered = (query) => {
+  if (typeof query !== 'object') {
+    return Promise.reject(new Error('Invalid article query'));
+  }
   return Article.find(query);
 };
 

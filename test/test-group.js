@@ -84,6 +84,28 @@ describe('Groups', function () {
 
     describe('getGroup', function () {});
 
+    describe('getGroupsFiltered', function () {
+      it('should reject on invalid input', function () {
+        return Promise.all([
+          Groups.getGroupsFiltered().should.eventually.be.rejected,
+          Groups.getGroupsFiltered('notAnObject').should.eventually.be.rejected,
+        ]);
+      });
+
+      it('should resolve to empty array when no groups match conditions', function () {
+        return Groups.getGroupsFiltered({ name: 'Not the group name' }).should.eventually.be.empty;
+      });
+
+      it('should resolve to list of article objects that match conditions', function () {
+        return Groups.getGroupsFiltered({ members: newUser._id })
+        .then(result => {
+          result.should.have.lengthOf(1);
+          result[0].name.should.equal('Group 0');
+          result[0].id.should.equal(newGroup.id);
+        });
+      });
+    });
+
     describe('getGroupMembers', function () {
       it('should reject on invalid input', function () {
         return Promise.all([

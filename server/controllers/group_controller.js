@@ -74,6 +74,9 @@ Example:
   });
 */
 export const getGroupsFiltered = (query) => {
+  if (typeof query !== 'object') {
+    return Promise.reject(new Error('Invalid group query'));
+  }
   return Group.find(query);
 };
 
