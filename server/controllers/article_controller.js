@@ -38,8 +38,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   if (user === null) {
     conditions.isPublic = true;
   } else {
-    const groupIds = user.groups.map(group => { return group._id; });
-    conditions.$or = [{ groups: { $in: groupIds } },
+    conditions.$or = [{ groups: { $in: user.groups } },
                       { isPublic: true },
                       { author: user._id }];
   }

@@ -14,7 +14,7 @@ const authCallback = (accessToken, refreshToken, profile, done) => {
         myUser = new User({
           name: profile.displayName,
           email: profile.emails[0].value,
-          groupIds: [],
+          groups: [],
           // TODO: let user specify username
           username: `${profile.name.givenName}${profile.id}`,
         });
