@@ -19,6 +19,7 @@ const muiTheme = getMuiTheme({
     accent2Color: deepOrange600,
     textColor: white,
   },
+  userAgent: (typeof navigator !== 'undefined' && navigator.userAgent) || 'all',
 });
 
 const styles = StyleSheet.create({
@@ -59,7 +60,7 @@ export default class TopNav extends React.Component {
     this.state = {
       value: 2,
     };
-    this.currentFeedName = props.currentFeedName || "No feed name given";
+    this.currentFeedName = props.currentFeedName || 'No feed name given';
     this.subscribed = props.subscribed || false;
     this.numFeedMembers = props.numFeedMembers || 0;
     this.numNotifications = props.numNotifications || 0;
@@ -70,9 +71,9 @@ export default class TopNav extends React.Component {
   render() {
     let subButton = null;
     if (this.subscribed) {
-      subButton = <RaisedButton label="unsubscribe" backgroundColor={red700} style={{ margin: 20, marginTop: -20 }} />
+      subButton = <RaisedButton label="unsubscribe" backgroundColor={red700} style={{ margin: 20, marginTop: -20 }} />;
     } else {
-      subButton = <RaisedButton label="subscribe" backgroundColor={yellow400} labelColor={grey900} style={{ marginBottom: 20, marginTop: -20 }} />
+      subButton = <RaisedButton label="subscribe" backgroundColor={yellow400} labelColor={grey900} style={{ marginBottom: 20, marginTop: -20 }} />;
     }
     return (
       <MuiThemeProvider muiTheme={muiTheme}>

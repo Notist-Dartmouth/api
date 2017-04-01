@@ -1,6 +1,8 @@
-import NotFound from '../../components/NotFound'
+/* eslint-disable linebreak-style */
+
+import NotFound from '../../components/NotFound';
 
 export default {
   path: '*',
-  component: NotFound
-}
+  component: NotFound,
+};

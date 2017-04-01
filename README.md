@@ -1,6 +1,6 @@
-Having problems with consistent linting -- in my Atom editor, doing airbnb style but just doing standard when I run `npm start`
-
 Number 1 priority is common/routes/PostList/components/PostListItem
+
+Linter works with airbnb style! Warnings/errors generated from `npm start` are as desired!
 
 - For chat on the right side, just need an empty, collapsible drawer (will later integrate with socket.io)
 

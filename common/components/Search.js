@@ -1,6 +1,6 @@
 import React from 'react';
 import AutoComplete from 'material-ui/AutoComplete';
-import { white, fullBlack } from 'material-ui/styles/colors';
+import { fullBlack } from 'material-ui/styles/colors';
 
 const fruit = [
   'Apple', 'Apricot', 'Avocado',
@@ -41,9 +41,9 @@ const Search = () => (
       filter={AutoComplete.fuzzyFilter}
       dataSource={fruit}
       maxSearchResults={5}
-      style={{ color: fullBlack}}
+      style={{ color: fullBlack }}
     />
-  {/* changing the style isn't working */}
+    {/* changing the style isn't working */}
   </div>
 );
 

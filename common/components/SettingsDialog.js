@@ -1,7 +1,10 @@
+/* I'm being a bad dude and disabling some eslint rules on a per file basis -- Byrne */
+/* eslint-disable no-unused-vars */
+
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
+import { RadioButton } from 'material-ui/RadioButton';
 import { StyleSheet, css } from 'aphrodite';
 import SettingsIcon from 'material-ui/svg-icons/action/settings';
 import { grey300, white, fullBlack } from 'material-ui/styles/colors';
@@ -12,7 +15,7 @@ const styles = StyleSheet.create({
     textColor: fullBlack,
     marginTop: 16,
   },
-})
+});
 
 /**
  * Dialog content can be scrollable.
@@ -23,11 +26,11 @@ export default class SettingsDialog extends React.Component {
   };
 
   handleOpen = () => {
-    this.setState({open: true});
+    this.setState({ open: true });
   };
 
   handleClose = () => {
-    this.setState({open: false});
+    this.setState({ open: false });
   };
 
   render() {
@@ -46,14 +49,13 @@ export default class SettingsDialog extends React.Component {
     ];
 
     const radios = [];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 20; i += 1) {
       radios.push(
         <RadioButton
           key={i}
           value={`value${i + 1}`}
           label={`Option ${i + 1}`}
-          style={css(styles.radioButton)}
-        />
+        />,
       );
     }
 
@@ -72,13 +74,6 @@ export default class SettingsDialog extends React.Component {
           autoScrollBodyContent
         >
           <p style={{ color: fullBlack }}>Some text</p>
-{/*
-  // they're white and I can't seem to fix it
-  RadioButtonGroup name="shipSpeed" defaultSelected="not_light">
-    {radios}
-  </RadioButtonGroup>
-  */}
-
         </Dialog>
       </div>
     );

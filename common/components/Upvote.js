@@ -1,8 +1,11 @@
-import React, {Component} from 'react';
-import {GoTriangleUp, GoTriangleDown} from 'react-icons/lib/go';
-import {
-  green500, red500,
-} from 'material-ui/styles/colors';
+import React from 'react';
+import { GoTriangleUp, GoTriangleDown } from 'react-icons/lib/go';
+import { green500, red500 } from 'material-ui/styles/colors';
+
+/* I'm being a bad dude and disabling some eslint rules on a per file basis -- Byrne */
+/* eslint-disable prefer-const */
+/* eslint-disable no-param-reassign */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 
 let noop = () => {};
 
@@ -25,7 +28,6 @@ class Upvote extends React.Component {
     this.downvoteContent = null;
 
     this.updating = false;
-
   }
 
     // getInitialState() {
@@ -35,72 +37,72 @@ class Upvote extends React.Component {
     //     };
     // }
 
-    componentWillReceiveProps(nextProps) {
-        let oldVoteStatus = this.props.voteStatus;
-        let newVoteStatus = nextProps.voteStatus;
+  componentWillReceiveProps(nextProps) {
+    let oldVoteStatus = this.props.voteStatus;
+    let newVoteStatus = nextProps.voteStatus;
 
-        // don't update unless post's vote status changes
-        if (oldVoteStatus === newVoteStatus) {
-            return;
-        }
-
-        this.setState({
-            updating: false,
-            voteStatus: nextProps.voteStatus
-        });
+      // don't update unless post's vote status changes
+    if (oldVoteStatus === newVoteStatus) {
+      return;
     }
 
-    allowed() {
-        let shouldAllow = this.props.shouldAllow;
-        let onDisallowed = this.props.onDisallowed || noop;
+    this.setState({
+      updating: false,
+      voteStatus: nextProps.voteStatus,
+    });
+  }
 
-        if (shouldAllow && !shouldAllow()) {
-            onDisallowed();
-            return false;
-        }
+  allowed() {
+    let shouldAllow = this.props.shouldAllow;
+    let onDisallowed = this.props.onDisallowed || noop;
 
-        return true;
+    if (shouldAllow && !shouldAllow()) {
+      onDisallowed();
+      return false;
     }
 
-    vote(nextStatus) {
-        if (this.state.updating || !this.allowed()) {
-            return;
-        }
+    return true;
+  }
 
-        let prevStatus = this.state.voteStatus;
-        let onUpvote = this.props.onUpvote || noop;
-        let onDownvote = this.props.onDownvote || noop;
-        let onRemoveVote = this.props.onRemoveVote || noop;
+  vote(nextStatus) {
+    if (this.state.updating || !this.allowed()) {
+      return;
+    }
 
-        if (prevStatus === nextStatus) {
+    let prevStatus = this.state.voteStatus;
+    let onUpvote = this.props.onUpvote || noop;
+    let onDownvote = this.props.onDownvote || noop;
+    let onRemoveVote = this.props.onRemoveVote || noop;
+
+    if (prevStatus === nextStatus) {
             // undo current vote
-            onRemoveVote();
-            nextStatus = 0;
-        } else {
+      onRemoveVote();
+      nextStatus = 0;
+    } else {
             // add/change vote
 
-            if (prevStatus !== 0 && nextStatus !== 0) {
+      if (prevStatus !== 0 && nextStatus !== 0) {
                 // undo previous vote first
-                onRemoveVote();
-            }
+        onRemoveVote();
+      }
 
             // add new vote
-            if (nextStatus === 1) {
-                onUpvote();
-            } else {
-                onDownvote();
-            }
-        }
-
-        this.setState({
-            // update voteStatus
-            voteStatus: nextStatus,
-            // wait for action to complete before allowing upvote
-            updating: true
-        });
+      if (nextStatus === 1) {
+        onUpvote();
+      } else {
+        onDownvote();
+      }
     }
 
-    render() {
+    this.setState({
+            // update voteStatus
+      voteStatus: nextStatus,
+            // wait for action to complete before allowing upvote
+      updating: true,
+    });
+  }
+
+  render() {
         // let voteStatus = this.state.voteStatus;
 
         // let upvoteCx = cx(this.props.className, {
@@ -109,32 +111,32 @@ class Upvote extends React.Component {
         //     'updating': this.state.updating
         // });
 
-        let upvoteContent = this.props.upvoteContent || <div className="upvote"><GoTriangleUp size={30} color={green500}/></div>;
-        let downvoteContent = this.props.downvoteContent || <div className="downvote"><GoTriangleDown size={30} color={red500}/></div>;
+    let upvoteContent = this.props.upvoteContent || <div className="upvote"><GoTriangleUp size={30} color={green500} /></div>;
+    let downvoteContent = this.props.downvoteContent || <div className="downvote"><GoTriangleDown size={30} color={red500} /></div>;
 
         // let beforeContent = this.props.beforeContent || null;
-        let beforeContent = this.props.beforeContent || 6;
-        let afterContent = this.props.afterContent || null;
+    let beforeContent = this.props.beforeContent || 6;
+    let afterContent = this.props.afterContent || null;
 
-        return (
-            <div className={ "upvoteCx" }>
-                <div className="react-upvote-icons">
-                    { upvoteContent && (
-                        <div className="upvote" onClick={ () => this.vote(1) }>
-                            { upvoteContent }
-                        </div>
-                    )}
-                    <span> { beforeContent }</span>
-                    { downvoteContent && (
-                        <div className="downvote" onClick={ () => this.vote(-1) }>
-                            { downvoteContent }
-                        </div>
-                    )}
-                </div>
-                { afterContent }
+    return (
+      <div className={'upvoteCx'}>
+        <div className="react-upvote-icons">
+          { upvoteContent && (
+            <div className="upvote" onClick={() => this.vote(1)}>
+              { upvoteContent }
             </div>
-        );
-    }
+          )}
+          <span> { beforeContent }</span>
+          { downvoteContent && (
+          <div className="downvote" onClick={() => this.vote(-1)}>
+            { downvoteContent }
+          </div>
+          )}
+        </div>
+        { afterContent }
+      </div>
+    );
+  }
 
 }
 

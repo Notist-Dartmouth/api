@@ -1,11 +1,55 @@
-import React from 'react'
+/* I'm being a bad dude and disabling some eslint rules on a per file basis -- Byrne */
+/* eslint-disable react/no-array-index-key */
 
-import { StyleSheet, css } from 'aphrodite'
-import data from '../data'
+import React from 'react';
+import { StyleSheet, css } from 'aphrodite';
+import data from '../data';
+
+/* I added padding so it doesn't go underneath nav --Byrne */
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 28,
+    lineHeight: '1.2',
+    margin: '0 0 1.5rem',
+    paddingTop: 90,
+  },
+  lead: {
+    fontSize: 18,
+    lineHeight: '1.5',
+    margin: '0 0 1.5rem',
+    color: '#555',
+  },
+  body: {
+    fontSize: '1rem',
+    lineHeight: '1.5',
+    margin: '0 0 1.5rem',
+    color: '#555',
+  },
+  list: {
+    fontSize: '1rem',
+    listStyle: 'none',
+    padding: 0,
+  },
+  link: {
+    display: 'block',
+    fontSize: '1.25rem',
+    margin: '0 0 .5rem',
+    lineHeight: '1.5',
+    fontWeight: 'bold',
+    color: '#08c',
+    opacity: 1,
+    transition: '.2s opacity ease',
+    textDecoration: 'none',
+    ':hover': {
+      opacity: 0.5,
+      textDecoration: 'none',
+    },
+  },
+});
 
 // This is a static page. It uses an array to hold data about the resources
 // and maintain DRY
-const Home = (props) => (
+const Home = props => (
   <div>
 
     <h2 className={css(styles.header)}>About</h2>
@@ -21,54 +65,12 @@ const Home = (props) => (
     <ul className={css(styles.list)}>
       {data.map((item, i) => (
         <li key={i}>
-          <h3><a className={css(styles.link)} href={item.link} target='_blank'>{item.resource}</a></h3>
+          <h3><a className={css(styles.link)} href={item.link} target="_blank" rel="noopener noreferrer">{item.resource}</a></h3>
           <p className={css(styles.body)}>{item.description}</p>
         </li>
        ))}
     </ul>
   </div>
-)
+);
 
-{/* I added padding so it doesn't go underneath nav --Byrne */}
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 28,
-    lineHeight: '1.2',
-    margin: '0 0 1.5rem',
-    paddingTop: 90
-  },
-  lead: {
-    fontSize: 18,
-    lineHeight: '1.5',
-    margin: '0 0 1.5rem',
-    color: '#555'
-  },
-  body: {
-    fontSize: '1rem',
-    lineHeight: '1.5',
-    margin: '0 0 1.5rem',
-    color: '#555'
-  },
-  list: {
-    fontSize: '1rem',
-    listStyle: 'none',
-    padding: 0
-  },
-  link: {
-    display: 'block',
-    fontSize: '1.25rem',
-    margin: '0 0 .5rem',
-    lineHeight: '1.5',
-    fontWeight: 'bold',
-    color: '#08c',
-    opacity: 1,
-    transition: '.2s opacity ease',
-    textDecoration: 'none',
-    ':hover': {
-      opacity: 0.5,
-      textDecoration: 'none'
-    }
-  }
-})
-
-export default Home
+export default Home;
