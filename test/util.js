@@ -1,3 +1,4 @@
+// app.settings.env = 'test';
 process.env.NODE_ENV = 'test';
 
 import Group from '../server/models/group';
@@ -41,7 +42,7 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
   }
 
   return Promise.all(groups.map(group => { return group.save(); }))
-  .then((savedGroups) => {
+  .then(savedGroups => {
     user.groups = savedGroups.map(group => {
       return {
         _id: group._id,
@@ -87,15 +88,13 @@ exports.addArticle = function (uri = 'www.testuri.com') {
   return exports.addArticleInGroups([], uri);
 };
 
-exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (articleId, groupId = null, text = 'This is a test', isPublic = true) {
   const annotation = new Annotation({
     articleId,
-    groupId,
+    groups: [groupId],
     articleText: 'Article makes an interesting point.',
-    text: 'This is a test.',
+    text,
     isPublic,
   });
-  annotation.save().then(savedAnnotation => {
-    return savedAnnotation;
-  });
+  return annotation.save();
 };
