@@ -89,10 +89,21 @@ router.post('/api/article', (req, res) => {
   }
 });
 
-// TODO: Decide what to do with users
-router.route('/api/user')
-//      .post(Users.createUser)
-      .get(Users.getUsers);
+router.get('/api/user', (req, res) => {
+  if (req.isAuthenticated()) {
+    // populate the user's groups
+    req.user.populate('groups')
+    .execPopulate()
+    .then(user => {
+      res.json(user);
+    })
+    .catch(err => {
+      res.json({ ERROR: serializeError(err) });
+    });
+  } else {
+    res.status(401).end();
+  }
+});
 
 /*
 Create a new group.

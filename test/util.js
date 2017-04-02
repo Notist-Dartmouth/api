@@ -42,7 +42,7 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
   }
 
   return Promise.all(groups.map(group => { return group.save(); }))
-  .then((savedGroups) => {
+  .then(savedGroups => {
     user.groups = savedGroups.map(group => {
       return {
         _id: group._id,
