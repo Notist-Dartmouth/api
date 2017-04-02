@@ -21,11 +21,10 @@ export const getUsers = (req, res) => {
   res.send('getting users');
 };
 
-export const addUserGroups = (userId, groups) => {
-  const groupObjs = groups.map(group => { return { _id: group._id, name: group.name, isPersonal: group.isPersonal }; });
-  return User.findByIdAndUpdate(userId, { $addToSet: { groups: { $each: groupObjs } } });
+export const addUserGroups = (userId, groupIds) => {
+  return User.findByIdAndUpdate(userId, { $addToSet: { groups: { $each: groupIds } } }, { new: true });
 };
 
-export const addUserGroup = (userId, group) => {
-  return addUserGroups(userId, [group]);
+export const addUserGroup = (userId, groupId) => {
+  return addUserGroups(userId, [groupId]);
 };
