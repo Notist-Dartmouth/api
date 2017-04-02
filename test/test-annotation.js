@@ -195,23 +195,10 @@ describe('Annotations', function () {
     });
 
     it('should return annotations in groupA on articleA');
-    it('should delete annotation with no replies' function() {
-      passportStub.login(user);
-      chai.request(app)
-      .delete(`/api/annotation/${AnnotationA.id}`)
-      .end(function(err, res) {
-        res.should.have.status(200);
-      });
-
-      return util.checkDatabase(resolve => {
-        resolve(true);
-      });
-    });
-
   });
 
   describe('AnnotationReplies', function () {
-    let PublicAnnotation, PrivateAnnotation;
+    let PublicAnnotation, PrivateAnnotation, StupidAnnotation;
 
     before(function () {
       util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then(newAnnotation => {
@@ -220,6 +207,9 @@ describe('Annotations', function () {
       util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
       .then(newAnnotation => {
         PrivateAnnotation = newAnnotation;
+      });
+      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a stupid annotation').then(newAnnotation => {
+        StupidAnnotation = newAnnotation;
       });
     });
 
@@ -294,6 +284,30 @@ describe('Annotations', function () {
         res.body.result[0].groups.should.include(GroupA._id.toString());
         done();
       });
+    });
+
+    it('should delete annotation with no replies', function () {
+      passportStub.login(user);
+      chai.request(app)
+      .delete(`/api/annotation/${StupidAnnotation.id}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        // TODO: when check db here, annotation doesn't exist so whats up?
+      });
+
+      return util.checkDatabase(resolve => {
+        resolve(Annotation.findById(StupidAnnotation.id).should.be.null);
+      });
+    });
+
+    it('should delete annotation with reply', function () {
+      passportStub.login(user);
+      chai.request(app)
+        .delete(`/api/annotation/${PublicAnnotation.id}`)
+        .end(function (err, res) {
+          res.should.have.status(200);
+        });
     });
   });
 });

@@ -90,11 +90,12 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 };
 
 export const deleteAnnotation = (annotationId) => {
-  const replies = Annotation.find({ parent: annotationId, deleted: false });
-  if (replies.length == 0) {
-    return Annotation.deleteOne({ _id: annotationId });
-  } else {
-    const update = { $set: { deleted: true } };
-    return Annotation.findOneAndUpdate({ _id: annotationId }, update, { returnNewDocument: true });
-  }
+  return Annotation.find({ parent: annotationId, deleted: false }).then(replies => {
+    if (replies.length > 0) {
+      const update = { $set: { deleted: true } };
+      return Annotation.findOneAndUpdate({ '_id': annotationId }, { $set: { deleted: true } }, { returnNewDocument: true });
+    } else {
+      return Annotation.findByIdAndRemove(annotationId);
+    }
+  });
 };

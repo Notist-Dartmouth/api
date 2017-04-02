@@ -389,25 +389,24 @@ router.post('/api/annotation/:id/edit', (req, res) => {
   }
 });
 
-router.delete('/api/annotation/:id', (res, res) => {
-  if (req.isAuthenticated()){
+router.delete('/api/annotation/:id', (req, res) => {
+  if (req.isAuthenticated()) {
     const annotationId = req.params.id;
     Annotations.deleteAnnotation(annotationId)
       .then(result => {
-        if (result == null){
+        if (result == null) {
           const err = new Error('Annotation not found');
-          res.json({ERROR: serializeError(err)});
+          res.json({ ERROR: serializeError(err) });
         } else {
-          res.json({SUCCESS: result});
+          res.json({ SUCCESS: result });
         }
       })
-      .catch (err => {
-        res.json({ERROR: serializeError(err )});
+      .catch(err => {
+        res.json({ ERROR: serializeError(err) });
       });
-    } else {
-      res.status(401).end();
-    }
+  } else {
+    res.status(401).end();
   }
-})
+});
 
 export default router;
