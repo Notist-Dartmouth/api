@@ -1,4 +1,6 @@
 import Annotation from '../models/annotation';
+import * as Articles from './article_controller';
+import mongodb from 'mongodb';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -71,7 +73,6 @@ export const createAnnotation = (user, body, articleId) => {
 // Returns a promise.
 export const getReplies = (user, parentId) => {
   const conditions = { parent: parentId };
-
   if (user === null) {
     conditions.isPublic = true;
   } else {
