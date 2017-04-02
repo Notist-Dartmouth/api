@@ -83,15 +83,19 @@ exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
 };
 
-exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (articleId, groupId, text = 'This is a test', isPublic = true, isTopLevel = true, parent = null) {
   const annotation = new Annotation({
     articleId,
     groupId,
     articleText: 'Article makes an interesting point.',
-    text: 'This is a test.',
+    text,
     isPublic,
+    isTopLevel,
+    parent,
   });
   annotation.save().then(savedAnnotation => {
+    console.log('in util');
+    console.log(savedAnnotation);
     return savedAnnotation;
   });
 };

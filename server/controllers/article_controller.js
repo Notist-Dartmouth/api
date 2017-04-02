@@ -1,6 +1,8 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
 
+import deepPopulate from 'mongoose-deep-populate';
+
 // TODO: getArticleGroups: Get all the groups of a given article
 // TODO: getArticlesFiltered: Get articles ordered, filtered by ____
 
@@ -44,21 +46,25 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
                       { author: user._id }];
   }
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-    conditions.ancestors = { $size: 0 }; // TODO: change this
+    conditions.isTopLevel = true;
   }
-
   return getArticle(uri)
-  .populate({
-    path: 'annotations',
-    match: conditions,
-  })
-  .exec()
+  // .plugin(deepPopulate, {
+  //   populate: {
+  //     annotations: {
+  //       match: conditions,
+  //     },
+  //   },
+  // })
+  // .populate('annotations')
   .then(article => {
     if (article === null) {
       // article not in db, so there are no annotations
       return [];
     } else {
-      return article.annotations;
+      console.log('in getArticleAnnotations');
+      console.log(article);
+      return article;
     }
   });
 };

@@ -37,7 +37,13 @@ export const createAnnotation = (user, body, articleId) => {
         annotation.article = parent.article;
         annotation.groups = parent.groups;
         annotation.isPublic = parent.isPublic;
+        annotation.isTopLevel = false;
         return annotation.save();
+      })
+      // update the parent annotation
+      .then(antn => {
+        const update = { $push: { annotationChildren: antn } };
+        return Annotation.findbyIdAndUpdate(body.parentId, update);
       })
       .catch(err => {
         const newErr = err;
@@ -51,6 +57,7 @@ export const createAnnotation = (user, body, articleId) => {
     annotation.article = articleId;
     annotation.isPublic = body.isPublic;
     annotation.groups = body.groups || [];
+    annotation.isTopLevel = true;
     if (!annotation.isPublic && annotation.groups.length > 1) {
       const err = new Error('Cannot assign private annotation to multiple groups');
       return Promise.reject(err);
