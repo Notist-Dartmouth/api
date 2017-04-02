@@ -196,15 +196,17 @@ describe('Annotations', function () {
   });
 
   describe('AnnotationReplies', function () {
-    let PublicAnnotation, PrivateAnnotation;
+    let PublicAnnotation;
+    let PrivateAnnotation;
 
     before(function () {
-      util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then(newAnnotation => {
-        PublicAnnotation = newAnnotation;
-      });
-      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
-      .then(newAnnotation => {
-        PrivateAnnotation = newAnnotation;
+      return Promise.all([
+        util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation'),
+        util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false),
+      ])
+      .then(newAnnotations => {
+        PublicAnnotation = newAnnotations[0];
+        PrivateAnnotation = newAnnotations[1];
       });
     });
 
