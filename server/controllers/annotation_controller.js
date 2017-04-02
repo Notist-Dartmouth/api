@@ -72,8 +72,7 @@ export const createAnnotation = (user, body, articleId) => {
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
-  // const conditions = { ancestors: { $in: [new mongodb.ObjectId(parentId)] } }; // TODO: I hate this whole objectId thing
-  const conditions = { parent: { $in: [new mongodb.ObjectId(parentId)] } };
+  const conditions = { parent: parentId };
   if (user === null) {
     conditions.isPublic = true;
   } else {
