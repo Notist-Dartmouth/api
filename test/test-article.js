@@ -1,6 +1,3 @@
-process.env.NODE_ENV = 'test';
-app.settings.env = 'test';
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
@@ -67,7 +64,7 @@ describe('Articles', function () {
         .post('/api/article')
         .send({ uri, title, groups: [] })
         .end((err, res) => {
-          should.exist(err); 
+          should.exist(err);
           // should.exist(res);
           // res.should.have.status(401);
         });

@@ -4,7 +4,7 @@
   "description": "React with Redux, React Router, Redial, Aphrodite, Express, Webpack.",
   "main": "server/app.js",
   "scripts": {
-    "test": "mocha --require babel-core/register",
+    "test": "NODE_ENV=test mocha --require babel-core/register",
     "dev": "nodemon server/app.js --exec babel-node",
     "coverage": "nyc npm test",
     "start": "babel-node server/app.js",
