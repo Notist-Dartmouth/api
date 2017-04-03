@@ -35,6 +35,10 @@ const annotationSchema = new Schema({
 
 // Enforce that private annotations have exactly one group.
 annotationSchema.pre('save', function preSave(next) {
+    // check if user can indeed save to these groups ?
+
+    // check that annotation.article exists
+
   if (!this.isPublic && this.groups.length > 1) {
     const err = new Error('Cannot assign private annotation to multiple groups');
     next(err);
@@ -43,23 +47,21 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
+annotationSchema.post('save', function postSave() {
+  // Save annotation to article
+
+  // Save annotation to group
+
+  // Save article to group
+
+  // Save group to article
+
+});
+
 annotationSchema.methods.isTopLevel = function isTopLevel() {
   return this.parent === undefined; // TODO: make sure this works
 };
 
-// TODO: we could maybe use virtual columns to deal with object id stuff?
-// annotationSchema.virtual('id').get(function () {
-//   return this._id.toString();
-// });
-//
-// annotationSchema.virtual('articleId')
-//   .get(function () { return this.article_id.toString(); })
-//   .set(function (articleId) { this.article_id = new ObjectId(articleId); });
-//
-//
-// annotationSchema.virtual('authorId').get(function () {
-//   return this.author_id.toString();
-// });
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 

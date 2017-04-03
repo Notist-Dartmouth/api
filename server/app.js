@@ -16,11 +16,12 @@ module.exports.app = app;
 // load environment variables
 require('dotenv').load();
 
-mongoose.connect(config.mongoURI[app.settings.env], (err, res) => {
+// connect to database 
+mongoose.connect(config.mongoURI[process.env.NODE_ENV], (err, res) => {
   if (err) {
     console.log(`Error connecting to the database: ${err}`);
   } else {
-    console.log(`Connected to Database: ${config.mongoURI[app.settings.env]}`);
+    console.log(`Connected to Database: ${config.mongoURI[process.env.NODE_ENV]}`);
   }
 });
 mongoose.Promise = global.Promise;
