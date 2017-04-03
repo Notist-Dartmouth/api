@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { StyleSheet, css } from 'aphrodite';
+import ArticleCard from '../../../components/ArticleCard';
 
 const styles = StyleSheet.create({
   root: {
@@ -21,18 +22,21 @@ const styles = StyleSheet.create({
 
 const PostListItem = ({ post }) => (
   <div className={css(styles.root)}>
-    <h3><Link to={`/post/${post.slug}`} className={css(styles.title)}> {post.title} </Link></h3>
-    <p>{post.subtitle}</p>
-    <p>domain = {post.domain}</p>
-    <p>{post.annotationContent}</p>
-    <img src={post.image} style={{ width: 200, height: 100 }} alt="card" />
-    <p>{post.username}</p>
-    <p>{post.points}</p>
-    <p>{post.timeSince}</p>
-    <p>{post.numUsers}</p>
-    <p>{post.numAnnotations}</p>
-    <p>{post.numReplies}</p>
-    <p>{post.currentVotes}</p>
+    <Link to={`/post/${post.slug}`} className={css(styles.title)}>{post.title}</Link>
+    <ArticleCard id="card1"
+      title={post.title}
+      domain={post.domain}
+      subtitle={post.subtitle}
+      annotationContent={post.annotationContent}
+      image={post.image}
+      username={post.username}
+      points={post.points}
+      timeSince={post.timeSince}
+      numUsers={post.numUsers}
+      numAnnotations={post.numAnnotations}
+      numReplies={post.numReplies}
+      currentVotes={post.currentVotes}
+    />
   </div>
 );
 

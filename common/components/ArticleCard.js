@@ -11,26 +11,22 @@ const styles = {
     position: 'relative',
     left: '70%',
   },
-
   annotationTextStyle: {
     position: 'relative',
     fontSize: 14,
     left: '2%',
   },
-
   articleTitleTextStyle: {
     fontWeight: 700,
     fontSize: 26,
     lineHeight: 1,
   },
-
   articleTextStyle: {
     fontSize: 15,
     fontStyle: 'italic',
     fontWeight: 100,
     backgroundColor: yellow200,
   },
-
   cardHeaderStyle: {
     position: 'relative',
     float: 'left',
@@ -38,12 +34,10 @@ const styles = {
     paddingLeft: '3%',
     top: 20,
   },
-
   domainTextStyle: {
     fontSize: 10,
     textDecoration: 'underline',
   },
-
   cardStyle: {
     // position: 'relative',
     // top: 80,
@@ -54,7 +48,6 @@ const styles = {
     marginRight: 20,
     marginLeft: 20,
   },
-
   articleInfoBar: {
     float: 'right',
     lineHeight: 2,
@@ -63,11 +56,9 @@ const styles = {
     paddingTop: '3%',
     paddingRight: '3%',
   },
-
   annotationAndInfo: {
     paddingLeft: '5%',
   },
-
 };
 
 class ArticleCard extends React.Component {

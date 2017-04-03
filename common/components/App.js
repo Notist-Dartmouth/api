@@ -72,9 +72,9 @@ const App = ({ children }) => (
     followingList={followingList}
     */}
     <TopNav
-      currentFeedName="Name of the group"
-      subscribed={false}
-      numFeedMembers={8}
+      currentFeedName="Name of the group!"
+      subscribed
+      numFeedMembers={4}
       numNotifications={9}
     />
     <MuiThemeProvider>

@@ -8,6 +8,7 @@ const CONFIG = require('./webpack.base');
 /* eslint-disable prefer-template */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
+/* eslint-disable comma-dangle */
 
 const { SERVER_ENTRY, SERVER_OUTPUT, PUBLIC_PATH } = CONFIG;
 
@@ -53,13 +54,13 @@ module.exports = {
   plugins: [
     new webpack.BannerPlugin(
         'require("source-map-support").install();',
-        { raw: true, entryOnly: false },
+        { raw: true, entryOnly: false }
     ),
     new webpack.IgnorePlugin(/\.(css|less|scss|svg|png|jpe?g|png)$/),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
-        warnings: false,
-      },
-    }),
+        warnings: false
+      }
+    })
   ],
 };
