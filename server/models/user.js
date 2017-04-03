@@ -14,6 +14,14 @@ const userSchema = new Schema({
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
+userSchema.virtual('articles').get(function () {
+
+});
+
+userSchema.virtual('annotations').get(function () {
+
+});
+
 userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
   let groupId = groupIdIn;
   if (typeof groupId !== 'object') {
