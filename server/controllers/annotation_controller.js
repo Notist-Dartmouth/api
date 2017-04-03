@@ -57,11 +57,13 @@ export const createAnnotation = (user, body, articleId) => {
       return Promise.reject(err);
     }
 
+    // TODO: move to pre-save
     // check that user is allowed to post to the groups
     if (!user.isMemberOfAll(annotation.groups)) {
       const err = new Error('Not authorized to post to these groups');
       return Promise.reject(err);
     } else {
+      // TODO: move to post-save
       Articles.addArticleGroups(annotation.article, annotation.groups);
     }
     return annotation.save();
