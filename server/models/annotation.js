@@ -47,7 +47,7 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
-annotationSchema.post('save', function postSave(next) {
+annotationSchema.post('save', function postSave() {
   // Save annotation to article
 
   // Save annotation to group
@@ -56,7 +56,6 @@ annotationSchema.post('save', function postSave(next) {
 
   // Save group to article
 
-  next();
 });
 
 annotationSchema.methods.isTopLevel = function isTopLevel() {
