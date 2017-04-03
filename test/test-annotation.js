@@ -297,7 +297,7 @@ describe('Annotations', function () {
       });
 
       return util.checkDatabase(resolve => {
-        resolve(Annotation.findById(StupidAnnotation.id).should.be.null);
+        resolve(Annotation.findById(StupidAnnotation.id).should.eventually.be.null);
       });
     });
 
