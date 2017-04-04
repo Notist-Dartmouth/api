@@ -5,7 +5,7 @@ import mongodb from 'mongodb';
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
   return Annotation.findById(annotationId)
-    .then(annotation => {
+    .then((annotation) => {
       if (annotation === null) {
         throw new Error('Annotation not found');
       }
@@ -23,52 +23,68 @@ export const getAnnotation = (user, annotationId) => {
     });
 };
 
-// PRECONDITION: user is not null.
-export const createAnnotation = (user, body, articleId) => {
+export const createAnnotation = (user, body, article) => {
   const annotation = new Annotation();
-  annotation.author = user._id;
-  annotation.username = user.username;
+  annotation.author = user;
+  annotation.username = user.username; // I dont think we should do this -- wht if user chnges usernme??
   annotation.text = body.text;
+
   if (body.parent) {
-    // ensure user is allowed to *read* the parent annotation
-    return getAnnotation(user, body.parent)
-      .then(parent => { // inherit properties from parent
-        annotation.parent = parent._id;
-        annotation.articleText = parent.articleText;
-        annotation.article = parent.article;
-        annotation.groups = parent.groups;
-        annotation.isPublic = parent.isPublic;
-        return annotation.save();
-      })
-      .catch(err => {
-        const newErr = err;
-        newErr.message = `Error getting parent: ${err.message}`;
-        throw newErr;
-      });
+    annotation.parent = body.parent;
   } else {
+    annotation.parent = null;
     annotation.articleText = body.articleText;
     annotation.ranges = body.ranges;
-    annotation.parent = null;
-    annotation.article = articleId;
     annotation.isPublic = body.isPublic;
     annotation.groups = body.groups || [];
-    if (!annotation.isPublic && annotation.groups.length > 1) {
-      const err = new Error('Cannot assign private annotation to multiple groups');
-      return Promise.reject(err);
-    }
-
-    // TODO: move to pre-save
-    // check that user is allowed to post to the groups
-    if (!user.isMemberOfAll(annotation.groups)) {
-      const err = new Error('Not authorized to post to these groups');
-      return Promise.reject(err);
-    } else {
-      // TODO: move to post-save
-      Articles.addArticleGroups(annotation.article, annotation.groups);
-    }
-    return annotation.save();
   }
+  return annotation.save();
 };
+
+
+// PRECONDITION: user is not null.
+// export const createAnnotation = (user, body, articleId) => {
+//   const annotation = new Annotation();
+//   annotation.author = user._id;
+//   annotation.username = user.username;
+//   annotation.text = body.text;
+//   if (body.parent) {
+//     // ensure user is allowed to *read* the parent annotation
+//     return getAnnotation(user, body.parent)
+//       .then((parent) => { // inherit properties from parent
+//         annotation.parent = parent._id;
+//         annotation.articleText = parent.articleText;
+//         annotation.article = parent.article;
+//         annotation.groups = parent.groups;
+//         annotation.isPublic = parent.isPublic;
+//         return annotation.save();
+//       })
+//       .catch((err) => {
+//         const newErr = err;
+//         newErr.message = `Error getting parent: ${err.message}`;
+//         throw newErr;
+//       });
+//   } else {
+//     annotation.articleText = body.articleText;
+//     annotation.ranges = body.ranges;
+//     annotation.parent = null;
+//     annotation.article = articleId;
+//     annotation.isPublic = body.isPublic;
+//     annotation.groups = body.groups || [];
+//
+//     // TODO: move to pre-save
+//     // check that user is allowed to post to the groups
+//     // if (!user.isMemberOfAll(annotation.groups)) {
+//     //   const err = new Error('Not authorized to post to these groups');
+//     //   return Promise.reject(err);
+//     // } else {
+//     //   // TODO: move to post-save
+//     //   Articles.addArticleGroups(annotation.article, annotation.groups);
+//     // }
+//
+//     return annotation.save();
+//   }
+// };
 
 // Get all replies to parentId (verifying that user has access to this comment)
 // Also succeeds if user is null and comment thread is public.

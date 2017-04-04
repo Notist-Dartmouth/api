@@ -1,4 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
+import Article from './article';
+import User from './user';
+import Group from './group';
+
 mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
@@ -16,17 +20,14 @@ const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   username: String,
   article: { type: ObjectId, ref: 'Article' },
-  // ancestors = [parent.ancestors parent._id] if has parent, else []
   parent: { type: ObjectId, ref: 'Annotation' },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
-
   text: { type: String, trim: true },
   articleText: String,
   ranges: [rangeSchema],
   // TODO: implement system for locating article text robustly
   points: { type: Number, default: 0 },
-
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
@@ -35,26 +36,43 @@ const annotationSchema = new Schema({
 
 // Enforce that private annotations have exactly one group.
 annotationSchema.pre('save', function preSave(next) {
-    // check if user can indeed save to these groups ?
+  // if annotation is reply, update fields accordingly
+  if (this.parent) {
+    const parent = Annotation.findById(this.parent);
+    this.article = parent.article;
+    this.articleText = parent.articleText;
+    this.ranges = parent.ranges;
+    this.isPublic = parent.isPublic;
+    this.groups = parent.groups;
+  }
 
-    // check that annotation.article exists
+  // check if user can indeed save to these groups
+  let err = null;
+  // const user = User.findById(this.author);
+  if (!this.author.isMemberOfAll(this.groups)) {
+    err = new Error('User not authorized to add annotation to one or more groups');
+  }
 
   if (!this.isPublic && this.groups.length > 1) {
-    const err = new Error('Cannot assign private annotation to multiple groups');
+    err = new Error('Cannot assign private annotation to multiple groups');
+  }
+
+  if (err != null) {
     next(err);
   } else {
     next();
   }
 });
 
-annotationSchema.post('save', function postSave(next) {
+annotationSchema.post('save', (doc, next) => {
   // Save annotation to article
 
   // Save annotation to group
 
-  // Save article to group
-
-  // Save group to article
+  // if (doc.parent == null) {
+  //   // Save article to group
+  //   Article.addArticleGroups(doc.article, doc.groups);
+  // }
 
   next();
 });
