@@ -16,7 +16,6 @@ const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   username: String,
   article: { type: ObjectId, ref: 'Article' },
-  // ancestors = [parent.ancestors parent._id] if has parent, else []
   parent: { type: ObjectId, ref: 'Annotation' },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },

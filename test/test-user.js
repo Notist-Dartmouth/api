@@ -1,4 +1,5 @@
 import { app } from '../server/app';
+process.env.NODE_ENV = 'test';
 app.settings.env = 'test';
 
 import chai from 'chai';
