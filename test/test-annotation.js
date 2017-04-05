@@ -1,10 +1,10 @@
+import { app } from '../server/app';
 process.env.NODE_ENV = 'test';
 app.settings.env = 'test';
 
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import passportStub from 'passport-stub';
-import { app } from '../server/app';
 
 import Article from '../server/models/article';
 import Annotation from '../server/models/annotation';
@@ -30,7 +30,7 @@ describe('Annotations', function () {
     .then(created => {
       GroupA = created.group;
       user = created.user;
-      return util.addArticleInGroup(null, 'www.nytimes.com/articleA');
+      return util.addArticle('www.nytimes.com/articleA');
     })
     .then(newArticle => {
       ArticleA = newArticle;
@@ -137,10 +137,11 @@ describe('Annotations', function () {
       });
 
       return util.checkDatabase(resolve => {
-        const articleQuery = Article.findOne({ uri: ArticleA.uri });
-        resolve(Promise.all([
-          articleQuery.should.eventually.have.property('groups', GroupA._id),
-        ]));
+        resolve(Article.findOne({ uri: ArticleA.uri })
+        .then(article => {
+          article.should.have.property('groups').with.lengthOf(1);
+          article.groups[0].toString().should.equal(GroupA.id);
+        }));
       });
     });
 
@@ -198,7 +199,9 @@ describe('Annotations', function () {
   });
 
   describe('AnnotationReplies', function () {
-    let PublicAnnotation, PrivateAnnotation, StupidAnnotation;
+    let PublicAnnotation;
+    let PrivateAnnotation;
+    let StupidAnnotation;
 
     before(function () {
       util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then(newAnnotation => {

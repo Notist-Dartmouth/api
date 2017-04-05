@@ -1,6 +1,5 @@
 import Annotation from '../models/annotation';
 import * as Articles from './article_controller';
-import mongodb from 'mongodb';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -63,9 +62,10 @@ export const createAnnotation = (user, body, articleId) => {
       return Promise.reject(err);
     }
     // TODO: this doesn't seem to be working ?
-    Articles.addArticleGroups(annotation.article, annotation.groups);
-
-    return annotation.save();
+    return Articles.addArticleGroups(annotation.article, annotation.groups)
+    .then(result => {
+      return annotation.save();
+    });
   }
 };
 
@@ -92,8 +92,7 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 export const deleteAnnotation = (annotationId) => {
   return Annotation.find({ parent: annotationId, deleted: false }).then(replies => {
     if (replies.length > 0) {
-      const update = { $set: { deleted: true } };
-      return Annotation.findOneAndUpdate({ '_id': annotationId }, { $set: { deleted: true } }, { returnNewDocument: true });
+      return Annotation.findOneAndUpdate({ _id: annotationId }, { $set: { deleted: true } }, { new: true });
     } else {
       return Annotation.findByIdAndRemove(annotationId);
     }
