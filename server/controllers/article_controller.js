@@ -56,14 +56,12 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   //     },
   //   },
   // })
-  // .populate('annotations')
+  .populate('annotations')
   .then(article => {
     if (article === null) {
       // article not in db, so there are no annotations
       return [];
     } else {
-      console.log('in getArticleAnnotations');
-      console.log(article);
       return article;
     }
   });
