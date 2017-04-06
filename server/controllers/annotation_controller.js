@@ -24,7 +24,7 @@ export const getAnnotation = (user, annotationId) => {
 
 // PRECONDITION: user is not null.
 export const createAnnotation = (user, body, articleId) => {
-  const annotation = new Annotation();
+  let annotation = new Annotation();
   annotation.author = user._id;
   annotation.username = user.username;
   annotation.text = body.text;
@@ -42,8 +42,12 @@ export const createAnnotation = (user, body, articleId) => {
       })
       // update the parent annotation
       .then(antn => {
-        const update = { $push: { annotationChildren: antn } };
-        return Annotation.findbyIdAndUpdate(body.parentId, update);
+        annotation = antn;
+        const update = { $push: { childAnnotations: antn } };
+        return Annotation.findByIdAndUpdate(body.parentId, update);
+      })
+      .then(par => {
+        return annotation;
       })
       .catch(err => {
         const newErr = err;
