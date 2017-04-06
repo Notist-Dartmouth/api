@@ -41,9 +41,9 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
     });
   }
 
-  return Promise.all(groups.map(group => { return group.save(); }))
-  .then(savedGroups => {
-    user.groups = savedGroups.map(group => {
+  return Promise.all(groups.map((group) => { return group.save(); }))
+  .then((savedGroups) => {
+    user.groups = savedGroups.map((group) => {
       return {
         _id: group._id,
         name: group.name,
@@ -51,20 +51,20 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
       };
     });
     return user.save()
-    .then(savedUser => {
+    .then((savedUser) => {
       return { user: savedUser, groups: savedGroups };
     });
   });
 };
 
 exports.addUserWithGroup = function (username = 'user', groupName = 'Group') {
-  return exports.addUserWithNGroups(1, username, groupName).then(res => {
+  return exports.addUserWithNGroups(1, username, groupName).then((res) => {
     return { user: res.user, group: res.groups[0] };
   });
 };
 
 exports.addUser = function (username = 'user') {
-  return exports.addUserWithNGroups(0, username).then(res => {
+  return exports.addUserWithNGroups(0, username).then((res) => {
     return res.user;
   });
 };
@@ -75,7 +75,7 @@ exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
     title: `Article at ${uri}`,
     groups,
   });
-  return article.save().then(savedArticle => {
+  return article.save().then((savedArticle) => {
     return savedArticle;
   });
 };
@@ -84,9 +84,10 @@ exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
 };
 
-exports.addArticleAnnotation = function (articleId, groupId = null, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (article, author = addUserWithGroup().user, groupId, text = 'This is a test', isPublic = true) {
   const annotation = new Annotation({
-    articleId,
+    article,
+    author,
     groups: [groupId],
     articleText: 'Article makes an interesting point.',
     text,

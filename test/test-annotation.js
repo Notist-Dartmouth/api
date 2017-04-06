@@ -24,12 +24,12 @@ describe('Annotations', function () {
 
   before(function () {
     return util.addUserWithGroup()
-    .then(created => {
+    .then((created) => {
       GroupA = created.group;
       user = created.user;
       return util.addArticleInGroup(null, 'www.nytimes.com/articleA');
     })
-    .then(newArticle => {
+    .then((newArticle) => {
       ArticleA = newArticle;
     });
   });
@@ -38,14 +38,14 @@ describe('Annotations', function () {
     passportStub.logout();
     setTimeout(() => {
       Promise.all([
-        Article.collection.drop(),
-        Group.collection.drop(),
-        User.collection.drop(),
-        Annotation.collection.drop(),
-      ]).then(res => {
+        // Article.collection.drop(),
+        // Group.collection.drop(),
+        // User.collection.drop(),
+        // Annotation.collection.drop(),
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -97,7 +97,7 @@ describe('Annotations', function () {
       });
 
       // let database update
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
@@ -133,7 +133,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.equal(text);
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         const articleQuery = Article.findOne({ uri: ArticleA.uri });
         resolve(Promise.all([
           articleQuery.should.eventually.have.property('groups', GroupA._id),
@@ -170,7 +170,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.equal(text);
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
@@ -182,25 +182,27 @@ describe('Annotations', function () {
       .end(function (err, res) {
         res.should.have.status(200);
         res.body.should.be.an('array');
+        res.body.should.have.length.of(2);
         res.body[0].should.have.property('articleText');
         res.body[0].should.have.property('text');
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
   });
 
   describe('AnnotationReplies', function () {
-    let PublicAnnotation, PrivateAnnotation;
+    let PublicAnnotation,
+      PrivateAnnotation;
 
     before(function () {
-      util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then(newAnnotation => {
+      util.addArticleAnnotation(ArticleA._id, user, '', 'This is a public annotation').then((newAnnotation) => {
         PublicAnnotation = newAnnotation;
       });
-      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
-      .then(newAnnotation => {
+      util.addArticleAnnotation(ArticleA._id, user, GroupA._id, 'This is a private annotation', false)
+      .then((newAnnotation) => {
         PrivateAnnotation = newAnnotation;
       });
     });
@@ -224,7 +226,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.eql(publicText);
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });

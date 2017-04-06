@@ -12,9 +12,9 @@ export const createArticle = (uri, groups) => {
   article.title = `Article at ${uri}`;
   article.groups = groups;
   return article.save()
-  .then(result => {
+  .then((result) => {
     return Groups.addGroupArticle(result._id, groups)
-    .then(res => {
+    .then((res) => {
       return result;
     });
   });
@@ -52,7 +52,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
     match: conditions,
   })
   .exec()
-  .then(article => {
+  .then((article) => {
     if (article === null) {
       // article not in db, so there are no annotations
       return [];

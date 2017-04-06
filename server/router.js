@@ -239,51 +239,25 @@ Output: Returns json file of the new annotation or error.
 router.post('/api/annotation', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
-    console.log(user);
     const body = req.body;
-    if (body.parent !== undefined && body.parent !== null) {
-    // if annotation is a reply
 
-      Annotations.createAnnotation(user, body)
-      .then((annotation) => {
-        Articles.addArticleAnnotation(annotation.article, annotation._id)
-        .then((result) => {
-          res.json({ SUCCESS: annotation });
-        });
-      })
-      .catch((err) => {
-        res.json({ ERROR: serializeError(err) });
-      });
-    } else {
-    // else annotation is not a reply
-      const uri = req.body.uri;
-      const groups = req.body.groups;
-
-      // if article not yet annotated
-      Articles.getArticle(uri)
-      .then((article) => {
-        if (article === null) {
-          return Articles.createArticle(uri, groups)
-          .then((newArticle) => {
-            const articleId = newArticle._id;
-            return Annotations.createAnnotation(user, body, articleId);
-          });
-        } else { // else add annotation to article
-          // TODO: if article already exists, it needs to be added to a group
-          const articleId = article._id;
-          return Annotations.createAnnotation(user, body, articleId);
-        }
-      })
-      .then((annotation) => {
-        return Articles.addArticleAnnotation(annotation.article, annotation._id)
-        .then((result) => {
-          res.json({ SUCCESS: annotation });
-        });
-      })
-      .catch((err) => {
-        res.json({ ERROR: serializeError(err) });
-      });
-    }
+    Articles.getArticle(req.body.uri)
+    .then((article) => {
+      if (article == null) {
+        return Articles.createArticle(req.body.uri, req.body.groups);
+      } else {
+        return article;
+      }
+    })
+    .then((article) => {
+      return Annotations.createAnnotation(user, body, article._id);
+    })
+    .then((annotation) => {
+      res.json({ SUCCESS: annotation });
+    })
+    .catch((err) => {
+      res.json({ ERROR: serializeError(err) });
+    });
   } else { // req unathenticated so send 401 error
     res.status(401).end();
   }

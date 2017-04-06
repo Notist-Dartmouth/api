@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
-import Article from './article';
-import User from './user';
-import Group from './group';
+import * as Articles from '../controllers/article_controller';
+// import User from './user';
+import * as Groups from '../controllers/group_controller';
 
 mongoose.Promise = global.Promise;
 
@@ -48,7 +48,6 @@ annotationSchema.pre('save', function preSave(next) {
 
   // check if user can indeed save to these groups
   let err = null;
-  // const user = User.findById(this.author);
   if (!this.author.isMemberOfAll(this.groups)) {
     err = new Error('User not authorized to add annotation to one or more groups');
   }
@@ -64,16 +63,18 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
-annotationSchema.post('save', (doc, next) => {
+annotationSchema.post('save', (annotation, next) => {
   // Save annotation to article
+  // use promise.all([
+  Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
 
-  // Save annotation to group
+  // Save article to group
+  if (annotation.parent == null) {
+    Articles.addArticleGroups(annotation.article, annotation.groups).exec();
+    Groups.addGroupArticle(annotation.article, annotation.groups);
+  }
 
-  // if (doc.parent == null) {
-  //   // Save article to group
-  //   Article.addArticleGroups(doc.article, doc.groups);
-  // }
-
+  // end of promise call next()
   next();
 });
 
