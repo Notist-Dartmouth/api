@@ -135,9 +135,7 @@ describe('Annotations', function () {
 
       return util.checkDatabase((resolve) => {
         const articleQuery = Article.findOne({ uri: ArticleA.uri });
-        resolve(Promise.all([
-          articleQuery.should.eventually.have.property('groups', GroupA._id),
-        ]));
+        resolve(articleQuery.should.eventually.have.property('groups', GroupA._id));
       });
     });
 
@@ -198,10 +196,12 @@ describe('Annotations', function () {
       PrivateAnnotation;
 
     before(function () {
-      util.addArticleAnnotation(ArticleA._id, user, '', 'This is a public annotation').then((newAnnotation) => {
+      // add promise.all
+      util.addArticleAnnotation(ArticleA._id, user, null, true, 'This is a public annotation')
+      .then((newAnnotation) => {
         PublicAnnotation = newAnnotation;
       });
-      util.addArticleAnnotation(ArticleA._id, user, GroupA._id, 'This is a private annotation', false)
+      util.addArticleAnnotation(ArticleA._id, user, GroupA._id, false, 'This is a private annotation')
       .then((newAnnotation) => {
         PrivateAnnotation = newAnnotation;
       });

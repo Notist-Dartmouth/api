@@ -38,34 +38,41 @@ const annotationSchema = new Schema({
 annotationSchema.pre('save', function preSave(next) {
   // if annotation is reply, update fields accordingly
   if (this.parent) {
-    const parent = Annotation.findById(this.parent);
-    this.article = parent.article;
-    this.articleText = parent.articleText;
-    this.ranges = parent.ranges;
-    this.isPublic = parent.isPublic;
-    this.groups = parent.groups;
-  }
+    this.constructor.findById(this.parent)
+    .then((parent) => {
+      this.article = parent.article;
+      this.articleText = parent.articleText;
+      this.ranges = parent.ranges;
+      this.isPublic = parent.isPublic;
+      this.groups = parent.groups;
 
-  // check if user can indeed save to these groups
-  let err = null;
-  if (!this.author.isMemberOfAll(this.groups)) {
-    err = new Error('User not authorized to add annotation to one or more groups');
-  }
+      // TODO: hella repetitive but idk how else to do this ..
+      if (!this.author.isMemberOfAll(this.groups)) {
+        next(new Error('User not authorized to add annotation to one or more groups'));
+      }
 
-  if (!this.isPublic && this.groups.length > 1) {
-    err = new Error('Cannot assign private annotation to multiple groups');
-  }
-
-  if (err != null) {
-    next(err);
+      if (!this.isPublic && this.groups.length > 1) {
+        next(new Error('Cannot assign private annotation to multiple groups'));
+      }
+      next();
+    });
   } else {
+    // check if user can indeed save to these groups
+    if (!this.author.isMemberOfAll(this.groups)) {
+      next(new Error('User not authorized to add annotation to one or more groups'));
+    }
+
+    if (!this.isPublic && this.groups.length > 1) {
+      next(new Error('Cannot assign private annotation to multiple groups'));
+    }
     next();
   }
 });
 
 annotationSchema.post('save', (annotation, next) => {
-  // Save annotation to article
   // use promise.all([
+
+  // Save annotation to article
   Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
 
   // Save article to group

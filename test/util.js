@@ -84,13 +84,15 @@ exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   return exports.addArticleInGroups([groupId], uri);
 };
 
-exports.addArticleAnnotation = function (article, author = addUserWithGroup().user, groupId, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (article, author, group, isPublic = true, text, articleText) {
+  let groups;
+  if (group) { groups = [group]; } else { groups = []; }
   const annotation = new Annotation({
     article,
     author,
-    groups: [groupId],
-    articleText: 'Article makes an interesting point.',
-    text,
+    groups,
+    articleText: articleText || 'Article makes an interesting point.',
+    text: text || 'This is a test',
     isPublic,
   });
   return annotation.save();
