@@ -81,7 +81,7 @@ exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
 };
 
 exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
-  return exports.addArticleInGroups([groupId], uri);
+  if (groupId) { return exports.addArticleInGroups([groupId], uri); } else { return exports.addArticleInGroups([], uri); }
 };
 
 exports.addArticleAnnotation = function (article, author, group, isPublic = true, text, articleText) {

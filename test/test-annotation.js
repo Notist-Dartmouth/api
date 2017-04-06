@@ -135,7 +135,7 @@ describe('Annotations', function () {
 
       return util.checkDatabase((resolve) => {
         const articleQuery = Article.findOne({ uri: ArticleA.uri });
-        resolve(articleQuery.should.eventually.have.property('groups', GroupA._id));
+        resolve(articleQuery.should.eventually.have.property('groups').that.contains(GroupA._id));
       });
     });
 
