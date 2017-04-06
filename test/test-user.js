@@ -25,7 +25,7 @@ describe('Users', function () {
       util.addUser('user0'),
       util.addUserWithNGroups(2, 'user1'),
     ])
-    .then(results => {
+    .then((results) => {
       user0 = results[0];
       user1 = results[1].user;
     });

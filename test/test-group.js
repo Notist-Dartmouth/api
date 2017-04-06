@@ -26,19 +26,19 @@ describe('Groups', () => {
 
   before(() => {
     return util.addUserWithGroup('user1')
-    .then(created => {
+    .then((created) => {
       newGroup = created.group;
       newUser = created.user;
       return util.addUser('user2');
     })
-    .then(user => {
+    .then((user) => {
       user2 = user;
       return Promise.all([
         util.addArticleInGroup(newGroup._id, 'www.article1.com'),
         util.addArticleInGroup(newGroup._id, 'www.article2.com'),
       ]);
     })
-    .then(articles => {
+    .then((articles) => {
       article1 = articles[0];
       article2 = articles[1];
       const update = { $push: {
@@ -49,16 +49,16 @@ describe('Groups', () => {
     });
   });
 
-  after(done => {
+  after((done) => {
     setTimeout(() => {
       Promise.all([
         Article.collection.drop(),
         Group.collection.drop(),
         User.collection.drop(),
-      ]).then(res => {
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -98,7 +98,7 @@ describe('Groups', () => {
       });
   });
 
-  it('should get a specific group on /api/group/:id GET', done => {
+  it('should get a specific group on /api/group/:id GET', (done) => {
     passportStub.login(newUser);
     chai.request(app)
       .get(`/api/group/${newGroup._id}`)
@@ -122,7 +122,7 @@ describe('Groups', () => {
       });
   });
 
-  it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', done => {
+  it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', (done) => {
     passportStub.login(newUser);
     const addedUserId = '345634563456345634563456';
     chai.request(app)

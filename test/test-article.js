@@ -24,7 +24,7 @@ describe('Articles', function () {
 
   before(function beforeCB() {
     return util.addUserWithGroup()
-    .then(created => {
+    .then((created) => {
       group0 = created.group;
       user = created.user;
     });
@@ -37,10 +37,10 @@ describe('Articles', function () {
         Article.collection.drop(),
         Group.collection.drop(),
         User.collection.drop(),
-      ]).then(res => {
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -154,10 +154,10 @@ describe('Articles', function () {
           articleQuery.should.eventually.have.property('uri', nURI),
           articleQuery.should.eventually.have.property('title'),
           articleQuery.should.eventually.have.property('annotations').that.is.empty,
-          articleQuery.then(article => {
+          articleQuery.then((article) => {
             article.groups.map(String).should.have.members([group0._id.toString()]);
             const articleId = article._id;
-            return groupQuery.then(group => {
+            return groupQuery.then((group) => {
               group.articles.map(String).should.have.members([articleId.toString()]);
             });
           }),
