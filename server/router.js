@@ -231,6 +231,7 @@ router.post('/api/annotation', (req, res) => {
 
       Annotations.createAnnotation(user, body)
       .then(annotation => {
+        console.log('updating the article');
         Articles.addArticleAnnotation(annotation.article, annotation._id)
         .then(result => {
           res.json({ SUCCESS: annotation });
@@ -296,7 +297,7 @@ router.get('/api/article/annotations', (req, res) => {
   const articleURI = req.query.uri;
   Articles.getArticleAnnotations(user, articleURI)
   .then(result => {
-    res.json(result);
+    res.json({ SUCCESS: result });
   })
   .catch(err => {
     res.json({ ERROR: serializeError(err) });
