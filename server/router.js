@@ -5,6 +5,7 @@ import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 import serializeError from 'serialize-error';
 
+import util from './util';
 import path from 'path';
 
 const router = Router();
@@ -71,17 +72,15 @@ router.post('/api/article', (req, res) => {
     const user = req.user;
 
     if (!user.isMemberOfAll(req.body.groups)) {
-      const err = new Error('User not authorized to add article to one or more groups');
-      res.json({ ERROR: serializeError(err) });
-      return;
+      throw new Error('User not authorized to add article to one or more groups');
     }
 
     Articles.createArticle(req.body.uri, req.body.groups)
     .then((result) => {
-      res.json({ SUCCESS: result });
+      util.returnPostSuccess(res, result);
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     // send 401 unauthorized
@@ -95,10 +94,10 @@ router.get('/api/user', (req, res) => {
     req.user.populate('groups')
     .execPopulate()
     .then((user) => {
-      res.json(user);
+      util.returnGetSuccess(res, user);
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     res.status(401).end();
@@ -122,11 +121,11 @@ router.post('/api/group', (req, res) => {
     .then((createdGroup) => {
       Users.addUserGroup(req.user._id, createdGroup._id)
       .then((updateResult) => {
-        res.json({ SUCCESS: createdGroup });
+        util.returnPostSuccess(res, createdGroup);
       });
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     // send 401 unauthorized
@@ -154,11 +153,11 @@ router.get('/api/group/:id', (req, res) => {
       } else if (!isMember && !group.isPublic) {
         throw new Error('Not a member of this private group');
       } else {
-        res.json(group);
+        util.returnGetSuccess(res, group);
       }
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     res.status(401).end();
@@ -181,10 +180,10 @@ router.post('/api/group/:groupId/user/:userId', (req, res) => {
       return Groups.addGroupMember(groupId, userId);
     })
     .then((updatedGroup) => {
-      res.json({ SUCCESS: updatedGroup });
+      util.returnPostSuccess(res, updatedGroup);
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     res.status(401).end();
@@ -200,10 +199,10 @@ Output: Returns json list of members of the group.
 router.get('/api/group/:groupId/members', (req, res) => {
   Groups.getMembers(req.params.groupId)
   .then((result) => {
-    res.json(result);
+    util.returnGetSuccess(res, result);
   })
   .catch((err) => {
-    res.json({ ERROR: serializeError(err) });
+    util.returnError(res, err);
   });
 });
 
@@ -216,10 +215,10 @@ Output: Returns json list of articles of the group.
 router.get('/api/group/:groupId/articles', (req, res) => {
   Groups.getArticles(req.params.groupId)
   .then((result) => {
-    res.json(result);
+    util.returnGetSuccess(res, result);
   })
   .catch((err) => {
-    res.json({ ERROR: serializeError(err) });
+    util.returnError(res, err);
   });
 });
 
@@ -253,10 +252,10 @@ router.post('/api/annotation', (req, res) => {
       return Annotations.createAnnotation(user, body, article._id);
     })
     .then((annotation) => {
-      res.json({ SUCCESS: annotation });
+      util.returnPostSuccess(res, annotation);
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else { // req unathenticated so send 401 error
     res.status(401).end();
@@ -279,10 +278,10 @@ router.get('/api/article/annotations', (req, res) => {
   const articleURI = req.query.uri;
   Articles.getArticleAnnotations(user, articleURI)
   .then((result) => {
-    res.json(result);
+    util.returnGetSuccess(res, result);
   })
   .catch((err) => {
-    res.json({ ERROR: serializeError(err) });
+    util.returnError(res, err);
   });
 });
 
@@ -300,10 +299,10 @@ router.get('/api/annotation/:id', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getAnnotation(user, annotationId)
   .then((result) => {
-    res.json({ SUCCESS: result });
+    util.returnGetSuccess(res, result);
   })
   .catch((err) => {
-    res.json({ ERROR: serializeError(err) });
+    util.returnError(res, err);
   });
 });
 
@@ -321,10 +320,10 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
   .then((result) => {
-    res.json({ result });
+    util.returnGetSuccess(res, result);
   })
   .catch((err) => {
-    res.json({ ERROR: serializeError(err) });
+    util.returnError(res, err);
   });
 });
 
@@ -343,14 +342,13 @@ router.post('/api/annotation/:id/edit', (req, res) => {
     .then((result) => {
       if (result === null) {
         // either the annotation doesn't exist or wasn't written by this user
-        const err = new Error('Annotation not found');
-        res.json({ ERROR: serializeError(err) });
+        throw new Error('Annotation not found');
       } else {
-        res.json({ SUCCESS: result });
+        util.returnPostSuccess(res, result);
       }
     })
     .catch((err) => {
-      res.json({ ERROR: serializeError(err) });
+      util.returnError(res, err);
     });
   } else {
     // send 401 unauthorized

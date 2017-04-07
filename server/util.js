@@ -5,7 +5,7 @@ exports.returnPostSuccess = function (res, result) {
 };
 
 exports.returnGetSuccess = function (res, result) {
-  res.json({ result });
+  res.json(result);
   return res;
 };
 

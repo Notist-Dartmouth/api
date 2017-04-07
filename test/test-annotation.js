@@ -255,10 +255,9 @@ describe('Annotations', function () {
       .get(`/api/annotation/${PublicAnnotation._id}/replies`)
       .end(function (err, res) {
         res.should.have.status(200);
-        res.body.should.have.property('result');
-        res.body.result.should.be.an('array');
-        res.body.result.should.have.length(1);
-        res.body.result[0].isPublic.should.be.true;
+        res.body.should.be.an('array');
+        res.body.should.have.length(1);
+        res.body[0].isPublic.should.be.true;
         done();
       });
     });
@@ -269,11 +268,10 @@ describe('Annotations', function () {
       .get(`/api/annotation/${PrivateAnnotation._id}/replies`)
       .end(function (err, res) {
         res.should.have.status(200);
-        res.body.should.have.property('result');
-        res.body.result.should.be.an('array');
-        res.body.result.should.have.length(1);
-        res.body.result[0].isPublic.should.be.false;
-        res.body.result[0].groups.should.include(GroupA._id.toString());
+        res.body.should.be.an('array');
+        res.body.should.have.length(1);
+        res.body[0].isPublic.should.be.false;
+        res.body[0].groups.should.include(GroupA._id.toString());
         done();
       });
     });
