@@ -30,9 +30,6 @@ const articleSchema = new Schema({
 
 articleSchema.plugin(deepPopulate, {
   populate: 'annotations',
-  rewrite: {
-    childAnnotations: 'annotations',
-  },
 });
 
 articleSchema.statics.normalizeURI = normalizeURI;

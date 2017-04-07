@@ -51,13 +51,8 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
     conditions.isTopLevel = true;
   }
-  const nURI = Article.normalizeURI(uri);
-  return Article.findOne({ uri: nURI })
+  return getArticle(uri)
   .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
-  // .populate({
-  //   path: 'annotations',
-  //   match: conditions,
-  // })
   .then(article => {
     if (article === null) {
       // article not in db, so there are no annotations
