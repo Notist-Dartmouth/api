@@ -69,11 +69,11 @@ exports.addUser = function (username = 'user') {
   });
 };
 
-exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
+exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
   const article = new Article({
     uri,
     title: `Article at ${uri}`,
-    groups,
+    groups: groupIds,
   });
   return article.save().then((savedArticle) => {
     return savedArticle;
@@ -82,6 +82,10 @@ exports.addArticleInGroups = function (groups, uri = 'www.testuri.com') {
 
 exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
   if (groupId) { return exports.addArticleInGroups([groupId], uri); } else { return exports.addArticleInGroups([], uri); }
+};
+
+exports.addArticle = function (uri = 'www.testuri.com') {
+  return exports.addArticleInGroups([], uri);
 };
 
 exports.addArticleAnnotation = function (article, author, group, isPublic = true, text, articleText) {
