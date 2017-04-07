@@ -231,7 +231,7 @@ router.post('/api/annotation', (req, res) => {
 
       Annotations.createAnnotation(user, body)
       .then(annotation => {
-        // Articles.addArticleAnnotation(annotation.article, annotation._id)  // should only need to keep track of top-level in articles
+        // Articles.addArticleAnnoChild(annotation.article, annotation._id, body.parentId)  // should only need to keep track of top-level in articles
         // .then(result => {
         res.json({ SUCCESS: annotation });
         // });

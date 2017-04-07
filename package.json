@@ -52,6 +52,7 @@
     "eslint-plugin-jsx-a11y": "^1.5.5",
     "eslint-plugin-react": "^5.2.2",
     "mongoose-deep-populate": "^3.0.0",
+    "mongoose-tree2": "^0.2.2",
     "nodemon": "^1.10.0"
   },
   "repository": {

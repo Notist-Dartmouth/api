@@ -1,7 +1,5 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
-// import mongoose from 'mongoose';
-// import deepPopulate from 'mongoose-deep-populate';
 
 // TODO: getArticleGroups: Get all the groups of a given article
 // TODO: getArticlesFiltered: Get articles ordered, filtered by ____
@@ -27,7 +25,11 @@ export const getArticle = (uri) => {
   return Article.findOne({ uri: nURI });
 };
 
-export const addArticleAnnotation = (articleId, annotationId) => {
+// export const addArticleAnnotation = (articleId, annotationId) => {
+//   return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
+// };
+
+export const addArticleAnnoChild = (articleId, annotationId, parentId) => {
   return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
 };
 
@@ -35,6 +37,7 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.
+
 export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   const conditions = {};
   if (user === null) {
@@ -50,32 +53,21 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   }
   const nURI = Article.normalizeURI(uri);
   return Article.findOne({ uri: nURI })
-  // .then(art => {
-  //   Article.deepPopulate(art, 'annotations');
+  .deepPopulate('annotations.childAnnotations')
+  // .populate({
+  //   path: 'annotations',
+  //   match: conditions,
   // })
-  // .plugin(deepPopulate, {
-  //   populate: {
-  //     childAnnotations: {
-  //       match: conditions,
-  //     },
-  //   },
-  //   rewrite: {
-  //     annotations: 'childAnnotations',
-  //   },
-  // })
-  .deepPopulate({
-    path: 'annotations',
-    match: conditions,
-  })
   .then(article => {
     if (article === null) {
       // article not in db, so there are no annotations
       return [];
     } else {
-      return article;
+      return article.annotations;
     }
   });
 };
+
 
 // TODO: Get one level of children down from this instead
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
