@@ -1,9 +1,6 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
 
-// TODO: getArticleGroups: Get all the groups of a given article
-// TODO: getArticlesFiltered: Get articles ordered, filtered by ____
-
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
 export const createArticle = (uri, groups) => {
@@ -25,11 +22,27 @@ export const getArticle = (uri) => {
   return Article.findOne({ uri: nURI });
 };
 
-// export const addArticleAnnotation = (articleId, annotationId) => {
-//   return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
-// };
 
-export const addArticleAnnoChild = (articleId, annotationId, parentId) => {
+/*
+Get a list of articles, filtered by some conditions.
+Input:
+  query: A mongodb query selector object
+Output: Resolves to a list of matching groups
+Example:
+  Articles.getArticlesFiltered({
+    title: /hamilton/i,
+    isSatire: false,
+    groups: someGroup._id,
+  });
+*/
+export const getArticlesFiltered = (query) => {
+  if (typeof query !== 'object') {
+    return Promise.reject(new Error('Invalid article query'));
+  }
+  return Article.find(query);
+};
+
+export const addArticleAnnotation = (articleId, annotationId) => {
   return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
 };
 
@@ -43,8 +56,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   if (user === null) {
     conditions.isPublic = true;
   } else {
-    const groupIds = user.groups.map(group => { return group._id; });
-    conditions.$or = [{ groups: { $in: groupIds } },
+    conditions.$or = [{ groups: { $in: user.groups } },
                       { isPublic: true },
                       { author: user._id }];
   }
@@ -81,4 +93,26 @@ Output: Returns a promise that resolves with result of updating article.
 */
 export const addArticleGroups = (articleId, groupIds) => {
   return Article.findByIdAndUpdate(articleId, { $addToSet: { groups: { $each: groupIds } } });
+};
+
+/*
+Get an array of the groups an article belongs to
+Input:
+  articleId: String article ID
+Output: Returns a promise that rejects if the article is not found
+ and otherwise resolves to an array of the group objects the article belongs to.
+*/
+export const getArticleGroups = (articleId) => {
+  return Article.findById(articleId)
+  .populate('groups')
+  .select('groups')
+  .exec()
+  .then(article => {
+    if (article === null) {
+      // reject since this shouldn't be an expected situation, if we have an articleId
+      throw new Error('Article not found');
+    } else {
+      return article.groups;
+    }
+  });
 };
