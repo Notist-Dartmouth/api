@@ -231,11 +231,10 @@ router.post('/api/annotation', (req, res) => {
 
       Annotations.createAnnotation(user, body)
       .then(annotation => {
-        console.log('updating the article');
-        Articles.addArticleAnnotation(annotation.article, annotation._id)
-        .then(result => {
-          res.json({ SUCCESS: annotation });
-        });
+        // Articles.addArticleAnnotation(annotation.article, annotation._id)  // should only need to keep track of top-level in articles
+        // .then(result => {
+        res.json({ SUCCESS: annotation });
+        // });
       })
       .catch(err => {
         res.json({ ERROR: serializeError(err) });
@@ -295,7 +294,7 @@ router.get('/api/article/annotations', (req, res) => {
     user = req.user;
   }
   const articleURI = req.query.uri;
-  Articles.getArticleAnnotations(user, articleURI)
+  Articles.getArticleAnnotations(user, articleURI, true)
   .then(result => {
     res.json({ SUCCESS: result });
   })

@@ -36,5 +36,14 @@ articleSchema.statics.urisAreEqual = (uri1, uri2) => {
 // TODO: add pre-save hook to check whether articles are satire or misleading
 // (probably by checking the hostname using url-parse)
 
+
+const deepPopulate = require('mongoose-deep-populate')(mongoose);
+articleSchema.plugin(deepPopulate, {
+  populate: 'annotations',
+  rewrite: {
+    annotations: 'childAnnotation',
+  },
+});
+
 const ArticleModel = mongoose.model('Article', articleSchema);
 export default ArticleModel;

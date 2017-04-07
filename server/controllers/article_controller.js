@@ -1,7 +1,7 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
-
-import deepPopulate from 'mongoose-deep-populate';
+// import mongoose from 'mongoose';
+// import deepPopulate from 'mongoose-deep-populate';
 
 // TODO: getArticleGroups: Get all the groups of a given article
 // TODO: getArticlesFiltered: Get articles ordered, filtered by ____
@@ -48,15 +48,25 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
     conditions.isTopLevel = true;
   }
-  return getArticle(uri)
+  const nURI = Article.normalizeURI(uri);
+  return Article.findOne({ uri: nURI })
+  // .then(art => {
+  //   Article.deepPopulate(art, 'annotations');
+  // })
   // .plugin(deepPopulate, {
   //   populate: {
-  //     annotations: {
+  //     childAnnotations: {
   //       match: conditions,
   //     },
   //   },
+  //   rewrite: {
+  //     annotations: 'childAnnotations',
+  //   },
   // })
-  .populate('annotations')
+  .deepPopulate({
+    path: 'annotations',
+    match: conditions,
+  })
   .then(article => {
     if (article === null) {
       // article not in db, so there are no annotations
