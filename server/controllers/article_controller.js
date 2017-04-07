@@ -53,7 +53,7 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   }
   const nURI = Article.normalizeURI(uri);
   return Article.findOne({ uri: nURI })
-  .deepPopulate('annotations.childAnnotations')
+  .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
   // .populate({
   //   path: 'annotations',
   //   match: conditions,
