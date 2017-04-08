@@ -92,38 +92,30 @@ export const editAnnotation = (userId, annotationId, updateText) => {
   return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };
 
+// Removes an annotation from the database, updates the parent's numChildren
+// and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (annotation) => {
-  if (annotation.numChildren > 0) {
-    // Mark as deleted but don't remove
-    annotation.deleted = true;
-    annotation.text = '[deleted]';
-    annotation.author = null;
-    return annotation.save();
+  if (annotation.parent === null) {
+    // base case: annotation is top-level
+    return annotation.remove();
   } else {
-    // annotation has no children, so remove
-    const removePromise = annotation.remove();
-    if (annotation.parent === null) {
-      // base case: annotation is top-level
-      return removePromise;
-    } else {
-      return removePromise
-      .then(removed => {
-        return Annotation.findById(removed.parent)
-        .then(parent => {
-          parent.numChildren--;
-          if (parent.deleted && parent.numChildren < 1) {
-            // remove parent recursively
-            return deleteAnnotationHelper(parent);
-          } else {
-            // parent will stay
-            return parent.save();
-          }
-        })
-        .then(result => {
-          return removed;
-        });
+    return annotation.remove()
+    .then(removed => {
+      return Annotation.findById(removed.parent)
+      .then(parent => {
+        parent.numChildren--;
+        if (parent.deleted && parent.numChildren < 1) {
+          // remove parent recursively
+          return deleteAnnotationHelper(parent);
+        } else {
+          // parent will stay, but update numChildren
+          return parent.save();
+        }
+      })
+      .then(result => {
+        return removed;
       });
-    }
+    });
   }
 };
 
@@ -133,6 +125,15 @@ export const deleteAnnotation = (annotationId) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
     }
-    return deleteAnnotationHelper(annotation);
+    if (annotation.numChildren < 1) {
+      // annotation has no children, so remove
+      return deleteAnnotationHelper(annotation);
+    } else {
+      // Mark as deleted but don't remove
+      annotation.deleted = true;
+      annotation.text = '[deleted]';
+      annotation.author = null;
+      return annotation.save();
+    }
   });
 };
