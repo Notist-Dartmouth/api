@@ -101,20 +101,17 @@ const deleteAnnotationHelper = (annotation) => {
   } else {
     return annotation.remove()
     .then(removed => {
-      return Annotation.findById(removed.parent)
-      .then(parent => {
-        parent.numChildren--;
-        if (parent.deleted && parent.numChildren < 1) {
-          // remove parent recursively
-          return deleteAnnotationHelper(parent);
-        } else {
-          // parent will stay, but update numChildren
-          return parent.save();
-        }
-      })
-      .then(result => {
-        return removed;
-      });
+      return Annotation.findById(removed.parent);
+    })
+    .then(parent => {
+      parent.numChildren--;
+      if (parent.deleted && parent.numChildren < 1) {
+        // remove parent recursively
+        return deleteAnnotationHelper(parent);
+      } else {
+        // parent will stay, but update numChildren
+        return parent.save();
+      }
     });
   }
 };
