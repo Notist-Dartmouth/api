@@ -46,11 +46,6 @@ export const createAnnotation = (user, body, articleId) => {
             return child;
           });
         });
-      })
-      .catch(err => {
-        const newErr = err;
-        newErr.message = `Error getting parent: ${err.message}`;
-        throw newErr;
       });
   } else {
     annotation.articleText = body.articleText;
@@ -135,6 +130,9 @@ const deleteAnnotationHelper = (annotation) => {
 export const deleteAnnotation = (annotationId) => {
   return Annotation.findById(annotationId)
   .then(annotation => {
+    if (annotation === null) {
+      throw new Error('Annotation to delete not found');
+    }
     return deleteAnnotationHelper(annotation);
   });
 };

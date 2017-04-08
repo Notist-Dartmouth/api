@@ -394,12 +394,7 @@ router.delete('/api/annotation/:id', (req, res) => {
     const annotationId = req.params.id;
     Annotations.deleteAnnotation(annotationId)
       .then(result => {
-        if (result == null) {
-          const err = new Error('Annotation not found');
-          res.json({ ERROR: serializeError(err) });
-        } else {
-          res.json({ SUCCESS: result });
-        }
+        res.json({ SUCCESS: true });
       })
       .catch(err => {
         res.json({ ERROR: serializeError(err) });

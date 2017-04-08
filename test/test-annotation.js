@@ -13,7 +13,7 @@ import User from '../server/models/user';
 
 import util from './util';
 
-chai.should();
+const should = chai.should();
 
 chai.use(chaiHttp);
 passportStub.install(app);
@@ -200,6 +200,7 @@ describe('Annotations', function () {
 
   describe('AnnotationReplies', function () {
     let PublicAnnotation;
+    let PublicReply;
     let PrivateAnnotation;
     let StupidAnnotation;
 
@@ -231,12 +232,17 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.isPublic.should.be.true;
-        res.body.SUCCESS.parent.should.eql(PublicAnnotation._id.toString());
+        res.body.SUCCESS.parent.should.eql(PublicAnnotation.id);
         res.body.SUCCESS.text.should.eql(publicText);
       });
 
       return util.checkDatabase(resolve => {
-        resolve(true);
+        resolve(Annotation.findOne({ text: publicText }).then(annotation => {
+          annotation.parent.toString().should.equal(PublicAnnotation.id);
+          annotation.isPublic.should.be.true;
+          annotation.article.toString().should.equal(ArticleA.id);
+          PublicReply = annotation;
+        }));
       });
     });
 
@@ -295,8 +301,7 @@ describe('Annotations', function () {
       .delete(`/api/annotation/${StupidAnnotation.id}`)
       .end(function (err, res) {
         res.should.have.status(200);
-        res.body.should.have.property('SUCCESS');
-        // TODO: when check db here, annotation doesn't exist so whats up?
+        res.body.should.have.property('SUCCESS').that.is.true;
       });
 
       return util.checkDatabase(resolve => {
@@ -307,10 +312,37 @@ describe('Annotations', function () {
     it('should delete annotation with reply', function () {
       passportStub.login(user);
       chai.request(app)
-        .delete(`/api/annotation/${PublicAnnotation.id}`)
-        .end(function (err, res) {
-          res.should.have.status(200);
-        });
+      .delete(`/api/annotation/${PublicAnnotation.id}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS').that.is.true;
+      });
+
+      return util.checkDatabase(resolve => {
+        resolve(Annotation.findById(PublicAnnotation.id).then(annotation => {
+          annotation.text.should.equal('[deleted]');
+          should.not.exist(annotation.author);
+          annotation.numChildren.should.equal(1);
+          annotation.deleted.should.be.true;
+        }));
+      });
+    });
+
+    it('should delete public reply and remove deleted parent', function () {
+      passportStub.login(user);
+      chai.request(app)
+      .delete(`/api/annotation/${PublicReply.id}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS').that.is.true;
+      });
+
+      return util.checkDatabase(resolve => {
+        resolve(Promise.all([
+          Annotation.findById(PublicReply.id).should.eventually.be.null,
+          Annotation.findById(PublicAnnotation.id).should.eventually.be.null,
+        ]));
+      });
     });
   });
 });

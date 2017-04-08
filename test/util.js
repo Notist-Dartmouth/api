@@ -94,7 +94,7 @@ exports.addArticleAnnotation = function (articleId, groupId = null, text = 'This
     groups = [groupId];
   }
   const annotation = new Annotation({
-    articleId,
+    article: articleId,
     groups,
     articleText: 'Article makes an interesting point.',
     text,
