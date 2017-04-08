@@ -4,7 +4,7 @@ import * as Articles from './article_controller';
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
   return Annotation.findById(annotationId)
-    .then(annotation => {
+    .then((annotation) => {
       if (annotation === null) {
         throw new Error('Annotation not found');
       }
@@ -31,18 +31,18 @@ export const createAnnotation = (user, body, articleId) => {
   if (body.parent) {
     // ensure user is allowed to *read* the parent annotation
     return getAnnotation(user, body.parent)
-      .then(parent => { // inherit properties from parent
+      .then((parent) => { // inherit properties from parent
         annotation.parent = parent._id;
         annotation.articleText = parent.articleText;
         annotation.article = parent.article;
         annotation.groups = parent.groups;
         annotation.isPublic = parent.isPublic;
         return annotation.save()
-        .then(child => {
+        .then((child) => {
           // On successful save, increment parent's numChildren
           parent.numChildren++;
           return parent.save()
-          .then(savedParent => {
+          .then((savedParent) => {
             return child;
           });
         });
@@ -66,7 +66,7 @@ export const createAnnotation = (user, body, articleId) => {
     }
     // TODO: this doesn't seem to be working ?
     return Articles.addArticleGroups(annotation.article, annotation.groups)
-    .then(result => {
+    .then((result) => {
       return annotation.save();
     });
   }
@@ -92,7 +92,7 @@ export const editAnnotation = (userId, annotationId, updateText) => {
   return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };
 
-const deleteAnnotationHelper = (annotation) => {
+const deleteAnnotationHelper = (user, annotation) => {
   if (annotation.numChildren > 0) {
     // Mark as deleted but don't remove
     annotation.deleted = true;
@@ -101,25 +101,25 @@ const deleteAnnotationHelper = (annotation) => {
     return annotation.save();
   } else {
     // annotation has no children, so remove
-    const removePromise = annotation.remove();
+    const removePromise = annotation.remove(user, () => { console.log('removed'); });
     if (annotation.parent === null) {
       // base case: annotation is top-level
       return removePromise;
     } else {
       return removePromise
-      .then(removed => {
+      .then((removed) => {
         return Annotation.findById(removed.parent)
-        .then(parent => {
+        .then((parent) => {
           parent.numChildren--;
           if (parent.deleted && parent.numChildren < 1) {
             // remove parent recursively
-            return deleteAnnotationHelper(parent);
+            return deleteAnnotationHelper(req, parent);
           } else {
             // parent will stay
             return parent.save();
           }
         })
-        .then(result => {
+        .then((result) => {
           return removed;
         });
       });
@@ -127,12 +127,12 @@ const deleteAnnotationHelper = (annotation) => {
   }
 };
 
-export const deleteAnnotation = (annotationId) => {
+export const deleteAnnotation = (user, annotationId) => {
   return Annotation.findById(annotationId)
-  .then(annotation => {
+  .then((annotation) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
     }
-    return deleteAnnotationHelper(annotation);
+    return deleteAnnotationHelper(user, annotation);
   });
 };

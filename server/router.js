@@ -77,10 +77,10 @@ router.post('/api/article', (req, res) => {
     }
 
     Articles.createArticle(req.body.uri, req.body.groups)
-    .then(result => {
+    .then((result) => {
       res.json({ SUCCESS: result });
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -94,10 +94,10 @@ router.get('/api/user', (req, res) => {
     // populate the user's groups
     req.user.populate('groups')
     .execPopulate()
-    .then(user => {
+    .then((user) => {
       res.json(user);
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -119,13 +119,13 @@ router.post('/api/group', (req, res) => {
     const isPersonal = req.body.isPersonal || false;
     const isPublic = !isPersonal && (req.body.isPublic || false);
     Groups.createGroup(req.body.name, req.body.description, req.user._id, isPersonal, isPublic)
-    .then(createdGroup => {
+    .then((createdGroup) => {
       Users.addUserGroup(req.user._id, createdGroup._id)
-      .then(updateResult => {
+      .then((updateResult) => {
         res.json({ SUCCESS: createdGroup });
       });
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -148,7 +148,7 @@ router.get('/api/group/:id', (req, res) => {
     const groupId = req.params.id;
     const isMember = user.isMemberOf(groupId);
     Groups.getGroup(groupId)
-    .then(group => {
+    .then((group) => {
       if (group === null) {
         throw new Error('Group not found');
       } else if (!isMember && !group.isPublic) {
@@ -157,7 +157,7 @@ router.get('/api/group/:id', (req, res) => {
         res.json(group);
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -177,13 +177,13 @@ router.post('/api/group/:groupId/user/:userId', (req, res) => {
   const userId = req.params.userId;
   if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
     Users.addUserGroup(userId, groupId)
-    .then(updatedUser => {
+    .then((updatedUser) => {
       return Groups.addGroupMember(groupId, userId);
     })
-    .then(updatedGroup => {
+    .then((updatedGroup) => {
       res.json({ SUCCESS: updatedGroup });
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -199,10 +199,10 @@ Output: Returns json list of members of the group.
 */
 router.get('/api/group/:groupId/members', (req, res) => {
   Groups.getMembers(req.params.groupId)
-  .then(result => {
+  .then((result) => {
     res.json(result);
   })
-  .catch(err => {
+  .catch((err) => {
     res.json({ ERROR: serializeError(err) });
   });
 });
@@ -215,10 +215,10 @@ Output: Returns json list of articles of the group.
 */
 router.get('/api/group/:groupId/articles', (req, res) => {
   Groups.getArticles(req.params.groupId)
-  .then(result => {
+  .then((result) => {
     res.json(result);
   })
-  .catch(err => {
+  .catch((err) => {
     res.json({ ERROR: serializeError(err) });
   });
 });
@@ -244,13 +244,13 @@ router.post('/api/annotation', (req, res) => {
     // if annotation is a reply
 
       Annotations.createAnnotation(user, body)
-      .then(annotation => {
+      .then((annotation) => {
         Articles.addArticleAnnotation(annotation.article, annotation._id)
-        .then(result => {
+        .then((result) => {
           res.json({ SUCCESS: annotation });
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.json({ ERROR: serializeError(err) });
       });
     } else {
@@ -266,10 +266,10 @@ router.post('/api/annotation', (req, res) => {
 
       // if article not yet annotated
       Articles.getArticle(uri)
-      .then(article => {
+      .then((article) => {
         if (article === null) {
           return Articles.createArticle(uri, groups)
-          .then(newArticle => {
+          .then((newArticle) => {
             const articleId = newArticle._id;
             return Annotations.createAnnotation(user, body, articleId);
           });
@@ -279,13 +279,13 @@ router.post('/api/annotation', (req, res) => {
           return Annotations.createAnnotation(user, body, articleId);
         }
       })
-      .then(annotation => {
+      .then((annotation) => {
         return Articles.addArticleAnnotation(annotation.article, annotation._id)
-        .then(result => {
+        .then((result) => {
           res.json({ SUCCESS: annotation });
         });
       })
-      .catch(err => {
+      .catch((err) => {
         res.json({ ERROR: serializeError(err) });
       });
     }
@@ -309,10 +309,10 @@ router.get('/api/article/annotations', (req, res) => {
   }
   const articleURI = req.query.uri;
   Articles.getArticleAnnotations(user, articleURI)
-  .then(result => {
+  .then((result) => {
     res.json(result);
   })
-  .catch(err => {
+  .catch((err) => {
     res.json({ ERROR: serializeError(err) });
   });
 });
@@ -330,10 +330,10 @@ router.get('/api/annotation/:id', (req, res) => {
   }
   const annotationId = req.params.id;
   Annotations.getAnnotation(user, annotationId)
-  .then(result => {
+  .then((result) => {
     res.json({ SUCCESS: result });
   })
-  .catch(err => {
+  .catch((err) => {
     res.json({ ERROR: serializeError(err) });
   });
 });
@@ -351,10 +351,10 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   }
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
-  .then(result => {
+  .then((result) => {
     res.json({ result });
   })
-  .catch(err => {
+  .catch((err) => {
     res.json({ ERROR: serializeError(err) });
   });
 });
@@ -371,7 +371,7 @@ router.post('/api/annotation/:id/edit', (req, res) => {
     const annotationId = req.params.id;
     const updateText = req.body.text;
     Annotations.editAnnotation(userId, annotationId, updateText)
-    .then(result => {
+    .then((result) => {
       if (result === null) {
         // either the annotation doesn't exist or wasn't written by this user
         const err = new Error('Annotation not found');
@@ -380,7 +380,7 @@ router.post('/api/annotation/:id/edit', (req, res) => {
         res.json({ SUCCESS: result });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.json({ ERROR: serializeError(err) });
     });
   } else {
@@ -392,11 +392,11 @@ router.post('/api/annotation/:id/edit', (req, res) => {
 router.delete('/api/annotation/:id', (req, res) => {
   if (req.isAuthenticated()) {
     const annotationId = req.params.id;
-    Annotations.deleteAnnotation(annotationId)
-      .then(result => {
+    Annotations.deleteAnnotation(req.user, annotationId)
+      .then((result) => {
         res.json({ SUCCESS: true });
       })
-      .catch(err => {
+      .catch((err) => {
         res.json({ ERROR: serializeError(err) });
       });
   } else {

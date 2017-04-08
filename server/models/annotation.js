@@ -44,6 +44,18 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
+annotationSchema.pre('remove', (next, user, callback) => {
+  if (user != this.author) {
+    next(new Error('User cannot remove annotation'));
+  }
+
+  // Remove annotation from article
+  Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } });
+  // if no more annotations then should probably do something?
+
+  next(callback);
+});
+
 annotationSchema.methods.isTopLevel = function isTopLevel() {
   return this.parent === undefined; // TODO: make sure this works
 };
