@@ -37,6 +37,7 @@ const annotationSchema = new Schema({
 // Enforce that private annotations have exactly one group.
 annotationSchema.pre('save', function preSave(next) {
   // if annotation is reply, update fields accordingly
+
   if (this.parent) {
     this.constructor.findById(this.parent)
     .then((parent) => {
@@ -54,6 +55,7 @@ annotationSchema.pre('save', function preSave(next) {
       if (!this.isPublic && this.groups.length > 1) {
         next(new Error('Cannot assign private annotation to multiple groups'));
       }
+
       next();
     });
   } else {
@@ -70,8 +72,6 @@ annotationSchema.pre('save', function preSave(next) {
 });
 
 annotationSchema.post('save', (annotation, next) => {
-  // use promise.all([
-
   // Save annotation to article
   Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
 
@@ -81,13 +81,22 @@ annotationSchema.post('save', (annotation, next) => {
     Groups.addGroupArticle(annotation.article, annotation.groups);
   }
 
-  // end of promise call next()
   next();
 });
 
+annotationSchema.pre('remove', (next, req, callback) => {
+  if (req.user != this.author) {
+    next(new Error('User not authorized to remove annotation'));
+  }
+  next(callback);
+});
+
 annotationSchema.methods.isTopLevel = function isTopLevel() {
-  return this.parent === undefined; // TODO: make sure this works
+  return this.parent === undefined; // TODO: make sure this works, this could also be virtual like below
 };
+// annotationSchema.virtual('isTopLevel').get(function () {
+//   return this.parrent == undefined;
+// });
 
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);

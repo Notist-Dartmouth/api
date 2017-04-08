@@ -13,11 +13,9 @@ export const createGroup = (name, description, userId, isPersonal, isPublic) => 
   group.name = name;
   group.description = description;
   group.creator = userId;
-
   group.createDate = Date.now();
   group.editDate = Date.now();
   group.members.push(userId);
-
   group.isPublic = isPublic;
   group.isPersonal = isPersonal;
 
@@ -43,7 +41,7 @@ Input:
 Output: Returns a promise that resolves with array of results of updating groups.
 */
 export const addGroupArticle = (articleId, groupIds) => {
-  const updates = groupIds.map(groupId => {
+  const updates = groupIds.map((groupId) => {
     return Group.findByIdAndUpdate(groupId, { $addToSet: { articles: articleId } });
   });
   return Promise.all(updates);
@@ -92,7 +90,7 @@ export const getGroupMembers = (groupId) => {
   .populate('members')
   .select('members')
   .exec()
-  .then(group => {
+  .then((group) => {
     if (group === null) {
       // reject since this shouldn't be an expected situation, if we have a groupId
       throw new Error('Group not found');
@@ -114,7 +112,7 @@ export const getGroupArticles = (groupId) => {
   .populate('articles')
   .select('articles')
   .exec()
-  .then(group => {
+  .then((group) => {
     if (group === null) {
       // reject since this shouldn't be an expected situation, if we have a groupId
       throw new Error('Group not found');

@@ -10,13 +10,11 @@ export const getAnnotation = (user, annotationId) => {
         throw new Error('Annotation not found');
       }
 
-      let isAuthorized = annotation.isPublic;
       if (user !== null) {
-        isAuthorized = isAuthorized || user.isMemberOfAny(annotation.groups);
-      }
-
-      if (!isAuthorized) {
-        throw new Error('Not authorized to access this annotation');
+        const isAuthorized = annotation.isPublic || user.isMemberOfAny(annotation.groups);
+        if (!isAuthorized) {
+          throw new Error('Not authorized to access this annotation');
+        }
       }
 
       return annotation;
