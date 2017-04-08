@@ -17,6 +17,8 @@ const annotationSchema = new Schema({
   username: String,
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation' },
+  // numChildren counts annotations marked as deleted, but not removed annotatins.
+  numChildren: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
 

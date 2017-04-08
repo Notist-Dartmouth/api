@@ -37,7 +37,12 @@ export const createAnnotation = (user, body, articleId) => {
         annotation.article = parent.article;
         annotation.groups = parent.groups;
         annotation.isPublic = parent.isPublic;
-        return annotation.save();
+        return annotation.save()
+        .then(result => {
+          // On successful save, increment parent's numChildren
+          parent.numChildren++;
+          return parent.save();
+        });
       })
       .catch(err => {
         const newErr = err;
@@ -89,12 +94,44 @@ export const editAnnotation = (userId, annotationId, updateText) => {
   return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };
 
-export const deleteAnnotation = (annotationId) => {
-  return Annotation.find({ parent: annotationId, deleted: false }).then(replies => {
-    if (replies.length > 0) {
-      return Annotation.findOneAndUpdate({ _id: annotationId }, { $set: { deleted: true } }, { new: true });
+const deleteAnnotationHelper = (annotation) => {
+  if (annotation.numChildren > 0) {
+    // Mark as deleted but don't remove
+    annotation.deleted = true;
+    annotation.text = '[deleted]';
+    annotation.author = null;
+    return annotation.save();
+  } else {
+    // annotation has no children, so remove
+    const removePromise = annotation.remove();
+    if (annotation.parent === null) {
+      // base case: annotation is top-level
+      return removePromise;
     } else {
-      return Annotation.findByIdAndRemove(annotationId);
+      return removePromise
+      .then(removed => {
+        return Annotation.findById(removed.parent)
+        .then(parent => {
+          parent.numChildren--;
+          if (parent.deleted && parent.numChildren < 1) {
+            // remove parent recursively
+            return deleteAnnotationHelper(parent);
+          } else {
+            // parent will stay
+            return parent.save();
+          }
+        })
+        .then(result => {
+          return removed;
+        });
+      });
     }
+  }
+};
+
+export const deleteAnnotation = (annotationId) => {
+  return Annotation.findById(annotationId)
+  .then(annotation => {
+    return deleteAnnotationHelper(annotation);
   });
 };
