@@ -38,10 +38,13 @@ export const createAnnotation = (user, body, articleId) => {
         annotation.groups = parent.groups;
         annotation.isPublic = parent.isPublic;
         return annotation.save()
-        .then(result => {
+        .then(child => {
           // On successful save, increment parent's numChildren
           parent.numChildren++;
-          return parent.save();
+          return parent.save()
+          .then(savedParent => {
+            return child;
+          });
         });
       })
       .catch(err => {
