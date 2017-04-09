@@ -28,7 +28,7 @@ describe('Users', function () {
       util.addUser('user0'),
       util.addUserWithNGroups(2, 'user1'),
     ])
-    .then(results => {
+    .then((results) => {
       user0 = results[0];
       user1 = results[1].user;
     });
@@ -56,7 +56,8 @@ describe('Users', function () {
         chai.request(app)
           .get('/api/user')
           .end((err, res) => {
-            should.not.exist(err);
+            should.exist(err);
+            should.exist(res);
             res.should.have.status(401);
             done();
           });

@@ -88,7 +88,7 @@ exports.addArticle = function (uri = 'www.testuri.com') {
   return exports.addArticleInGroups([], uri);
 };
 
-exports.addArticleAnnotation = function (articleId, groupId = null, author, text = 'This is a test', isPublic = true) {
+exports.addArticleAnnotation = function (articleId, groupId, author, text = 'This is a test', isPublic = true) {
   let groups = [];
   if (groupId) {
     groups = [groupId];

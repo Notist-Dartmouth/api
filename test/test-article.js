@@ -33,14 +33,14 @@ describe('Articles', function () {
 
   before(function () {
     return util.addUserWithNGroups(2)
-    .then(created => {
+    .then((created) => {
       group0 = created.groups[0];
       group1 = created.groups[1];
       user = created.user;
 
       return util.addArticle(testArticleURI);
     })
-    .then(article => {
+    .then((article) => {
       testArticle = article;
     });
   });
@@ -52,10 +52,10 @@ describe('Articles', function () {
         Article.collection.drop(),
         Group.collection.drop(),
         User.collection.drop(),
-      ]).then(res => {
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -99,7 +99,7 @@ describe('Articles', function () {
 
       it('should resolve to list of article objects that match conditions', function () {
         return Articles.getArticlesFiltered({ uri: testArticleURI })
-        .then(result => {
+        .then((result) => {
           result.should.have.lengthOf(1);
           result[0].title.should.equal(`Article at ${testArticleURI}`);
           result[0].id.should.equal(testArticle.id);
@@ -138,7 +138,7 @@ describe('Articles', function () {
       before(function () {
         // add article we need for the tests
         return util.addArticleInGroups([group0._id, group1._id])
-        .then(article => {
+        .then((article) => {
           myArticle = article;
         });
       });
@@ -158,7 +158,7 @@ describe('Articles', function () {
 
       it('should resolve to array of groups article belongs to', function () {
         return Articles.getArticleGroups(myArticle._id)
-        .then(groups => {
+        .then((groups) => {
           groups.should.have.lengthOf(2);
           for (let i = 0; i < 2; i++) {
             groups[i].should.have.property('name').match(/Group/);
@@ -183,7 +183,7 @@ describe('Articles', function () {
           .post('/api/article')
           .send({ uri, title, groups: [] })
           .end((err, res) => {
-            should.not.exist(err);
+            should.exist(err);
             should.exist(res);
             res.should.have.status(401);
           });
@@ -273,10 +273,10 @@ describe('Articles', function () {
             articleQuery.should.eventually.have.property('uri', nURI),
             articleQuery.should.eventually.have.property('title'),
             articleQuery.should.eventually.have.property('annotations').that.is.empty,
-            articleQuery.then(article => {
+            articleQuery.then((article) => {
               article.groups.map(String).should.have.members([group0._id.toString()]);
               const articleId = article._id;
-              return groupQuery.then(group => {
+              return groupQuery.then((group) => {
                 group.articles.map(String).should.have.members([articleId.toString()]);
               });
             }),
