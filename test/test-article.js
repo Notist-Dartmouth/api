@@ -1,9 +1,8 @@
-import { app } from '../server/app';
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
 import passportStub from 'passport-stub';
+import { app } from '../server/app';
 
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
@@ -181,7 +180,6 @@ describe('Articles', function () {
           .post('/api/article')
           .send({ uri, title, groups: [] })
           .end((err, res) => {
-            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
           });

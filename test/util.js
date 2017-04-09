@@ -88,15 +88,17 @@ exports.addArticle = function (uri = 'www.testuri.com') {
   return exports.addArticleInGroups([], uri);
 };
 
-exports.addArticleAnnotation = function (article, author, group, isPublic = true, text, articleText) {
-  let groups;
-  if (group) { groups = [group]; } else { groups = []; }
+exports.addArticleAnnotation = function (articleId, groupId, author, text = 'This is a test', isPublic = true) {
+  let groups = [];
+  if (groupId) {
+    groups = [groupId];
+  }
   const annotation = new Annotation({
-    article,
-    author,
+    article: articleId,
     groups,
-    articleText: articleText || 'Article makes an interesting point.',
-    text: text || 'This is a test',
+    author,
+    articleText: 'Article makes an interesting point.',
+    text,
     isPublic,
   });
   return annotation.save();

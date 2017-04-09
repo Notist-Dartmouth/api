@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
+
 import * as Articles from '../controllers/article_controller';
-// import User from './user';
 import * as Groups from '../controllers/group_controller';
+import Article from './article';
 
 mongoose.Promise = global.Promise;
 
@@ -20,7 +21,9 @@ const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   username: String,
   article: { type: ObjectId, ref: 'Article' },
-  parent: { type: ObjectId, ref: 'Annotation' },
+  parent: { type: ObjectId, ref: 'Annotation', default: null },
+  // numChildren counts annotations marked as deleted, but not removed annotatins.
+  numChildren: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
@@ -40,7 +43,7 @@ annotationSchema.pre('save', function preSave(next) {
 
   const fillReply = new Promise((resolve, reject) => {
     if (this.parent) {
-      this.constructor.findById(this.parent)
+      this.constructor.findByIdAndUpdate(this.parent, { $inc: { numChildren: 1 } })
       .then((parent) => {
         this.article = parent.article;
         this.articleText = parent.articleText;
@@ -90,11 +93,22 @@ annotationSchema.pre('remove', (next, req, callback) => {
   next(callback);
 });
 
+annotationSchema.pre('remove', function preRemove(next, user) {
+  if (this.author && user._id.toString() !== this.author.toString()) {
+    next(new Error('User cannot remove annotation'));
+  }
+
+  // Remove annotation from article
+  Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
+    next(); // if no more annotations then should probably do something?
+  });
+});
+
 annotationSchema.methods.isTopLevel = function isTopLevel() {
   return this.parent === undefined; // TODO: make sure this works, this could also be virtual like below
 };
 // annotationSchema.virtual('isTopLevel').get(function () {
-//   return this.parrent == undefined;
+//   return this.parent == undefined;
 // });
 
 

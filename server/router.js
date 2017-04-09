@@ -356,4 +356,19 @@ router.post('/api/annotation/:id/edit', (req, res) => {
   }
 });
 
+router.delete('/api/annotation/:id', (req, res) => {
+  if (req.isAuthenticated()) {
+    const annotationId = req.params.id;
+    Annotations.deleteAnnotation(req.user, annotationId)
+      .then((result) => {
+        util.returnPostSuccess(res, true);
+      })
+      .catch((err) => {
+        util.returnError(res, err);
+      });
+  } else {
+    res.status(401).end();
+  }
+});
+
 export default router;
