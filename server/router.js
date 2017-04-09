@@ -20,25 +20,6 @@ const router = Router();
   DELETE -> {success}
 */
 
-// navigate to login page
-router.get('/login', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.redirect('/');
-  } else {
-    res.sendFile(path.join(__dirname, 'login.html'));
-  }
-});
-
-// navigate to home page
-router.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    console.log(req.user.name, 'is logged in.');
-    res.sendFile(path.join(__dirname, 'home.html'));
-  } else {
-    res.redirect('/login');
-  }
-});
-
 // navigate to logout page
 router.get('/logout', (req, res) => {
   req.logout();
