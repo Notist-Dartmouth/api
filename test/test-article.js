@@ -180,7 +180,6 @@ describe('Articles', function () {
           .post('/api/article')
           .send({ uri, title, groups: [] })
           .end((err, res) => {
-            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
           });

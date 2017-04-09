@@ -53,7 +53,6 @@ describe('Users', function () {
         chai.request(app)
           .get('/api/user')
           .end((err, res) => {
-            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             done();
