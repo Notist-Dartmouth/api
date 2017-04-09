@@ -106,7 +106,7 @@ const deleteAnnotationHelper = (user, annotation) => {
       parent.numChildren--;
       if (parent.deleted && parent.numChildren < 1) {
         // remove parent recursively
-        return deleteAnnotationHelper(parent);
+        return deleteAnnotationHelper(user, parent);
       } else {
         // parent will stay, but update numChildren
         return parent.save();

@@ -47,7 +47,7 @@ annotationSchema.pre('save', function preSave(next) {
 });
 
 annotationSchema.pre('remove', function preRemove(next, user) {
-  if (user._id.toString() !== this.author.toString()) {
+  if (this.author && user._id.toString() !== this.author.toString()) {
     next(new Error('User cannot remove annotation'));
   }
 

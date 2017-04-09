@@ -27,12 +27,12 @@ describe('Annotations', function () {
 
   before(function () {
     return util.addUserWithGroup()
-    .then(created => {
+    .then((created) => {
       GroupA = created.group;
       user = created.user;
       return util.addArticle('www.nytimes.com/articleA');
     })
-    .then(newArticle => {
+    .then((newArticle) => {
       ArticleA = newArticle;
     });
   });
@@ -45,10 +45,10 @@ describe('Annotations', function () {
         Group.collection.drop(),
         User.collection.drop(),
         Annotation.collection.drop(),
-      ]).then(res => {
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -100,7 +100,7 @@ describe('Annotations', function () {
       });
 
       // let database update
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
@@ -136,9 +136,9 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.equal(text);
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(Article.findOne({ uri: ArticleA.uri })
-        .then(article => {
+        .then((article) => {
           article.should.have.property('groups').with.lengthOf(1);
           article.groups[0].toString().should.equal(GroupA.id);
         }));
@@ -174,7 +174,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.equal(text);
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
@@ -190,7 +190,7 @@ describe('Annotations', function () {
         res.body[0].should.have.property('text');
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(true);
       });
     });
@@ -206,11 +206,11 @@ describe('Annotations', function () {
 
     before(function () {
       return Promise.all([
-        util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation'),
-        util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false),
-        util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a stupid annotation'),
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a public annotation'),
+        util.addArticleAnnotation(ArticleA._id, GroupA._id, user, 'This is a private annotation', false),
+        util.addArticleAnnotation(ArticleA._id, GroupA._id, user, 'This is a stupid annotation'),
       ])
-      .then(newAnnotations => {
+      .then((newAnnotations) => {
         PublicAnnotation = newAnnotations[0];
         PrivateAnnotation = newAnnotations[1];
         StupidAnnotation = newAnnotations[2];
@@ -236,8 +236,8 @@ describe('Annotations', function () {
         res.body.SUCCESS.text.should.eql(publicText);
       });
 
-      return util.checkDatabase(resolve => {
-        resolve(Annotation.findOne({ text: publicText }).then(annotation => {
+      return util.checkDatabase((resolve) => {
+        resolve(Annotation.findOne({ text: publicText }).then((annotation) => {
           annotation.parent.toString().should.equal(PublicAnnotation.id);
           annotation.isPublic.should.be.true;
           annotation.article.toString().should.equal(ArticleA.id);
@@ -304,7 +304,7 @@ describe('Annotations', function () {
         res.body.should.have.property('SUCCESS').that.is.true;
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(Annotation.findById(StupidAnnotation.id).should.eventually.be.null);
       });
     });
@@ -318,8 +318,8 @@ describe('Annotations', function () {
         res.body.should.have.property('SUCCESS').that.is.true;
       });
 
-      return util.checkDatabase(resolve => {
-        resolve(Annotation.findById(PublicAnnotation.id).then(annotation => {
+      return util.checkDatabase((resolve) => {
+        resolve(Annotation.findById(PublicAnnotation.id).then((annotation) => {
           annotation.text.should.equal('[deleted]');
           should.not.exist(annotation.author);
           annotation.numChildren.should.equal(1);
@@ -337,7 +337,7 @@ describe('Annotations', function () {
         res.body.should.have.property('SUCCESS').that.is.true;
       });
 
-      return util.checkDatabase(resolve => {
+      return util.checkDatabase((resolve) => {
         resolve(Promise.all([
           Annotation.findById(PublicReply.id).should.eventually.be.null,
           Annotation.findById(PublicAnnotation.id).should.eventually.be.null,
