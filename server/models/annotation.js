@@ -1,4 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
+
+import Article from './article';
 mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
@@ -44,16 +46,15 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
-annotationSchema.pre('remove', (next, user, callback) => {
-  if (user != this.author) {
+annotationSchema.pre('remove', function (next, user, callback) {
+  if (user._id.toString() != this.author.toString()) {
     next(new Error('User cannot remove annotation'));
   }
 
   // Remove annotation from article
-  Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } });
-  // if no more annotations then should probably do something?
-
-  next(callback);
+  Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
+    next(callback); // if no more annotations then should probably do something?
+  });
 });
 
 annotationSchema.methods.isTopLevel = function isTopLevel() {

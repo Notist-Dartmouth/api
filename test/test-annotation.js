@@ -41,10 +41,10 @@ describe('Annotations', function () {
     passportStub.logout();
     setTimeout(() => {
       Promise.all([
-        // Article.collection.drop(),
-        // Group.collection.drop(),
-        // User.collection.drop(),
-        // Annotation.collection.drop(),
+        Article.collection.drop(),
+        Group.collection.drop(),
+        User.collection.drop(),
+        Annotation.collection.drop(),
       ]).then((res) => {
         done();
       })
@@ -203,14 +203,14 @@ describe('Annotations', function () {
       StupidAnnotation;
 
     before(function () {
-      util.addArticleAnnotation(ArticleA._id, null, 'This is a public annotation').then((newAnnotation) => {
+      util.addArticleAnnotation(ArticleA._id, null, user, 'This is a public annotation').then((newAnnotation) => {
         PublicAnnotation = newAnnotation;
       });
-      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a private annotation', false)
+      util.addArticleAnnotation(ArticleA._id, GroupA._id, user, 'This is a private annotation', false)
       .then((newAnnotation) => {
         PrivateAnnotation = newAnnotation;
       });
-      util.addArticleAnnotation(ArticleA._id, GroupA._id, 'This is a stupid annotation').then((newAnnotation) => {
+      util.addArticleAnnotation(ArticleA._id, GroupA._id, user, 'This is a stupid annotation').then((newAnnotation) => {
         StupidAnnotation = newAnnotation;
       });
     });

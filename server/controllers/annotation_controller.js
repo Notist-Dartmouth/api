@@ -95,15 +95,14 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // Removes an annotation from the database, updates the parent's numChildren
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
-  if (annotation.parent === null) {
-    // base case: annotation is top-level
-    return annotation.remove(user, () => { console.log('removed'); });
+  if (annotation.parent === null) { // base case: annotation is top-level
+    return annotation.remove(user, (result) => { console.log(result); });
   } else {
-    return annotation.remove((user, () => { console.log('removed'); })
-    .then(removed => {
+    return annotation.remove(user, () => {})
+    .then((removed) => {
       return Annotation.findById(removed.parent);
     })
-    .then(parent => {
+    .then((parent) => {
       parent.numChildren--;
       if (parent.deleted && parent.numChildren < 1) {
         // remove parent recursively
@@ -113,7 +112,6 @@ const deleteAnnotationHelper = (user, annotation) => {
         return parent.save();
       }
     });
-
   }
 };
 
