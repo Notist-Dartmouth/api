@@ -1,10 +1,7 @@
-import { app } from '../server/app';
-process.env.NODE_ENV = 'test';
-app.settings.env = 'test';
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import passportStub from 'passport-stub';
+import { app } from '../server/app';
 
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
@@ -32,19 +29,19 @@ describe('Groups', function () {
 
   before(function () {
     return util.addUserWithGroup('user1')
-    .then(created => {
+    .then((created) => {
       newGroup = created.group;
       newUser = created.user;
       return util.addUser('user2');
     })
-    .then(user => {
+    .then((user) => {
       user2 = user;
       return Promise.all([
         util.addArticleInGroup(newGroup._id, 'www.article1.com'),
         util.addArticleInGroup(newGroup._id, 'www.article2.com'),
       ]);
     })
-    .then(articles => {
+    .then((articles) => {
       article1 = articles[0];
       article2 = articles[1];
       const update = { $push: {
@@ -61,10 +58,10 @@ describe('Groups', function () {
         Article.collection.drop(),
         Group.collection.drop(),
         User.collection.drop(),
-      ]).then(res => {
+      ]).then((res) => {
         done();
       })
-      .catch(err => {
+      .catch((err) => {
         done(err);
       });
     }, 50);
@@ -99,7 +96,7 @@ describe('Groups', function () {
 
       it('should resolve to list of article objects that match conditions', function () {
         return Groups.getGroupsFiltered({ members: newUser._id })
-        .then(result => {
+        .then((result) => {
           result.should.have.lengthOf(1);
           result[0].name.should.equal('Group 0');
           result[0].id.should.equal(newGroup.id);
@@ -119,7 +116,7 @@ describe('Groups', function () {
 
       it('should resolve to array of members', function () {
         return Groups.getGroupMembers(newGroup.id)
-        .then(members => {
+        .then((members) => {
           members.should.have.lengthOf(2);
           for (let i = 0; i < 2; i++) {
             members[i].should.have.property('name').match(/Test User/);
@@ -143,7 +140,7 @@ describe('Groups', function () {
 
       it('should resolve to array of articles in group', function () {
         return Groups.getGroupArticles(newGroup.id)
-        .then(articles => {
+        .then((articles) => {
           articles.should.have.lengthOf(2);
           for (let i = 0; i < 2; i++) {
             articles[i].should.have.property('uri').match(/article.\.com/);
@@ -186,7 +183,7 @@ describe('Groups', function () {
         });
     });
 
-    it('should get a specific group on /api/group/:id GET', done => {
+    it('should get a specific group on /api/group/:id GET', (done) => {
       passportStub.login(newUser);
       chai.request(app)
         .get(`/api/group/${newGroup._id}`)
@@ -210,7 +207,7 @@ describe('Groups', function () {
         });
     });
 
-    it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', done => {
+    it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', (done) => {
       passportStub.login(newUser);
       const addedUserId = '345634563456345634563456';
       chai.request(app)
