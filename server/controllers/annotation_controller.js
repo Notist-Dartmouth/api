@@ -96,9 +96,9 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
   if (annotation.parent === null) { // base case: annotation is top-level
-    return annotation.remove(user, (result) => { console.log(result); });
+    return annotation.remove(user);
   } else {
-    return annotation.remove(user, () => {})
+    return annotation.remove(user)
     .then((removed) => {
       return Annotation.findById(removed.parent);
     })

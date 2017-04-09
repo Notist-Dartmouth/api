@@ -46,14 +46,14 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
-annotationSchema.pre('remove', function (next, user, callback) {
+annotationSchema.pre('remove', function (next, user) {
   if (user._id.toString() != this.author.toString()) {
     next(new Error('User cannot remove annotation'));
   }
 
   // Remove annotation from article
   Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
-    next(callback); // if no more annotations then should probably do something?
+    next(); // if no more annotations then should probably do something?
   });
 });
 
