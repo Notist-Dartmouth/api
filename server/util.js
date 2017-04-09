@@ -1,3 +1,4 @@
+import serializeError from 'serialize-error';
 
 exports.returnPostSuccess = function (res, result) {
   res.json({ SUCCESS: result });

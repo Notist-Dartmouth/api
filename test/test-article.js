@@ -227,7 +227,6 @@ describe('Articles', function () {
           .post('/api/article')
           .send({ uri, groups: [groupId] })
           .end((err, res) => {
-            should.not.exist(err);
             should.exist(res);
             res.should.have.status(200);
             res.should.be.json;

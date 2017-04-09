@@ -318,7 +318,6 @@ describe('Annotations', function () {
       return util.checkDatabase((resolve) => {
         resolve(Annotation.findById(PublicAnnotation.id).then((annotation) => {
           annotation.text.should.equal('[deleted]');
-          should.not.exist(annotation.author);
           annotation.numChildren.should.equal(1);
           annotation.deleted.should.be.true;
         }));

@@ -86,21 +86,14 @@ annotationSchema.post('save', (annotation, next) => {
   next();
 });
 
-annotationSchema.pre('remove', (next, req, callback) => {
-  if (req.user != this.author) {
-    next(new Error('User not authorized to remove annotation'));
-  }
-  next(callback);
-});
-
-annotationSchema.pre('remove', function preRemove(next, user) {
-  if (this.author && user._id.toString() !== this.author.toString()) {
+annotationSchema.pre('remove', function preRemove(next, user, callback) {
+  if (!this.deleted && user._id.toString() !== this.author.toString()) {
     next(new Error('User cannot remove annotation'));
   }
 
   // Remove annotation from article
   Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
-    next(); // if no more annotations then should probably do something?
+    next(callback); // if no more annotations then should probably do something?
   });
 });
 

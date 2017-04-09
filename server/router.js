@@ -3,7 +3,6 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
-import serializeError from 'serialize-error';
 
 import util from './util';
 import path from 'path';
@@ -72,7 +71,7 @@ router.post('/api/article', (req, res) => {
     const user = req.user;
 
     if (!user.isMemberOfAll(req.body.groups)) {
-      throw new Error('User not authorized to add article to one or more groups');
+      util.returnError(res, new Error('User not authorized to add article to one or more groups'));
     }
 
     Articles.createArticle(req.body.uri, req.body.groups)

@@ -65,27 +65,29 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
   if (annotation.parent === null) { // base case: annotation is top-level
-    return annotation.remove(user);
+    return annotation.remove(user, (result) => { console.log(result); });
   } else {
     return annotation.remove(user)
     .then((removed) => {
-      return Annotation.findById(removed.parent);
+      return Annotation.findByIdAndUpdate(removed.parent, { $inc: { numChildren: -1 } }, { new: true });
     })
     .then((parent) => {
-      parent.numChildren--;
       if (parent.deleted && parent.numChildren < 1) {
         // remove parent recursively
         return deleteAnnotationHelper(user, parent);
       } else {
-        // parent will stay, but update numChildren
-        return parent.save();
+        return parent;
       }
     });
   }
 };
 
 export const deleteAnnotation = (user, annotationId) => {
-  return Annotation.findById(annotationId)
+  const deleteUpdate = {
+    deleted: true,
+    text: '[deleted]',
+  };
+  return Annotation.findByIdAndUpdate(annotationId, deleteUpdate)
   .then((annotation) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
@@ -93,12 +95,6 @@ export const deleteAnnotation = (user, annotationId) => {
     if (annotation.numChildren < 1) {
       // annotation has no children, so remove
       return deleteAnnotationHelper(user, annotation);
-    } else {
-      // Mark as deleted but don't remove
-      annotation.deleted = true;
-      annotation.text = '[deleted]';
-      annotation.author = null;
-      return annotation.save();
     }
   });
 };
