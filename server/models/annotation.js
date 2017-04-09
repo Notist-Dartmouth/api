@@ -38,37 +38,36 @@ const annotationSchema = new Schema({
 annotationSchema.pre('save', function preSave(next) {
   // if annotation is reply, update fields accordingly
 
-  if (this.parent) {
-    this.constructor.findById(this.parent)
-    .then((parent) => {
-      this.article = parent.article;
-      this.articleText = parent.articleText;
-      this.ranges = parent.ranges;
-      this.isPublic = parent.isPublic;
-      this.groups = parent.groups;
+  const fillReply = new Promise((resolve, reject) => {
+    if (this.parent) {
+      this.constructor.findById(this.parent)
+      .then((parent) => {
+        this.article = parent.article;
+        this.articleText = parent.articleText;
+        this.ranges = parent.ranges;
+        this.isPublic = parent.isPublic;
+        this.groups = parent.groups;
+        resolve(true);
+      });
+    } else {
+      resolve(true);
+    }
+  });
 
-      // TODO: hella repetitive but idk how else to do this ..
-      if (!this.author.isMemberOfAll(this.groups)) {
-        next(new Error('User not authorized to add annotation to one or more groups'));
-      }
-
-      if (!this.isPublic && this.groups.length > 1) {
-        next(new Error('Cannot assign private annotation to multiple groups'));
-      }
-
-      next();
-    });
-  } else {
-    // check if user can indeed save to these groups
+  fillReply.then(() => {
     if (!this.author.isMemberOfAll(this.groups)) {
-      next(new Error('User not authorized to add annotation to one or more groups'));
+      throw new Error('User not authorized to add annotation to one or more groups');
     }
 
     if (!this.isPublic && this.groups.length > 1) {
-      next(new Error('Cannot assign private annotation to multiple groups'));
+      throw new Error('Cannot assign private annotation to multiple groups');
     }
+
     next();
-  }
+  })
+  .catch((err) => {
+    next(err);
+  });
 });
 
 annotationSchema.post('save', (annotation, next) => {
