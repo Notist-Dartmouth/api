@@ -1,11 +1,8 @@
-import { app } from '../server/app';
-process.env.NODE_ENV = 'test';
-app.settings.env = 'test';
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiAsPromised from 'chai-as-promised';
 import passportStub from 'passport-stub';
+import { app } from '../server/app';
 
 import Group from '../server/models/group';
 import User from '../server/models/user';
@@ -56,7 +53,7 @@ describe('Users', function () {
         chai.request(app)
           .get('/api/user')
           .end((err, res) => {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             done();

@@ -1,10 +1,7 @@
-import { app } from '../server/app';
-process.env.NODE_ENV = 'test';
-app.settings.env = 'test';
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import passportStub from 'passport-stub';
+import { app } from '../server/app';
 
 import Article from '../server/models/article';
 // import Annotation from '../server/models/annotation';
