@@ -101,9 +101,7 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
   });
 });
 
-annotationSchema.methods.isTopLevel = function isTopLevel() {
-  return this.parent === undefined; // TODO: make sure this works, this could also be virtual like below
-};
+// TODO: lets make isTopLevel virtual
 // annotationSchema.virtual('isTopLevel').get(function () {
 //   return this.parent == undefined;
 // });

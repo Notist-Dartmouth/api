@@ -100,8 +100,6 @@ exports.addArticleAnnotation = function (articleId, groupId, author, text = 'Thi
     articleText: 'Article makes an interesting point.',
     text,
     isPublic,
-    isTopLevel,
-    parent,
   });
   return annotation.save();
 };
