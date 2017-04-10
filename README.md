@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Notist/notist.svg?branch=master)](https://travis-ci.org/Notist/notist)
+[![Build Status](https://travis-ci.org/Notist/api.svg?branch=master)](https://travis-ci.org/Notist/api)
 
 http://notist.herokuapp.com
 

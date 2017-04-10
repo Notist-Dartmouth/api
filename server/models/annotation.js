@@ -1,4 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
+
+import Article from './article';
 mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
@@ -20,6 +22,8 @@ const annotationSchema = new Schema({
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
   isTopLevel: { type: Boolean, default: false },
 
+  // TODO: get rid of numChildren
+  numChildren: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
 
@@ -45,9 +49,20 @@ annotationSchema.pre('save', function preSave(next) {
   }
 });
 
-// annotationSchema.methods.isTopLevel = function isTopLevel() {
-//   return this.parent === undefined; // TODO: make sure this works
-// };
+annotationSchema.pre('remove', function preRemove(next, user) {
+  if (this.author && user._id.toString() !== this.author.toString()) {
+    next(new Error('User cannot remove annotation'));
+  }
+
+  // Remove annotation from article
+  Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
+    next(); // if no more annotations then should probably do something?
+  });
+});
+
+annotationSchema.methods.isTopLevel = function isTopLevel() {
+  return this.parent === undefined; // TODO: make sure this works
+};
 
 // TODO: we could maybe use virtual columns to deal with object id stuff?
 // annotationSchema.virtual('id').get(function () {
