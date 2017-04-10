@@ -1,6 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
 
+import * as Articles from '../controllers/article_controller';
+import * as Groups from '../controllers/group_controller';
 import Article from './article';
+
 mongoose.Promise = global.Promise;
 
 const ObjectId = Schema.Types.ObjectId;
@@ -26,13 +29,11 @@ const annotationSchema = new Schema({
   numChildren: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
-
   text: { type: String, trim: true },
   articleText: String,
   ranges: [rangeSchema],
   // TODO: implement system for locating article text robustly
   points: { type: Number, default: 0 },
-
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
   edited: { type: Boolean, default: false },
@@ -41,42 +42,72 @@ const annotationSchema = new Schema({
 
 // Enforce that private annotations have exactly one group.
 annotationSchema.pre('save', function preSave(next) {
-  if (!this.isPublic && this.groups.length > 1) {
-    const err = new Error('Cannot assign private annotation to multiple groups');
-    next(err);
-  } else {
+  // if annotation is reply, update fields accordingly
+
+  const fillReply = new Promise((resolve, reject) => {
+    if (this.parent) {
+      this.constructor.findByIdAndUpdate(this.parent, { $inc: { numChildren: 1 }, $push: { childAnnotations: this._id } }) // @angela: here is where we add childAnnotations
+      .then((parent) => {
+        this.article = parent.article;
+        this.articleText = parent.articleText;
+        this.ranges = parent.ranges;
+        this.isPublic = parent.isPublic;
+        this.groups = parent.groups;
+        this.isTopLevel = false; // @angela: maybe we don't need to do this , see virtual?
+        resolve(true);
+      });
+    } else {
+      resolve(true);
+    }
+  });
+
+  fillReply.then(() => {
+    if (!this.author.isMemberOfAll(this.groups)) {
+      throw new Error('User not authorized to add annotation to one or more groups');
+    }
+
+    if (!this.isPublic && this.groups.length > 1) {
+      throw new Error('Cannot assign private annotation to multiple groups');
+    }
+
     next();
-  }
+  })
+  .catch((err) => {
+    next(err);
+  });
 });
 
-annotationSchema.pre('remove', function preRemove(next, user) {
-  if (this.author && user._id.toString() !== this.author.toString()) {
+annotationSchema.post('save', (annotation, next) => {
+  // Save annotation to article
+  Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
+
+  // Save article to group
+  if (annotation.parent == null) {
+    Articles.addArticleGroups(annotation.article, annotation.groups).exec();
+    Groups.addGroupArticle(annotation.article, annotation.groups);
+  }
+
+  next();
+});
+
+annotationSchema.pre('remove', function preRemove(next, user, callback) {
+  if (!this.deleted && user._id.toString() !== this.author.toString()) {
     next(new Error('User cannot remove annotation'));
   }
 
   // Remove annotation from article
   Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
-    next(); // if no more annotations then should probably do something?
+    next(callback); // if no more annotations then should probably do something?
   });
 });
 
 annotationSchema.methods.isTopLevel = function isTopLevel() {
-  return this.parent === undefined; // TODO: make sure this works
+  return this.parent === undefined; // TODO: make sure this works, this could also be virtual like below
 };
+// annotationSchema.virtual('isTopLevel').get(function () {
+//   return this.parent == undefined;
+// });
 
-// TODO: we could maybe use virtual columns to deal with object id stuff?
-// annotationSchema.virtual('id').get(function () {
-//   return this._id.toString();
-// });
-//
-// annotationSchema.virtual('articleId')
-//   .get(function () { return this.article_id.toString(); })
-//   .set(function (articleId) { this.article_id = new ObjectId(articleId); });
-//
-//
-// annotationSchema.virtual('authorId').get(function () {
-//   return this.author_id.toString();
-// });
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 

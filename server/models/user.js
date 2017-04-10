@@ -2,8 +2,9 @@ import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
 import mongodb from 'mongodb';
 
+import Annotation from './annotation';
+
 const userSchema = new Schema({
-  // TODO: articles field
   googleId: String,
   facebookId: String,
   name: { type: String, required: true },
@@ -14,12 +15,25 @@ const userSchema = new Schema({
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
 
+userSchema.virtual('articles').get(() => {
+  // get annotations
+  return Annotation.distinct(article, { author: this }).then((articles) => {
+    return articles;
+  });
+});
+
+userSchema.virtual('annotations').get(function () {
+  return Annotation.find({ author: this }).then((annotations) => {
+    return annotations;
+  });
+});
+
 userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
   let groupId = groupIdIn;
   if (typeof groupId !== 'object') {
     groupId = new mongodb.ObjectId(groupIdIn);
   }
-  return this.groups.some(someGroup => {
+  return this.groups.some((someGroup) => {
     return someGroup.equals(groupId);
   });
 };
