@@ -72,6 +72,7 @@ router.post('/api/article', (req, res) => {
 
     if (!user.isMemberOfAll(req.body.groups)) {
       util.returnError(res, new Error('User not authorized to add article to one or more groups'));
+      return;
     }
 
     Articles.createArticle(req.body.uri, req.body.groups)

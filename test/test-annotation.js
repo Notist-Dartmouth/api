@@ -282,7 +282,6 @@ describe('Annotations', function () {
       chai.request(app)
       .get(`/api/annotation/${PrivateAnnotation._id}/replies`)
       .end(function (err, res) {
-        console.log(user.annotations);
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.should.have.length(1);

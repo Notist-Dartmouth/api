@@ -1,5 +1,4 @@
 import Annotation from '../models/annotation';
-import * as Articles from './article_controller';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -65,7 +64,7 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
   if (annotation.parent === null) { // base case: annotation is top-level
-    return annotation.remove(user, (result) => { console.log(result); });
+    return annotation.remove(user, (result) => {});
   } else {
     return annotation.remove(user)
     .then((removed) => {
@@ -87,7 +86,7 @@ export const deleteAnnotation = (user, annotationId) => {
     deleted: true,
     text: '[deleted]',
   };
-  return Annotation.findByIdAndUpdate(annotationId, deleteUpdate)
+  return Annotation.findByIdAndUpdate(annotationId, deleteUpdate, { new: true })
   .then((annotation) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
@@ -95,6 +94,8 @@ export const deleteAnnotation = (user, annotationId) => {
     if (annotation.numChildren < 1) {
       // annotation has no children, so remove
       return deleteAnnotationHelper(user, annotation);
+    } else {
+      return annotation;
     }
   });
 };
