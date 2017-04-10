@@ -16,7 +16,7 @@ module.exports.app = app;
 // load environment variables
 require('dotenv').load();
 
-mongoose.connect(config.mongoURI[app.settings.env], (err, res) => {
+mongoose.connect(config.mongoURI[process.env.NODE_ENV], (err, res) => {
   if (err) {
     console.log(`Error connecting to the database: ${err}`);
   } else {

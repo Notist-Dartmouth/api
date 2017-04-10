@@ -1,5 +1,4 @@
 import Annotation from '../models/annotation';
-import * as Articles from './article_controller';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -22,54 +21,23 @@ export const getAnnotation = (user, annotationId) => {
     });
 };
 
-// PRECONDITION: user is not null.
-export const createAnnotation = (user, body, articleId) => {
+export const createAnnotation = (user, body, article) => {
   const annotation = new Annotation();
-  annotation.author = user._id;
-  annotation.username = user.username;
+  annotation.author = user;
+  annotation.username = user.username; // I dont think we should do this -- wht if user chnges usernme??
   annotation.text = body.text;
+
   if (body.parent) {
-    // ensure user is allowed to *read* the parent annotation
-    return getAnnotation(user, body.parent)
-      .then((parent) => { // inherit properties from parent
-        annotation.parent = parent._id;
-        annotation.articleText = parent.articleText;
-        annotation.article = parent.article;
-        annotation.groups = parent.groups;
-        annotation.isPublic = parent.isPublic;
-        return annotation.save()
-        .then((child) => {
-          // On successful save, increment parent's numChildren
-          parent.numChildren++;
-          return parent.save()
-          .then((savedParent) => {
-            return child;
-          });
-        });
-      });
+    annotation.parent = body.parent;
   } else {
+    annotation.parent = null;
+    annotation.article = article;
     annotation.articleText = body.articleText;
     annotation.ranges = body.ranges;
-    annotation.parent = null;
-    annotation.article = articleId;
     annotation.isPublic = body.isPublic;
     annotation.groups = body.groups || [];
-    if (!annotation.isPublic && annotation.groups.length > 1) {
-      const err = new Error('Cannot assign private annotation to multiple groups');
-      return Promise.reject(err);
-    }
-
-    // check that user is allowed to post to the groups
-    if (!user.isMemberOfAll(annotation.groups)) {
-      const err = new Error('Not authorized to post to these groups');
-      return Promise.reject(err);
-    }
-    // TODO: this doesn't seem to be working ?
-    return Articles.addArticleGroups(annotation.article, annotation.groups)
-    .then((result) => {
-      return annotation.save();
-    });
   }
+  return annotation.save();
 };
 
 // Get all replies to parentId (verifying that user has access to this comment)
@@ -96,27 +64,29 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
   if (annotation.parent === null) { // base case: annotation is top-level
-    return annotation.remove(user);
+    return annotation.remove(user, (result) => {});
   } else {
     return annotation.remove(user)
     .then((removed) => {
-      return Annotation.findById(removed.parent);
+      return Annotation.findByIdAndUpdate(removed.parent, { $inc: { numChildren: -1 } }, { new: true });
     })
     .then((parent) => {
-      parent.numChildren--;
       if (parent.deleted && parent.numChildren < 1) {
         // remove parent recursively
         return deleteAnnotationHelper(user, parent);
       } else {
-        // parent will stay, but update numChildren
-        return parent.save();
+        return parent;
       }
     });
   }
 };
 
 export const deleteAnnotation = (user, annotationId) => {
-  return Annotation.findById(annotationId)
+  const deleteUpdate = {
+    deleted: true,
+    text: '[deleted]',
+  };
+  return Annotation.findByIdAndUpdate(annotationId, deleteUpdate, { new: true })
   .then((annotation) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
@@ -125,11 +95,7 @@ export const deleteAnnotation = (user, annotationId) => {
       // annotation has no children, so remove
       return deleteAnnotationHelper(user, annotation);
     } else {
-      // Mark as deleted but don't remove
-      annotation.deleted = true;
-      annotation.text = '[deleted]';
-      annotation.author = null;
-      return annotation.save();
+      return annotation;
     }
   });
 };

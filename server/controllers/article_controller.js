@@ -9,9 +9,9 @@ export const createArticle = (uri, groups) => {
   article.title = `Article at ${uri}`;
   article.groups = groups;
   return article.save()
-  .then(result => {
+  .then((result) => {
     return Groups.addGroupArticle(result._id, groups)
-    .then(res => {
+    .then((res) => {
       return result;
     });
   });
@@ -63,20 +63,19 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   }
 
   return getArticle(uri)
-  .populate({
-    path: 'annotations',
-    match: conditions,
-  })
-  .select('annotations')
-  .exec()
-  .then(article => {
-    if (article === null) {
-      // article not in db, so there are no annotations
-      return [];
-    } else {
-      return article.annotations;
-    }
-  });
+          .populate({
+            path: 'annotations',
+            match: conditions,
+          })
+          .select('annotations')
+          .exec()
+          .then((article) => {
+            if (article === null) { // article not in db, so there are no annotations
+              return [];
+            } else {
+              return article.annotations;
+            }
+          });
 };
 
 // TODO: Get one level of children down from this instead
@@ -110,7 +109,7 @@ export const getArticleGroups = (articleId) => {
   .populate('groups')
   .select('groups')
   .exec()
-  .then(article => {
+  .then((article) => {
     if (article === null) {
       // reject since this shouldn't be an expected situation, if we have an articleId
       throw new Error('Article not found');
