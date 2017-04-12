@@ -6,7 +6,7 @@
   "main": "server/app.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --require babel-core/register",
-    "dev": "nodemon server/app.js --exec babel-node",
+    "dev": "NODE_ENV=development nodemon server/app.js --exec babel-node",
     "start": "babel-node server/app.js",
     "build": "babel app -d dist",
     "prod": "npm run build; node dist/server.js"
