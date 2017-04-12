@@ -18,13 +18,9 @@ const rangeSchema = new Schema({
 
 const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
-  username: String,
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation' },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
-
-  // TODO: get rid of numChildren
-  numChildren: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
@@ -44,14 +40,13 @@ annotationSchema.pre('save', function preSave(next) {
 
   const fillReply = new Promise((resolve, reject) => {
     if (this.parent) {
-      this.constructor.findByIdAndUpdate(this.parent, { $inc: { numChildren: 1 }, $push: { childAnnotations: this._id } }) // @angela: here is where we add childAnnotations
+      this.constructor.findByIdAndUpdate(this.parent, { $push: { childAnnotations: this._id } })
       .then((parent) => {
         this.article = parent.article;
         this.articleText = parent.articleText;
         this.ranges = parent.ranges;
         this.isPublic = parent.isPublic;
         this.groups = parent.groups;
-        // this.isTopLevel = false; // @angela: maybe we don't need to do this , see virtual?
         resolve(true);
       });
     } else {
@@ -101,6 +96,10 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
 
 annotationSchema.virtual('isTopLevel').get(function () {
   return this.parent == undefined;
+});
+
+annotationSchema.virtual('numChildren').get(function () {
+  return this.childAnnotations.length;
 });
 
 

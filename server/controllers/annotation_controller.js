@@ -25,7 +25,6 @@ export const getAnnotation = (user, annotationId) => {
 export const createAnnotation = (user, body, article) => {
   const annotation = new Annotation();
   annotation.author = user;
-  annotation.username = user.username; // I dont think we should do this -- wht if user chnges usernme??
   annotation.text = body.text;
   annotation.article = article;
 
@@ -69,7 +68,7 @@ const deleteAnnotationHelper = (user, annotation) => {
   } else {
     return annotation.remove(user)
     .then((removed) => {
-      return Annotation.findByIdAndUpdate(removed.parent, { $inc: { numChildren: -1 } }, { new: true });
+      return Annotation.findByIdAndUpdate(removed.parent, { $pull: { childAnnotations: removed._id } }, { new: true });
     })
     .then((parent) => {
       if (parent.deleted && parent.numChildren < 1) {
