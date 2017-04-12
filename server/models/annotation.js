@@ -20,10 +20,8 @@ const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   username: String,
   article: { type: ObjectId, ref: 'Article' },
-
   parent: { type: ObjectId, ref: 'Annotation' },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
-  isTopLevel: { type: Boolean, default: false },
 
   // TODO: get rid of numChildren
   numChildren: { type: Number, default: 0 },
@@ -53,7 +51,7 @@ annotationSchema.pre('save', function preSave(next) {
         this.ranges = parent.ranges;
         this.isPublic = parent.isPublic;
         this.groups = parent.groups;
-        this.isTopLevel = false; // @angela: maybe we don't need to do this , see virtual?
+        // this.isTopLevel = false; // @angela: maybe we don't need to do this , see virtual?
         resolve(true);
       });
     } else {
@@ -101,10 +99,9 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
   });
 });
 
-// TODO: lets make isTopLevel virtual
-// annotationSchema.virtual('isTopLevel').get(function () {
-//   return this.parent == undefined;
-// });
+annotationSchema.virtual('isTopLevel').get(function () {
+  return this.parent == undefined;
+});
 
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
