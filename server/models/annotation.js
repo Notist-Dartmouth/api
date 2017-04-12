@@ -16,14 +16,11 @@ const rangeSchema = new Schema({
   endOffset: Number,
 }, { _id: false });
 
-// TODO: change names of fields to not have "Id" in them
 const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
-  username: String,
   article: { type: ObjectId, ref: 'Article' },
-  parent: { type: ObjectId, ref: 'Annotation', default: null },
-  // numChildren counts annotations marked as deleted, but not removed annotatins.
-  numChildren: { type: Number, default: 0 },
+  parent: { type: ObjectId, ref: 'Annotation' },
+  childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
@@ -43,7 +40,7 @@ annotationSchema.pre('save', function preSave(next) {
 
   const fillReply = new Promise((resolve, reject) => {
     if (this.parent) {
-      this.constructor.findByIdAndUpdate(this.parent, { $inc: { numChildren: 1 } })
+      this.constructor.findByIdAndUpdate(this.parent, { $push: { childAnnotations: this._id } })
       .then((parent) => {
         this.article = parent.article;
         this.articleText = parent.articleText;
@@ -97,12 +94,13 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
   });
 });
 
-annotationSchema.methods.isTopLevel = function isTopLevel() {
-  return this.parent === undefined; // TODO: make sure this works, this could also be virtual like below
-};
-// annotationSchema.virtual('isTopLevel').get(function () {
-//   return this.parent == undefined;
-// });
+annotationSchema.virtual('isTopLevel').get(function () {
+  return this.parent == undefined;
+});
+
+annotationSchema.virtual('numChildren').get(function () {
+  return this.childAnnotations.length;
+});
 
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);

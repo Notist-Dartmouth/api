@@ -46,19 +46,6 @@ router.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-
-// TODO: Rewrite this endpoint; getAllArticles is no longer a function
-// router.get('/api/article', (req, res) => {
-//   Articles.getAllArticles()
-//   .then(result => {
-//     res.setHeader('Content-Type', 'application/json');
-//     res.json({ SUCCESS: result });
-//   })
-//   .catch(err => {
-//     res.json({ ERROR: serializeError(err) });
-//   });
-// });
-
 /*
 Create a new article.
 Input:
@@ -276,7 +263,7 @@ router.get('/api/article/annotations', (req, res) => {
     user = req.user;
   }
   const articleURI = req.query.uri;
-  Articles.getArticleAnnotations(user, articleURI)
+  Articles.getArticleAnnotations(user, articleURI, true)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })

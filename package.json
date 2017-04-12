@@ -6,7 +6,7 @@
   "main": "server/app.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --require babel-core/register",
-    "dev": "nodemon server/app.js --exec babel-node",
+    "dev": "NODE_ENV=development nodemon server/app.js --exec babel-node",
     "start": "babel-node server/app.js",
     "build": "babel app -d dist",
     "prod": "npm run build; node dist/server.js"
@@ -29,6 +29,7 @@
     "mocha": "^3.2.0",
     "mongodb": "^2.2.24",
     "mongoose": "^4.7.8",
+    "mongoose-deep-populate": "^3.0.0",
     "normalize-url": "^1.9.0",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
@@ -38,7 +39,7 @@
     "serialize-error": "^2.1.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.23.0",
+    "babel-cli": "^6.24.0",
     "babel-core": "^6.22.1",
     "babel-eslint": "^6.1.2",
     "babel-register": "^6.22.0",
@@ -50,6 +51,8 @@
     "eslint-plugin-import": "^1.12.0",
     "eslint-plugin-jsx-a11y": "^1.5.5",
     "eslint-plugin-react": "^5.2.2",
+    "mongoose-deep-populate": "^3.0.0",
+    "mongoose-tree2": "^0.2.2",
     "nodemon": "^1.10.0"
   },
   "repository": {

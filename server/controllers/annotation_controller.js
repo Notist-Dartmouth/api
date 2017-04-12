@@ -21,17 +21,17 @@ export const getAnnotation = (user, annotationId) => {
     });
 };
 
+
 export const createAnnotation = (user, body, article) => {
   const annotation = new Annotation();
   annotation.author = user;
-  annotation.username = user.username; // I dont think we should do this -- wht if user chnges usernme??
   annotation.text = body.text;
+  annotation.article = article;
 
   if (body.parent) {
     annotation.parent = body.parent;
   } else {
     annotation.parent = null;
-    annotation.article = article;
     annotation.articleText = body.articleText;
     annotation.ranges = body.ranges;
     annotation.isPublic = body.isPublic;
@@ -63,12 +63,12 @@ export const editAnnotation = (userId, annotationId, updateText) => {
 // Removes an annotation from the database, updates the parent's numChildren
 // and recurses if the parent needs to be removed as well.
 const deleteAnnotationHelper = (user, annotation) => {
-  if (annotation.parent === null) { // base case: annotation is top-level
+  if (annotation.parent == null) { // base case: annotation is top-level
     return annotation.remove(user, (result) => {});
   } else {
     return annotation.remove(user)
     .then((removed) => {
-      return Annotation.findByIdAndUpdate(removed.parent, { $inc: { numChildren: -1 } }, { new: true });
+      return Annotation.findByIdAndUpdate(removed.parent, { $pull: { childAnnotations: removed._id } }, { new: true });
     })
     .then((parent) => {
       if (parent.deleted && parent.numChildren < 1) {

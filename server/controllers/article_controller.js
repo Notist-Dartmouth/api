@@ -22,6 +22,7 @@ export const getArticle = (uri) => {
   return Article.findOne({ uri: nURI });
 };
 
+
 /*
 Get a list of articles, filtered by some conditions.
 Input:
@@ -49,6 +50,7 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Get all annotations on an article, accessible by user, optionally in a specific set of groups
 // If user is null, return public annotations.
 // Returns a promise.
+
 export const getArticleAnnotations = (user, uri, toplevelOnly) => {
   const conditions = {};
   if (user === null) {
@@ -59,24 +61,20 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
                       { author: user._id }];
   }
   if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-    conditions.parent = null;
+    conditions.isTopLevel = true;
   }
-
   return getArticle(uri)
-          .populate({
-            path: 'annotations',
-            match: conditions,
-          })
-          .select('annotations')
-          .exec()
-          .then((article) => {
-            if (article === null) { // article not in db, so there are no annotations
-              return [];
-            } else {
-              return article.annotations;
-            }
-          });
+  .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+  .then((article) => {
+    if (article === null) {
+      // article not in db, so there are no annotations
+      return [];
+    } else {
+      return article.annotations;
+    }
+  });
 };
+
 
 // TODO: Get one level of children down from this instead
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
