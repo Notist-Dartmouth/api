@@ -10,6 +10,8 @@ import session from 'express-session';
 
 const MongoStore = require('connect-mongo')(session);
 
+const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist-frontend.herokuapp.com' : 'http://localhost:5000';
+
 const app = express();
 module.exports.app = app;
 
@@ -39,7 +41,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
 
-const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist-frontend.herokuapp.com' : 'http://localhost:5000';
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: frontEndHost, failureRedirect: `${frontEndHost}/login` }));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
@@ -48,7 +49,11 @@ app.get('/auth/facebook/callback',
                                       failureRedirect: `${frontEndHost}/login` }));
 
 // enable/disable cross origin resource sharing if necessary
-app.use(cors());
+const corsOptions = {
+  origin: frontEndHost,
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 // enable json message body for posting data to API
 app.use(bodyParser.urlencoded({ extended: true }));
