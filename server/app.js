@@ -38,12 +38,14 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
+
+const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist-frontend.herokuapp.com' : 'http://localhost:5000';
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' }));
+app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: frontEndHost, failureRedirect: `${frontEndHost}/login` }));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { successRedirect: '/',
-                                      failureRedirect: '/login' }));
+  passport.authenticate('facebook', { successRedirect: frontEndHost,
+                                      failureRedirect: `${frontEndHost}/login` }));
 
 // enable/disable cross origin resource sharing if necessary
 app.use(cors());
