@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
 import normalizeUrl from 'normalize-url';
+import fetch from 'node-fetch';
 const deepPopulate = require('mongoose-deep-populate')(mongoose);
 
 const normalizeURI = (uri) => {
@@ -12,6 +13,24 @@ const normalizeURI = (uri) => {
   return normalizeUrl(uri, options);
 };
 
+// Fields returned by Mercury
+const mercurySchema = new Schema({
+  title: String,
+  content: { type: String, select: false },
+  author: String,
+  date_published: Date,
+  lead_image_url: String,
+  dek: String,
+  next_page_url: String,
+  url: String,
+  domain: String,
+  excerpt: String,
+  word_count: Number,
+  direction: String,
+  total_pages: Number,
+  rendered_pages: Number,
+}, { _id: false });
+
 const articleSchema = new Schema({
   uri: {
     type: String,
@@ -20,7 +39,7 @@ const articleSchema = new Schema({
     unique: true,
     required: true,
   },
-  title: { type: String, trim: true, required: true },
+  info: mercurySchema,
   annotations: [{ type: Schema.Types.ObjectId, ref: 'Annotation' }],
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
 
@@ -37,6 +56,36 @@ articleSchema.statics.normalizeURI = normalizeURI;
 articleSchema.statics.urisAreEqual = (uri1, uri2) => {
   return normalizeURI(uri1) === normalizeURI(uri2);
 };
+
+articleSchema.methods.getMercuryInfo = function getMercuryInfo() {
+  const encodedURI = encodeURIComponent(this.uri);
+  return fetch(`https://mercury.postlight.com/parser?url=${encodedURI}`,
+  { headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.MERCURY_API_KEY } })
+  .then((res) => {
+    return res.json();
+  }).then((json) => {
+    if (typeof json.message === 'object' && json.message === null) {
+      // failure to find article
+      return null;
+    } else {
+      return json;
+    }
+  });
+};
+
+// Presave: get Mercury info
+articleSchema.pre('save', function preSave(next) {
+  if (!this.info) {
+    this.getMercuryInfo()
+    .then((info) => {
+      this.info = info;
+      next();
+    })
+    .catch((err) => {
+      next(err);
+    });
+  }
+});
 
 // TODO: add pre-save hook to check whether articles are satire or misleading
 // (probably by checking the hostname using url-parse)
