@@ -240,7 +240,7 @@ Output: Returns json file of the article's annotations or error.
 */
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
-  const topLevelOnly = req.topLevelOnly;
+  const topLevelOnly = req.query.topLevelOnly;
   if (req.isAuthenticated()) {
     user = req.user;
   }
