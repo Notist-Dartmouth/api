@@ -51,7 +51,7 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // If user is null, return public annotations.
 // Returns a promise.
 
-export const getArticleAnnotations = (user, uri, toplevelOnly) => {
+export const getArticleAnnotations = (user, uri, topLevelOnly) => {
   const conditions = {};
   if (user === null) {
     conditions.isPublic = true;
@@ -60,19 +60,26 @@ export const getArticleAnnotations = (user, uri, toplevelOnly) => {
                       { isPublic: true },
                       { author: user._id }];
   }
-  if (typeof toplevelOnly !== 'undefined' && toplevelOnly) {
-    conditions.isTopLevel = true;
-  }
-  return getArticle(uri)
-  .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
-  .then((article) => {
-    if (article === null) {
-      // article not in db, so there are no annotations
-      return [];
-    } else {
+  if (topLevelOnly) {
+    return getArticle(uri)
+    .populate('annotations')
+    .exec()
+    .then((article) => {
+      if (article === null) {
+        return [];
+      }
       return article.annotations;
-    }
-  });
+    });
+  } else {
+    return getArticle(uri)
+    .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+    .then((article) => {
+      if (article === null) {
+        return [];
+      }
+      return article.annotations;
+    });
+  }
 };
 
 
