@@ -240,11 +240,12 @@ Output: Returns json file of the article's annotations or error.
 */
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
+  const topLevelOnly = req.query.topLevelOnly;
   if (req.isAuthenticated()) {
     user = req.user;
   }
   const articleURI = req.query.uri;
-  Articles.getArticleAnnotations(user, articleURI, true)
+  Articles.getArticleAnnotations(user, articleURI, topLevelOnly)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
