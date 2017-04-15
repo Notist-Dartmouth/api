@@ -64,8 +64,11 @@ articleSchema.methods.getMercuryInfo = function getMercuryInfo() {
   .then((res) => {
     return res.json();
   }).then((json) => {
-    if (typeof json.message === 'object' && json.message === null) {
-      // failure to find article
+    if ( // Mercury error conditions:
+      !json ||
+      (typeof json.message === 'object' && json.message === null) ||
+      json.error
+    ) {
       return null;
     } else {
       return json;
@@ -82,8 +85,11 @@ articleSchema.pre('save', function preSave(next) {
       next();
     })
     .catch((err) => {
+      this.info = null;
       next(err);
     });
+  } else {
+    next();
   }
 });
 
