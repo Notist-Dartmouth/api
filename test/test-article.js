@@ -305,7 +305,7 @@ describe('Articles', function () {
           .then((article) => {
             should.exist(article);
             article.should.have.property('info');
-            const keyList = [
+            const propertyList = [
               'title',
               'author',
               'url',
@@ -315,8 +315,8 @@ describe('Articles', function () {
               'excerpt',
               'lead_image_url',
             ];
-            for (let i = 0; i < keyList.length; i++) {
-              article.info.should.have.property(keyList[i]);
+            for (const property of propertyList) {
+              article.info.should.have.property(property);
             }
           }));
         };
