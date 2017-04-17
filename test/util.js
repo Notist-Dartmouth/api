@@ -6,15 +6,16 @@ import User from '../server/models/user';
 import Article from '../server/models/article';
 import Annotation from '../server/models/annotation';
 
-exports.checkDatabase = function (delayedCallback) {
-  // number of milliseconds to allow for the db to update
-  const DB_UPDATE_WAIT = 50;
+/* Wait a period of time, and then resolve as controlled by delayedCallback.
+ * dbUpdateWait: (50) number of milliseconds to allow for the db to update
+ */
+exports.checkDatabase = function (delayedCallback, dbUpdateWait = 50) {
   return new Promise((resolve, reject) => {
     if (typeof delayedCallback !== 'function') {
       reject(new TypeError('Invalid callback to checkDatabase'));
     } else {
       // let callback function resolve the promise after waiting
-      setTimeout(() => { delayedCallback(resolve); }, DB_UPDATE_WAIT);
+      setTimeout(() => { delayedCallback(resolve); }, dbUpdateWait);
     }
   });
 };
@@ -72,8 +73,21 @@ exports.addUser = function (username = 'user') {
 exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
   const article = new Article({
     uri,
-    title: `Article at ${uri}`,
     groups: groupIds,
+    info: {
+      title: `Article at ${uri}`,
+      author: 'Fake Author',
+      date_published: Date.now(),
+      url: uri,
+      lead_image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Article_icon_cropped.svg/2000px-Article_icon_cropped.svg.png',
+      dek: 'An article we\'re using to test Notist',
+      excerpt: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam porta arcu in metus interdum, ut eleifend lorem luctus.',
+      total_pages: 1,
+      rendered_pages: 1,
+      next_page_url: null,
+      direction: 'ltr',
+      word_count: 200,
+    },
   });
   return article.save().then((savedArticle) => {
     return savedArticle;
