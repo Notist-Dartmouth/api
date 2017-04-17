@@ -340,8 +340,53 @@ describe('Annotations', function () {
       });
     });
   });
+
+  describe('AnnotationEdits', function () {
+    let PublicAnnotation;
+    let PrivateAnnotation;
+    const updateText = 'The text of this annotation has been updated.';
+
+    before(function () {
+      return Promise.all([
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a public annotation'),
+        util.addArticleAnnotation(ArticleA._id, GroupA._id, user, 'This is a private annotation', false),
+      ])
+      .then((newAnnotations) => {
+        PublicAnnotation = newAnnotations[0];
+        PrivateAnnotation = newAnnotations[1];
+      });
+    });
+
+    it('should edit a public annotation', function (done) {
+      passportStub.login(user);
+      chai.request(app)
+      .post(`/api/annotation/${PublicAnnotation.id}/edit`)
+      .send({
+        text: updateText,
+      })
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.text.should.equal(updateText);
+        res.body.SUCCESS.edited.should.be.true;
+        done();
+      });
+    });
+
+    it('should edit a private annnotation', function (done) {
+      passportStub.login(user);
+      chai.request(app)
+      .post(`/api/annotation/${PrivateAnnotation.id}/edit`)
+      .send({
+        text: updateText,
+      })
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.text.should.equal(updateText);
+        res.body.SUCCESS.edited.should.be.true;
+        done();
+      });
+    });
+  });
 });
-
-
-/* annotations */
-/* groups */
