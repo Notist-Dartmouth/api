@@ -54,9 +54,10 @@ export const getReplies = (user, parentId) => {
 };
 
 // PRECONDITION: user is not null.
-export const editAnnotation = (annotationId, updateText) => {
+export const editAnnotation = (user, annotationId, updateText) => {
+  const conditions = { _id: annotationId, author: user._id };
   const update = { $set: { text: updateText, editDate: Date.now(), edited: true } };
-  return Annotation.findByIdAndUpdate(annotationId, update, { new: true });
+  return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };
 
 // Removes an annotation from the database, updates the parent's numChildren
