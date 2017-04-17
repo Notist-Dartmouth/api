@@ -145,7 +145,7 @@ describe('Groups', function () {
           articles.should.have.lengthOf(2);
           for (let i = 0; i < 2; i++) {
             articles[i].should.have.property('uri').match(/article.\.com/);
-            articles[i].should.have.property('title').match(/Article at/);
+            articles[i].should.have.deep.property('info.title').match(/Article at/);
             articles[i].should.have.property('groups').include(newGroup.id);
           }
           articles[0].id.should.not.equal(articles[1].id);

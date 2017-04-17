@@ -6,7 +6,6 @@ import * as Groups from './group_controller';
 export const createArticle = (uri, groups) => {
   const article = new Article();
   article.uri = uri;
-  article.title = `Article at ${uri}`;
   article.groups = groups;
   return article.save()
   .then((result) => {

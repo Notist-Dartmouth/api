@@ -98,7 +98,7 @@ describe('Articles', function () {
         return Articles.getArticlesFiltered({ uri: testArticleURI })
         .then((result) => {
           result.should.have.lengthOf(1);
-          result[0].title.should.equal(`Article at ${testArticleURI}`);
+          result[0].info.title.should.equal(`Article at ${testArticleURI}`);
           result[0].id.should.equal(testArticle.id);
         });
       });
@@ -138,10 +138,6 @@ describe('Articles', function () {
         .then((article) => {
           myArticle = article;
         });
-      });
-
-      after(function () {
-        return Article.collection.drop();
       });
 
       it('should reject on invalid input', function () {
@@ -202,21 +198,21 @@ describe('Articles', function () {
             res.should.have.status(200);
             res.should.be.json;
             res.should.have.deep.property('body.SUCCESS');
-            res.body.SUCCESS.should.have.property('uri', nURI); // TODO: something about this line errors !!
-            res.body.SUCCESS.should.have.property('title');
+            res.body.SUCCESS.should.have.property('uri', nURI);
+            res.body.SUCCESS.should.have.property('info').that.is.null;
             res.body.SUCCESS.should.have.property('groups').that.is.empty;
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
           });
 
-        return util.checkDatabase((resolve) => {
+        const dbCallback = (resolve) => {
           const articleQuery = Article.findOne({ uri: nURI });
           resolve(Promise.all([
             articleQuery.should.eventually.have.property('groups').that.is.empty,
             articleQuery.should.eventually.have.property('uri', nURI),
-            articleQuery.should.eventually.have.property('title'),
             articleQuery.should.eventually.have.property('annotations').that.is.empty,
           ]));
-        });
+        };
+        return util.checkDatabase(dbCallback, 250); // allow more time for Mercury to be called
       });
 
       it('should return error because try to add article to fake group', function () {
@@ -256,17 +252,16 @@ describe('Articles', function () {
             res.should.be.json;
             res.should.have.deep.property('body.SUCCESS');
             res.body.SUCCESS.should.have.property('uri', nURI);
-            res.body.SUCCESS.should.have.property('title');
+            res.body.SUCCESS.should.have.property('info').that.is.null;
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
             res.body.SUCCESS.should.have.property('groups').with.members([group0._id.toString()]);
           });
 
-        return util.checkDatabase((resolve) => {
+        const dbCallback = (resolve) => {
           const articleQuery = Article.findOne({ uri: nURI });
           const groupQuery = Group.findById(group0._id);
           resolve(Promise.all([
             articleQuery.should.eventually.have.property('uri', nURI),
-            articleQuery.should.eventually.have.property('title'),
             articleQuery.should.eventually.have.property('annotations').that.is.empty,
             articleQuery.then((article) => {
               article.groups.map(String).should.have.members([group0._id.toString()]);
@@ -276,7 +271,56 @@ describe('Articles', function () {
               });
             }),
           ]));
-        });
+        };
+        return util.checkDatabase(dbCallback, 250); // allow more time for Mercury to be called
+      });
+
+      it('should add a real article populated with info from Mercury', function () {
+        const uri = 'www.example.com';
+        const nURI = Article.normalizeURI(uri);
+        passportStub.login(user);
+        chai.request(app)
+          .post('/api/article')
+          .send({ uri, groups: [] })
+          .end((err, res) => {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.have.deep.property('body.SUCCESS');
+            res.body.SUCCESS.should.have.property('uri', nURI);
+            res.body.SUCCESS.should.have.property('groups').that.is.empty;
+            res.body.SUCCESS.should.have.property('annotations').that.is.empty;
+            const articleInfo = res.body.SUCCESS.info;
+            articleInfo.should.have.property('title', 'Example Domain');
+            articleInfo.should.have.property('author', null);
+            articleInfo.should.have.property('url', nURI);
+            articleInfo.should.have.property('domain', 'example.com');
+            articleInfo.should.have.property('content').match(/<p>This domain is established/);
+            articleInfo.should.have.property('excerpt').match(/^This domain is established/);
+            articleInfo.should.have.property('lead_image_url', null);
+          });
+
+        const dbCallback = (resolve) => {
+          resolve(Article.findOne({ uri: nURI })
+          .then((article) => {
+            should.exist(article);
+            article.should.have.property('info');
+            const propertyList = [
+              'title',
+              'author',
+              'url',
+              'date_published',
+              'domain',
+              'content',
+              'excerpt',
+              'lead_image_url',
+            ];
+            for (const property of propertyList) {
+              article.info.should.have.property(property);
+            }
+          }));
+        };
+        return util.checkDatabase(dbCallback, 250);
       });
     });
   });
