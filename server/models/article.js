@@ -57,7 +57,7 @@ articleSchema.statics.urisAreEqual = (uri1, uri2) => {
   return normalizeURI(uri1) === normalizeURI(uri2);
 };
 
-articleSchema.methods.getMercuryInfo = function getMercuryInfo() {
+articleSchema.methods.fetchMercuryInfo = function fetchMercuryInfo() {
   const encodedURI = encodeURIComponent(this.uri);
   return fetch(`https://mercury.postlight.com/parser?url=${encodedURI}`,
   { headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.MERCURY_API_KEY } })
@@ -76,10 +76,10 @@ articleSchema.methods.getMercuryInfo = function getMercuryInfo() {
   });
 };
 
-// Presave: get Mercury info
+// Presave: fetch Mercury info
 articleSchema.pre('save', function preSave(next) {
   if (!this.info) {
-    this.getMercuryInfo()
+    this.fetchMercuryInfo()
     .then((info) => {
       this.info = info;
       next();
