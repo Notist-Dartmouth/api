@@ -54,8 +54,8 @@ export const getReplies = (user, parentId) => {
 };
 
 // PRECONDITION: user is not null.
-export const editAnnotation = (userId, annotationId, updateText) => {
-  const conditions = { _id: annotationId, authorId: userId };
+export const editAnnotation = (user, annotationId, updateText) => {
+  const conditions = { _id: annotationId, author: user._id };
   const update = { $set: { text: updateText, editDate: Date.now(), edited: true } };
   return Annotation.findOneAndUpdate(conditions, update, { new: true });
 };

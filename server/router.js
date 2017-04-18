@@ -304,10 +304,10 @@ Output: Returns json file of the edited annotation or error.
 */
 router.post('/api/annotation/:id/edit', (req, res) => {
   if (req.isAuthenticated()) {
-    const userId = req.user._id;
+    const user = req.user;
     const annotationId = req.params.id;
     const updateText = req.body.text;
-    Annotations.editAnnotation(userId, annotationId, updateText)
+    Annotations.editAnnotation(user, annotationId, updateText)
     .then((result) => {
       if (result === null) {
         // either the annotation doesn't exist or wasn't written by this user
