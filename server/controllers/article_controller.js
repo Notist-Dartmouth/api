@@ -51,18 +51,11 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // If user is null, return public annotations.
 // Returns a promise.
 
-export const getArticleAnnotations = (user, uri, topLevelOnly) => {
-  const conditions = {};
-  if (user === null) {
-    conditions.isPublic = true;
-  } else {
-    conditions.$or = [{ groups: { $in: user.groups } },
-                      { isPublic: true },
-                      { author: user._id }];
-  }
+export const getArticleAnnotations = (user, uri, topLevelOnly, pagination_options) => {
+
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate('annotations')
+    .populate({path: 'annotations', options: pagination_options)
     .exec()
     .then((article) => {
       if (article === null) {
@@ -80,15 +73,6 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
       return article.annotations;
     });
   }
-};
-
-
-// TODO: Get one level of children down from this instead
-// Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
-// Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
-// Returns a promise.
-export const getTopLevelAnnotations = (user, articleId) => {
-  return getArticleAnnotations(user, articleId, true);
 };
 
 /*
