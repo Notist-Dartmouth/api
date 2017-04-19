@@ -193,6 +193,26 @@ describe('Annotations', function () {
       });
     });
 
+    it('should return only two annotations on articleA visible to user', function (done) {
+      Promise.all([
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a third annotation on ArticleA'),
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a fourth annotation on ArticleA'),
+      ]).then((newAnnotations) => {
+        passportStub.login(user);
+        chai.request(app)
+        .get(`/api/article/annotations?uri=${ArticleA.uri}&page=1&size=2&toplevel=true`)
+        .end(function (err, res) {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.should.have.length.of(2);
+          res.body[0].should.have.property('articleText');
+          res.body[0].articleText.should.eql(newAnnotations[0].articleText);
+          res.body[0].should.have.property('text');
+          done();
+        });
+      });
+    });
+
     it('should return annotations in groupA on articleA');
   });
 
@@ -303,6 +323,15 @@ describe('Annotations', function () {
       return util.checkDatabase((resolve) => {
         resolve(Annotation.findById(StupidAnnotation.id).should.eventually.be.null);
       });
+
+      // TODO: Remove this, for now keep commented for reference
+      // return util.checkDatabase((resolve) => {
+      //   let emptyoptions;
+      //   resolve(Article.findOne({ uri: ArticleA.uri }).populate({ path: 'annotations', options: { limit: 2, sort: { createDate: -1 } } })
+      //   .then((article) => {
+      //     console.log(article.annotations);
+      //   }));
+      // });
     });
 
     it('should delete annotation with reply', function () {
