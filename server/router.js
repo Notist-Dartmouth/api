@@ -235,17 +235,26 @@ router.post('/api/annotation', (req, res) => {
 /*
 Get annotations of an article
 Input:
-  req.body.uri: URI of article
+  req.query.uri: URI of article
 Output: Returns json file of the article's annotations or error.
 */
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
-  const topLevelOnly = req.query.topLevelOnly;
+  let pagination_options = {};
+  if (req.query.page && req.query.size) {
+    pagination_options.skip = req.query.size * req.query.page;
+    pagination_options.limit = req.query.size * 1;
+  }
+  if (req.query.sort) { // TODO: work on this
+    pagination_options.sort = sort;
+  }
+
+  const topLevelOnly = req.query.toplevel;
   if (req.isAuthenticated()) {
     user = req.user;
   }
   const articleURI = req.query.uri;
-  Articles.getArticleAnnotations(user, articleURI, topLevelOnly)
+  Articles.getArticleAnnotations(user, articleURI, topLevelOnly, pagination_options)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })

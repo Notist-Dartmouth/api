@@ -52,10 +52,9 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Returns a promise.
 
 export const getArticleAnnotations = (user, uri, topLevelOnly, pagination_options) => {
-
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate({path: 'annotations', options: pagination_options)
+    .populate({ path: 'annotations', options: pagination_options })
     .exec()
     .then((article) => {
       if (article === null) {
