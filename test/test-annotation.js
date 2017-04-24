@@ -179,22 +179,22 @@ describe('Annotations', function () {
       });
     });
 
-    // it('should return all annotations on articleA visible to user', function () {
-    //   passportStub.login(user);
-    //   chai.request(app)
-    //   .get(`/api/article/annotations?uri=${ArticleA.uri}`)
-    //   .end(function (err, res) {
-    //     res.should.have.status(200);
-    //     res.body.should.be.an('array');
-    //     res.body.should.have.length.of(2);
-    //     res.body[0].should.have.property('articleText');
-    //     res.body[0].should.have.property('text');
-    //   });
-    //
-    //   return util.checkDatabase((resolve) => {
-    //     resolve(true);
-    //   });
-    // });
+    it('should return all annotations on articleA visible to user', function () {
+      passportStub.login(user);
+      chai.request(app)
+      .get(`/api/article/annotations?uri=${ArticleA.uri}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.should.have.length.of(2);
+        res.body[0].should.have.property('articleText');
+        res.body[0].should.have.property('text');
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(true);
+      });
+    });
 
     it('should return only two annotations on articleA visible to user', function (done) {
       Promise.all([
