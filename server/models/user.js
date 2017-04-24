@@ -13,6 +13,7 @@ const userSchema = new Schema({
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  // exploreCluster: Number,
 });
 
 userSchema.virtual('articles').get(() => {
