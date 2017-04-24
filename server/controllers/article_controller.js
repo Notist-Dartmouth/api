@@ -2,8 +2,8 @@ import Article from '../models/article';
 import * as Groups from './group_controller';
 import Annotation from '../models/annotation';
 
-import mongoose from 'mongoose';
-var ObjectId = mongoose.Types.ObjectId;
+import mongodb from 'mongodb';
+const ObjectId = mongodb.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
@@ -84,18 +84,18 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 export const getArticleAnnotationsPaginated = (user, article, topLevelOnly, pagination) => {
   let query; // TODO: add conditions back in
   if (pagination.last) {
-    query = { article, _id: { $gt: ObjectId(pagination.last) } };
+    query = { article, _id: { $gt: new ObjectId(pagination.last) } };
   } else {
     query = { article };
   }
 
   if (topLevelOnly) {
     return Annotation.find(query)
-    .sort({ createdDate: 1 })
+    .sort({ createDate: 1 })
     .limit(pagination.limit);
   } else {
     return Annotation.find({ query })
-    .sort({ createdDate: 1 })
+    .sort({ createDate: 1 })
     .limit(pagination.limit)
     .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
   }
