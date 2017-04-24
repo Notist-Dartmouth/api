@@ -5,7 +5,6 @@ import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 
 import util from './util';
-import path from 'path';
 
 const router = Router();
 
@@ -257,14 +256,14 @@ router.get('/api/article/annotations', (req, res) => {
 
 router.get('/api/article/annotations/paginated', (req, res) => {
   let user = null;
-  let pagination_options = {};
+  const pagination = {};
 
   if (req.query.limit) {
-    pagination_options.limit = req.query.limit * 1;
+    pagination.limit = req.query.limit * 1;
   }
 
   if (req.query.last) {
-    pagination_options.last = req.query.last;
+    pagination.last = req.query.last;
   }
 
   const topLevelOnly = req.query.toplevel;
@@ -272,9 +271,9 @@ router.get('/api/article/annotations/paginated', (req, res) => {
     user = req.user;
   }
 
-  console.log(pagination_options);
+  console.log(pagination);
   const article = req.query.article;
-  Articles.getArticleAnnotationsPaginated(user, article, topLevelOnly, pagination_options)
+  Articles.getArticleAnnotationsPaginated(user, article, topLevelOnly, pagination)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
