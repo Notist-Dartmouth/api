@@ -181,7 +181,7 @@ Input:
 Output: Returns json list of articles of the group.
 */
 router.get('/api/group/:groupId/articles', (req, res) => {
-  Groups.getArticles(req.params.groupId)
+  Groups.getGroupArticles(req.params.groupId)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
