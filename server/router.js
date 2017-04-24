@@ -181,7 +181,10 @@ Input:
 Output: Returns json list of articles of the group.
 */
 router.get('/api/group/:groupId/articles', (req, res) => {
-  Groups.getArticles(req.params.groupId)
+  let pagination_options = {};
+  // TODO: build pagination_options from query
+
+  Groups.getGroupArticles(req.params.groupId, pagination_options)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
@@ -240,21 +243,41 @@ Output: Returns json file of the article's annotations or error.
 */
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
-  let pagination_options = {};
-  if (req.query.page && req.query.size) {
-    pagination_options.skip = req.query.size * req.query.page;
-    pagination_options.limit = req.query.size * 1;
+  const topLevelOnly = req.query.toplevel;
+  if (req.isAuthenticated()) {
+    user = req.user;
   }
-  if (req.query.sort) { // TODO: work on this
-    pagination_options.sort = sort;
+
+  const articleURI = req.query.uri;
+  Articles.getArticleAnnotations(user, articleURI, topLevelOnly)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+router.get('/api/article/annotations/paginated', (req, res) => {
+  let user = null;
+  let pagination_options = {};
+
+  if (req.query.limit) {
+    pagination_options.limit = req.query.limit * 1;
+  }
+
+  if (req.query.last) {
+    pagination_options.last = req.query.last;
   }
 
   const topLevelOnly = req.query.toplevel;
   if (req.isAuthenticated()) {
     user = req.user;
   }
-  const articleURI = req.query.uri;
-  Articles.getArticleAnnotations(user, articleURI, topLevelOnly, pagination_options)
+
+  console.log(pagination_options);
+  const article = req.query.article;
+  Articles.getArticleAnnotationsPaginated(user, article, topLevelOnly, pagination_options)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })

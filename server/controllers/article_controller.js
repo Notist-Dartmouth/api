@@ -1,5 +1,9 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
+import Annotation from '../models/annotation';
+
+import mongoose from 'mongoose';
+var ObjectId = mongoose.Types.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
@@ -50,10 +54,10 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // If user is null, return public annotations.
 // Returns a promise.
 
-export const getArticleAnnotations = (user, uri, topLevelOnly, pagination_options) => {
+export const getArticleAnnotations = (user, uri, topLevelOnly) => {
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate({ path: 'annotations', options: pagination_options })
+    .populate({ path: 'annotations' })
     .exec()
     .then((article) => {
       if (article === null) {
@@ -70,6 +74,23 @@ export const getArticleAnnotations = (user, uri, topLevelOnly, pagination_option
       }
       return article.annotations;
     });
+  }
+};
+
+/*
+* Get all annotations on an article but as dictated by pagination options
+* TODO: implement sorting
+*/
+export const getArticleAnnotationsPaginated = (user, article, topLevelOnly, pagination) => {
+  if (topLevelOnly) {
+    return Annotation.find({ article, _id: { $gt: ObjectId(pagination.last) } })
+    .sort({ createdDate: 1 })
+    .limit(pagination.limit);
+  } else {
+    return Annotation.find({ article })
+    .sort({ createdDate: 1 })
+    .limit(pagination.limit)
+    .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
   }
 };
 
