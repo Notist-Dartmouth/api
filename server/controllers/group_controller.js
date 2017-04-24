@@ -1,4 +1,5 @@
 import Group from '../models/group';
+import Article from '../models/article';
 
 /*
 Create a new group.
@@ -122,7 +123,7 @@ export const getGroupArticles = (groupId) => {
   });
 };
 
-export const getGroupArticlesPaginated = (groupId, pagination_options) => {
-  return Articles.find({ groups: groupId }).limit(pagination_options.limit);
+export const getGroupArticlesPaginated = (groupId, pagination) => {
+  return Article.find({ groups: groupId }).limit(pagination.limit);
   // TODO: somehow need to figure out sorting
 };

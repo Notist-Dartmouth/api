@@ -94,11 +94,11 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
   });
 });
 
-annotationSchema.virtual('isTopLevel').get(function () {
-  return this.parent == undefined;
+annotationSchema.virtual('isTopLevel').get(function getIsTopLevel() {
+  return typeof(this.parent) === 'undefined' || this.parent === null;
 });
 
-annotationSchema.virtual('numChildren').get(function () {
+annotationSchema.virtual('numChildren').get(function getNumChildren() {
   return this.childAnnotations.length;
 });
 
