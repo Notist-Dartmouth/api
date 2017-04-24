@@ -45,13 +45,15 @@ describe('Annotations', function () {
       ]).then((res) => {
         done();
       })
-      .catch((err) => {
-        done(err);
-      });
+        .catch((err) => {
+          done(err);
+        });
     }, 50);
   });
 
   describe('FirstAnnotation', function () {
+    let AnnotationB;
+
     it('should return 401 error for unauthenticated user', function (done) {
       chai.request(app)
       .post('/api/annotation')
@@ -169,6 +171,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.articleText.should.equal(articleText);
         res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
+        AnnotationB = res.body.SUCCESS;
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
       return util.checkDatabase((resolve) => {
@@ -176,22 +179,22 @@ describe('Annotations', function () {
       });
     });
 
-    it('should return all annotations on articleA visible to user', function () {
-      passportStub.login(user);
-      chai.request(app)
-      .get(`/api/article/annotations?uri=${ArticleA.uri}`)
-      .end(function (err, res) {
-        res.should.have.status(200);
-        res.body.should.be.an('array');
-        res.body.should.have.length.of(2);
-        res.body[0].should.have.property('articleText');
-        res.body[0].should.have.property('text');
-      });
-
-      return util.checkDatabase((resolve) => {
-        resolve(true);
-      });
-    });
+    // it('should return all annotations on articleA visible to user', function () {
+    //   passportStub.login(user);
+    //   chai.request(app)
+    //   .get(`/api/article/annotations?uri=${ArticleA.uri}`)
+    //   .end(function (err, res) {
+    //     res.should.have.status(200);
+    //     res.body.should.be.an('array');
+    //     res.body.should.have.length.of(2);
+    //     res.body[0].should.have.property('articleText');
+    //     res.body[0].should.have.property('text');
+    //   });
+    //
+    //   return util.checkDatabase((resolve) => {
+    //     resolve(true);
+    //   });
+    // });
 
     it('should return only two annotations on articleA visible to user', function (done) {
       Promise.all([
@@ -200,7 +203,7 @@ describe('Annotations', function () {
       ]).then((newAnnotations) => {
         passportStub.login(user);
         chai.request(app)
-        .get(`/api/article/annotations?uri=${ArticleA.uri}&page=1&size=2&toplevel=true`)
+        .get(`/api/article/annotations/paginated?article=${ArticleA.id}&limit=2&toplevel=true&last=${AnnotationB._id}`)
         .end(function (err, res) {
           res.should.have.status(200);
           res.body.should.be.an('array');
