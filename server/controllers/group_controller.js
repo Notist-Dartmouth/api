@@ -107,9 +107,9 @@ Output: Rejects if groupId is not found;
 otherwise resolves to array of article objects that are in the group.
 */
 // TODO: we don't actually have a router function for this quite yet
-export const getGroupArticles = (groupId, pagination_options) => {
+export const getGroupArticles = (groupId) => {
   return Group.findById(groupId)
-  .populate({ path: 'articles', options: pagination_options }) // THIS IS WHERE PAGINATION WOULD HAPPEN
+  .populate({ path: 'articles' })
   .select('articles')
   .exec()
   .then((group) => {
@@ -120,4 +120,9 @@ export const getGroupArticles = (groupId, pagination_options) => {
       return group.articles;
     }
   });
+};
+
+export const getGroupArticlesPaginated = (groupId, pagination_options) => {
+  return Articles.find({ groups: groupId }).limit(pagination_options.limit);
+  // TODO: somehow need to figure out sorting
 };

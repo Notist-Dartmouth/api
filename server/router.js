@@ -181,10 +181,7 @@ Input:
 Output: Returns json list of articles of the group.
 */
 router.get('/api/group/:groupId/articles', (req, res) => {
-  let pagination_options = {};
-  // TODO: build pagination_options from query
-
-  Groups.getGroupArticles(req.params.groupId, pagination_options)
+  Groups.getGroupArticles(req.params.groupId)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
