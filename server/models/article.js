@@ -39,6 +39,9 @@ const articleSchema = new Schema({
     unique: true,
     required: true,
   },
+
+  avgUserScore: Number,
+  numShares: Number,
   info: mercurySchema,
   annotations: [{ type: Schema.Types.ObjectId, ref: 'Annotation' }],
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
