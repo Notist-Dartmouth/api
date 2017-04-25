@@ -81,21 +81,27 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 * Get all annotations on an article but as dictated by pagination options
 * TODO: implement sorting
 */
-export const getArticleAnnotationsPaginated = (user, article, topLevelOnly, pagination) => {
-  let query; // TODO: add conditions back in
+export const getArticleAnnotationsPaginated = (user, conditions) => {
+  let query = conditions.query;
+  let pagination = conditions.pagination;
+  let sort_options = {};
+
   if (pagination.last) {
-    query = { article, _id: { $gt: new ObjectId(pagination.last) } };
-  } else {
-    query = { article };
+    query._id = { $gt: new ObjectId(pagination.last) };
+    // query = { conditions.query, article, _id: { $gt: new ObjectId(pagination.last) } }; // should be less than if sorting in decreasing
   }
 
-  if (topLevelOnly) {
+  if (pagination.sort) {
+    sort_options = pagination.sort;
+  }
+
+  if (conditions.topLevelOnly) {
     return Annotation.find(query)
-    .sort({ createDate: 1 })
+    .sort(sort_options)
     .limit(pagination.limit);
   } else {
-    return Annotation.find({ query })
-    .sort({ createDate: 1 })
+    return Annotation.find(query)
+    .sort(sort_options)
     .limit(pagination.limit)
     .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
   }

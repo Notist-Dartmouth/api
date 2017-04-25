@@ -237,6 +237,7 @@ Input:
   req.query.uri: URI of article
 Output: Returns json file of the article's annotations or error.
 */
+// TODO: add conditions back in
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
   const topLevelOnly = req.query.toplevel;
@@ -256,24 +257,36 @@ router.get('/api/article/annotations', (req, res) => {
 
 router.get('/api/article/annotations/paginated', (req, res) => {
   let user = null;
-  const pagination = {};
+  const conditions = { query: {}, pagination: {} };
 
-  if (req.query.limit) {
-    pagination.limit = req.query.limit * 1;
-  }
+  conditions.topLevelOnly = req.query.toplevel;
+  conditions.query.article = req.query.article;
 
-  if (req.query.last) {
-    pagination.last = req.query.last;
-  }
-
-  const topLevelOnly = req.query.toplevel;
   if (req.isAuthenticated()) {
     user = req.user;
   }
 
-  console.log(pagination);
-  const article = req.query.article;
-  Articles.getArticleAnnotationsPaginated(user, article, topLevelOnly, pagination)
+  if (user === null) {
+    conditions.query.isPublic = true;
+  } else {
+    conditions.query.$or = [{ groups: { $in: user.groups } },
+                       { isPublic: true },
+                       { author: user._id }];
+  }
+
+  if (req.query.limit) {
+    conditions.pagination.limit = req.query.limit * 1;
+  }
+
+  if (req.query.last) {
+    conditions.pagination.last = req.query.last;
+  }
+
+  if (req.query.sort) {
+    conditions.pagination.sort = req.query.sort;
+  }
+
+  Articles.getArticleAnnotationsPaginated(user, conditions)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
