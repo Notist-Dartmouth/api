@@ -20,9 +20,15 @@ export const createArticle = (uri, groups) => {
   });
 };
 
-export const getArticle = (uri) => {
+// Query must be JSON with an "uri" field
+export const getArticle = (uri, query) => {
+  if (!query) {
+    query = {};
+  }
+
   const nURI = Article.normalizeURI(uri);
-  return Article.findOne({ uri: nURI });
+  query.uri = nURI;
+  return Article.findOne(query);
 };
 
 
@@ -55,8 +61,16 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Returns a promise.
 
 export const getArticleAnnotations = (user, uri, topLevelOnly) => {
+  const query = {};
+  if (user === null) {
+    query.isPublic = true;
+  } else {
+    query.$or = [{ groups: { $in: user.groups } },
+                         { isPublic: true },
+                         { author: user._id }];
+  }
   if (topLevelOnly) {
-    return getArticle(uri)
+    return getArticle(uri, query)
     .populate({ path: 'annotations' })
     .exec()
     .then((article) => {
@@ -79,7 +93,6 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 
 /*
 * Get all annotations on an article but as dictated by pagination options
-* TODO: implement sorting
 */
 export const getArticleAnnotationsPaginated = (user, conditions) => {
   let query = conditions.query;
