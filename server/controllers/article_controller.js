@@ -99,15 +99,21 @@ export const getArticleAnnotationsPaginated = (user, conditions) => {
   let pagination = conditions.pagination;
   let sort_options = {};
 
-  if (pagination.last) {
-    query._id = { $gt: new ObjectId(pagination.last) };
+  // TODO: sorting needs work
+  if (pagination.last && !pagination.sort) { // Default is to sort in order of most recent annotation
+    query._id = { $lt: new ObjectId(pagination.last) };
+    sort_options = { createDate: -1 };
     // query = { conditions.query, article, _id: { $gt: new ObjectId(pagination.last) } }; // should be less than if sorting in decreasing
+  } else if (pagination.last && pagination.sort && pagination.sort_dir == -1) { // NOTE: right now must be sorting on DATES
+    query[pagination.sort] = { $lt: new ObjectId(pagination.last) };
+    sort_options[pagination.sort] = -1;
+  } else if (pagination.last && pagination.sort && pagination.sort_dir == 1) {
+    query[pagination.sort] = { $gt: new ObjectId(pagination.last) };
+    sort_options[pagination.sort] = 1;
   }
 
-  if (pagination.sort) {
-    sort_options = pagination.sort;
-  }
-
+  console.log(query);
+  console.log(sort_options);
   if (conditions.topLevelOnly) {
     return Annotation.find(query)
     .sort(sort_options)

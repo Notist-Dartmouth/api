@@ -90,6 +90,7 @@ describe('Annotations', function () {
         parentId: null,
       })
       .end(function (err, res) {
+        console.log(res);
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);
@@ -203,7 +204,7 @@ describe('Annotations', function () {
       ]).then((newAnnotations) => {
         passportStub.login(user);
         chai.request(app)
-        .get(`/api/article/annotations/paginated?article=${ArticleA.id}&limit=2&toplevel=true&last=${AnnotationB._id}`)
+        .get(`/api/article/annotations/paginated?article=${ArticleA.id}&limit=2&toplevel=true&last=${newAnnotations[1]._id}`)
         .end(function (err, res) {
           res.should.have.status(200);
           res.body.should.be.an('array');
