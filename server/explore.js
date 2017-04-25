@@ -7,20 +7,34 @@
 // Note: all the below are TODO.
 
 /*
+
+User Flow:
+1) Get Facebook Permissions
+2) Compute Explore Number using politecho.com
+  -> Explore Number = avg. of (all your friends politecho scores) = about your bubble
+    friends politecho scores = calculated via pages they've liked + articles they've shared
+    for each article shared by friend on fb
+      add to notist db (NOTE: make sure we can add articles without annotations)
+      add / update avgUserScore using the users politecho score as calulcated
+3) Serve articles
+  -> show articles that have avgUserScore in a range of some constant * standardDeviation
+*/
+
+/*
 * Function that uses politecho.com to determine one's social media bubble, computing
 * an average and assigning it to a user
 */
-export const computeUser = () => {};
+export const computeUserExploreNumber = () => {};
 
 /*
 * Every time a user annotates an article, we should re-calculate their average
 */
-export const updateUser = () => {};
+export const updateUserExploreNumber = () => {};
 
 /*
-* Function to get called when populating the explore feed view
-* QUESTION: Where are we getting initial data from, facebook ?!
-*
+Function to get called when populating the explore feed view
+QUESTION: Where are we getting initial data from, facebook ?!
+
 */
 export const populateExploreFeed = () => {};
 
