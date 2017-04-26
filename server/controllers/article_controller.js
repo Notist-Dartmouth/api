@@ -86,9 +86,33 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 // Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
 // Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
 // Returns a promise.
-export const getTopLevelAnnotations = (user, articleId) => {
-  return getArticleAnnotations(user, articleId, true);
+export const getTopLevelAnnotations = (user, uri) => {
+  return getArticleAnnotations(user, uri, true);
 };
+
+
+/*
+Get the number of replies to an article
+Input:
+  user: User object
+  uri: String article uri
+Output: Number of replies.
+*/
+const flatten = (arr) => {
+  return arr.reduce((flat, toFlatten) => {
+    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+  }, []);
+};
+
+export const getArticleReplyNumber = (user, uri) => {
+  return getArticleAnnotations(user, uri, false)
+  .then((annotations) => {
+    const anno = flatten(annotations);
+    return anno.length;
+  });
+};
+
+
 
 /*
 Add multiple groups to an article
