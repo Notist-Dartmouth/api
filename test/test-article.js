@@ -185,7 +185,7 @@ describe('Articles', function () {
         });
       });
 
-      it('should add a single article with no groups', function () {
+      it('should add a single article with no groups', function (done) {
         const uri = 'www.noGroupURI.com';
         const nURI = Article.normalizeURI(uri);
         passportStub.login(user);
@@ -202,17 +202,8 @@ describe('Articles', function () {
             res.body.SUCCESS.should.have.property('info', null);
             res.body.SUCCESS.should.have.property('groups').that.is.empty;
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
+            done();
           });
-
-        const dbCallback = (resolve) => {
-          const articleQuery = Article.findOne({ uri: nURI });
-          resolve(Promise.all([
-            articleQuery.should.eventually.have.property('groups').that.is.empty,
-            articleQuery.should.eventually.have.property('uri', nURI),
-            articleQuery.should.eventually.have.property('annotations').that.is.empty,
-          ]));
-        };
-        return util.checkDatabase(dbCallback, 250); // allow more time for Mercury to be called
       });
 
       it('should return error because try to add article to fake group', function () {
@@ -238,7 +229,7 @@ describe('Articles', function () {
         });
       });
 
-      it('should add article to group with proper references in both documents', function () {
+      it('should add article to group with proper references in both documents', function (done) {
         const uri = 'www.oneGroupURI.com';
         const nURI = Article.normalizeURI(uri);
         passportStub.login(user);
@@ -255,27 +246,11 @@ describe('Articles', function () {
             res.body.SUCCESS.should.have.property('info', null);
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
             res.body.SUCCESS.should.have.property('groups').with.members([group0._id.toString()]);
+            done();
           });
-
-        const dbCallback = (resolve) => {
-          const articleQuery = Article.findOne({ uri: nURI });
-          const groupQuery = Group.findById(group0._id);
-          resolve(Promise.all([
-            articleQuery.should.eventually.have.property('uri', nURI),
-            articleQuery.should.eventually.have.property('annotations').that.is.empty,
-            articleQuery.then((article) => {
-              article.groups.map(String).should.have.members([group0._id.toString()]);
-              const articleId = article._id;
-              return groupQuery.then((group) => {
-                group.articles.map(String).should.have.members([articleId.toString()]);
-              });
-            }),
-          ]));
-        };
-        return util.checkDatabase(dbCallback, 250); // allow more time for Mercury to be called
       });
 
-      it('should add a real article populated with info from Mercury', function () {
+      it('should add a real article populated with info from Mercury', function (done) {
         const uri = 'www.example.com';
         const nURI = Article.normalizeURI(uri);
         passportStub.login(user);
@@ -298,29 +273,8 @@ describe('Articles', function () {
             articleInfo.should.have.property('content').match(/<p>This domain is established/);
             articleInfo.should.have.property('excerpt').match(/^This domain is established/);
             articleInfo.should.have.property('lead_image_url', null);
+            done();
           });
-
-        const dbCallback = (resolve) => {
-          resolve(Article.findOne({ uri: nURI })
-          .then((article) => {
-            should.exist(article);
-            article.should.have.property('info');
-            const propertyList = [
-              'title',
-              'author',
-              'url',
-              'date_published',
-              'domain',
-              'content',
-              'excerpt',
-              'lead_image_url',
-            ];
-            for (const property of propertyList) {
-              article.info.should.have.property(property);
-            }
-          }));
-        };
-        return util.checkDatabase(dbCallback, 250);
       });
     });
   });
