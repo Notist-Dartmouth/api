@@ -193,18 +193,24 @@ router.get('/api/group/:groupId/articles', (req, res) => {
 });
 
 
+/*
+Get articles posted in a group as pages. Request should include query:
+  limit: number of items per page
+  page: number of page to be loaded
+  sort: field to sort on, must be field on Article model
+  sort_dir: direction to sort in, -1 for decreasing, 1 for increasing
+*/
 router.get('/api/group/:groupId/articles/paginated', (req, res) => {
-  const conditions = { query: {}, pagination: {} };
+  const conditions = { query: {}, pagination: {}, sort: {} };
   conditions.query.group = req.params.groupId;
   if (req.query.limit) {
     conditions.pagination.limit = req.query.limit;
   }
   if (req.query.last) {
-    conditions.pagination.last = req.query.last;
+    conditions.pagination.skip = req.query.limit * req.query.page;
   }
   if (req.query.sort) {
-    conditions.pagination.sort = req.query.sort;
-    conditions.pagination.sort_dir = req.query.sort_dir;
+    conditions.sort[req.query.sort] = req.query.sort_dir;
   }
 
   Groups.getGroupArticlesPaginated(req.params.groupId, conditions)

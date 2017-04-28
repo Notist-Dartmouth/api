@@ -23,8 +23,7 @@ describe('Groups', function () {
   let newGroup;
   let newUser;
   let user2;
-  let article1;
-  let article2;
+  let article1, article2, article3, article4;
   const fakeObjectId = '123412341234123412341234';
 
   before(function () {
@@ -152,6 +151,39 @@ describe('Groups', function () {
         });
       });
     });
+
+    describe('getGroupArticlesPaginated', function () {
+      it('should reject on invalid input', function () {
+        return Promise.all([
+          Groups.getGroupArticlesPaginated().should.eventually.be.rejected,
+          Groups.getGroupArticlesPaginated(123).should.eventually.be.rejected,
+          Groups.getGroupArticlesPaginated('notObjectId', { fakefield: 'fakeval' }).should.eventually.be.rejected,
+        ]);
+      });
+
+      it('should resolve to paginated array of articles in group sorted by most recent', function () {
+        return Promise.all([
+          util.addArticleInGroup(newGroup._id, 'www.article3.com'),
+          util.addArticleInGroup(newGroup._id, 'www.article4.com'),
+        ]).then((newArticles) => {
+          const conditions = {};
+
+          conditions.query = { groups: newGroup.id };
+          conditions.pagination = { skip: 1, limit: 2 };
+          condtions.sort_opt = { editDate: -1 };
+
+          return Groups.getGroupArticlesPaginated(newGroup.id, conditions)
+            .then((articles) => {
+              articles.should.have.lengthOf(2);
+              articles[0].should.have.property('uri').match('ww.article2.com');
+            });
+        });
+      });
+
+      it('should resolve to paginated array of articles sorted by ', function (done) {
+        done();
+      });
+    });
   });
 
   describe('API calls', function () {
@@ -232,5 +264,19 @@ describe('Groups', function () {
           done();
         });
     });
+
+    it('should get two articles of group', function () {
+      passport.login(newUser);
+      chai.request(app)
+      .get(`/api/group/${newGroup._id}/articles/paginated&page=1&limit=2`)
+      .end((err, res) => {
+        res.body.should.be.an('array');
+        res.body.should.have.length('2');
+        res.body[0].should.have.property('uri');
+        res.body[0].should.have.property('info');
+      });
+    });
+
+    it('should retrieve ');
   });
 });
