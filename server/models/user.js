@@ -8,11 +8,13 @@ const userSchema = new Schema({
   googleId: String,
   facebookId: String,
   name: { type: String, required: true },
-  username: { type: String, unique: true, required: true },
   email: { type: String, unique: true, required: true },
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  exploreNumber: Number,
+  numExplorations: Number,
+  exploreStandardDev: Number,
 });
 
 userSchema.virtual('articles').get(() => {

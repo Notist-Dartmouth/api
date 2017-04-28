@@ -1,5 +1,9 @@
 import Article from '../models/article';
 import * as Groups from './group_controller';
+import Annotation from '../models/annotation';
+
+import mongoose from 'mongoose';
+var ObjectId = mongoose.Types.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
@@ -51,17 +55,9 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Returns a promise.
 
 export const getArticleAnnotations = (user, uri, topLevelOnly) => {
-  const conditions = {};
-  if (user === null) {
-    conditions.isPublic = true;
-  } else {
-    conditions.$or = [{ groups: { $in: user.groups } },
-                      { isPublic: true },
-                      { author: user._id }];
-  }
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate('annotations')
+    .populate({ path: 'annotations' })
     .exec()
     .then((article) => {
       if (article === null) {
@@ -81,13 +77,21 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
   }
 };
 
-
-// TODO: Get one level of children down from this instead
-// Get top-level annotations on an article, accessible by user, optionally in a specific set of groups
-// Equivalent to getArticleAnnotations, but only returns annotations with no ancestors.
-// Returns a promise.
-export const getTopLevelAnnotations = (user, articleId) => {
-  return getArticleAnnotations(user, articleId, true);
+/*
+* Get all annotations on an article but as dictated by pagination options
+* TODO: implement sorting
+*/
+export const getArticleAnnotationsPaginated = (user, article, topLevelOnly, pagination) => {
+  if (topLevelOnly) {
+    return Annotation.find({ article, _id: { $gt: ObjectId(pagination.last) } })
+    .sort({ createdDate: 1 })
+    .limit(pagination.limit);
+  } else {
+    return Annotation.find({ article })
+    .sort({ createdDate: 1 })
+    .limit(pagination.limit)
+    .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
+  }
 };
 
 /*
