@@ -13,7 +13,7 @@ export const createArticle = (uri, groups) => {
   article.groups = groups;
   return article.save()
   .then((result) => {
-    return Groups.addGroupArticle(result._id, groups)
+    return Groups.addGroupArticle(result._id, groups) // TODO: move to post-save
     .then((res) => {
       return result;
     });
@@ -112,8 +112,6 @@ export const getArticleAnnotationsPaginated = (user, conditions) => {
     sort_options[pagination.sort] = 1;
   }
 
-  console.log(query);
-  console.log(sort_options);
   if (conditions.topLevelOnly) {
     return Annotation.find(query)
     .sort(sort_options)

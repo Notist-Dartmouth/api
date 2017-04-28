@@ -107,7 +107,7 @@ Input:
 Output: Rejects if groupId is not found;
 otherwise resolves to array of article objects that are in the group.
 */
-// TODO: we don't actually have a router function for this quite yet
+// TODO: should only return articles within last 3 months
 export const getGroupArticles = (groupId) => {
   return Group.findById(groupId)
   .populate({ path: 'articles' })
@@ -123,7 +123,23 @@ export const getGroupArticles = (groupId) => {
   });
 };
 
-export const getGroupArticlesPaginated = (groupId, pagination) => {
-  return Article.find({ groups: groupId }).limit(pagination.limit);
-  // TODO: somehow need to figure out sorting
+/*
+*/
+export const getGroupArticlesPaginated = (groupId, conditions) => {
+  const query = conditions.query;
+  query['groups'] = groupId;
+
+  // TODO: should only return articles within last 3 months
+  var start = Date.now();
+  var end = new Date();
+  end.setDate(end.getDate() - 90);
+  query['createDate'] = { $lte: start, $gt: end };
+
+  const pagination = conditions.pagination;
+  const sort_opt = conditions.sort;
+
+  return Article.find(query)
+    .sort(sort_opt)
+    .skip(pagination.skip)
+    .limit(pagination.limit);
 };
