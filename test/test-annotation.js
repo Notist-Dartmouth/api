@@ -90,7 +90,6 @@ describe('Annotations', function () {
         parentId: null,
       })
       .end(function (err, res) {
-        console.log(res);
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);

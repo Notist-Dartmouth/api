@@ -126,17 +126,15 @@ export const getGroupArticles = (groupId) => {
 /*
 */
 export const getGroupArticlesPaginated = (groupId, conditions) => {
+  if (!conditions) {
+    conditions = { query: {}, pagination: {}, sort_opt: {} };
+  }
+
   const query = conditions.query;
   query['groups'] = groupId;
 
-  // TODO: should only return articles within last 3 months
-  var start = Date.now();
-  var end = new Date();
-  end.setDate(end.getDate() - 90);
-  query['createDate'] = { $lte: start, $gt: end };
-
-  const pagination = conditions.pagination;
-  const sort_opt = conditions.sort;
+  const pagination = conditions.pagination || {};
+  const sort_opt = conditions.sort || { createDate: -1 };
 
   return Article.find(query)
     .sort(sort_opt)
