@@ -127,17 +127,18 @@ export const getGroupArticles = (groupId) => {
 */
 export const getGroupArticlesPaginated = (groupId, conditions) => {
   if (!conditions) {
-    conditions = { query: {}, pagination: {}, sort_opt: {} };
+    conditions = { pagination: {}, sort: {} };
   }
 
-  const query = conditions.query;
-  query['groups'] = groupId;
+  const query = { groups: groupId };
 
   const pagination = conditions.pagination || {};
-  const sort_opt = conditions.sort || { createDate: -1 };
+  if (!typeof(conditions.sort) === 'object' || Object.keys(conditions.sort).length === 0) {
+    conditions.sort = { createDate: -1 };
+  }
 
   return Article.find(query)
-    .sort(sort_opt)
+    .sort(conditions.sort)
     .skip(pagination.skip)
     .limit(pagination.limit);
 };

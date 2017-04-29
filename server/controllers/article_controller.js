@@ -95,30 +95,30 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 * Get all annotations on an article but as dictated by pagination options
 */
 export const getArticleAnnotationsPaginated = (user, conditions) => {
-  let query = conditions.query;
-  let pagination = conditions.pagination;
-  let sort_options = {};
+  const query = conditions.query;
+  const pagination = conditions.pagination;
+  let sortOptions = {};
 
   // TODO: sorting needs work
   if (pagination.last && !pagination.sort) { // Default is to sort in order of most recent annotation
     query._id = { $lt: new ObjectId(pagination.last) };
-    sort_options = { createDate: -1 };
+    sortOptions = { createDate: -1 };
     // query = { conditions.query, article, _id: { $gt: new ObjectId(pagination.last) } }; // should be less than if sorting in decreasing
-  } else if (pagination.last && pagination.sort && pagination.sort_dir == -1) { // NOTE: right now must be sorting on DATES
+  } else if (pagination.last && pagination.sort && pagination.sort_dir === -1) { // NOTE: right now must be sorting on DATES
     query[pagination.sort] = { $lt: new ObjectId(pagination.last) };
-    sort_options[pagination.sort] = -1;
-  } else if (pagination.last && pagination.sort && pagination.sort_dir == 1) {
+    sortOptions[pagination.sort] = -1;
+  } else if (pagination.last && pagination.sort && pagination.sort_dir === 1) {
     query[pagination.sort] = { $gt: new ObjectId(pagination.last) };
-    sort_options[pagination.sort] = 1;
+    sortOptions[pagination.sort] = 1;
   }
 
   if (conditions.topLevelOnly) {
     return Annotation.find(query)
-    .sort(sort_options)
+    .sort(sortOptions)
     .limit(pagination.limit);
   } else {
     return Annotation.find(query)
-    .sort(sort_options)
+    .sort(sortOptions)
     .limit(pagination.limit)
     .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
   }
