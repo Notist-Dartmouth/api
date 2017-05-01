@@ -61,7 +61,10 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
   }
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate('annotations')
+    .populate({
+      path: 'annotations',
+      match: { parent: null },
+    })
     .exec()
     .then((article) => {
       if (article === null) {
@@ -70,8 +73,9 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
       return article.annotations;
     });
   } else {
+    const deepPath = 'annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations';
     return getArticle(uri)
-    .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+    .deepPopulate(deepPath, { populate: { annotations: { match: { parent: null } } } })
     .then((article) => {
       if (article === null) {
         return [];
