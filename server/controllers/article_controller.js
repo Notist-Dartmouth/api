@@ -61,17 +61,20 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Returns a promise.
 
 export const getArticleAnnotations = (user, uri, topLevelOnly) => {
-  const query = {};
+  const query = { parent: null };
   if (user === null) {
     query.isPublic = true;
   } else {
     query.$or = [{ groups: { $in: user.groups } },
-                         { isPublic: true },
-                         { author: user._id }];
+                 { isPublic: true },
+                 { author: user._id }];
   }
   if (topLevelOnly) {
-    return getArticle(uri, query)
-    .populate({ path: 'annotations' })
+    return getArticle(uri)
+    .populate({
+      path: 'annotations',
+      match: query,
+    })
     .exec()
     .then((article) => {
       if (article === null) {
@@ -80,8 +83,9 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
       return article.annotations;
     });
   } else {
+    const deepPath = 'annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations';
     return getArticle(uri)
-    .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+    .deepPopulate(deepPath, { populate: { annotations: { match: query } } })
     .then((article) => {
       if (article === null) {
         return [];
