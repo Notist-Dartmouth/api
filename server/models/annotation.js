@@ -19,7 +19,7 @@ const rangeSchema = new Schema({
 const annotationSchema = new Schema({
   author: { type: ObjectId, ref: 'User' },
   article: { type: ObjectId, ref: 'Article' },
-  parent: { type: ObjectId, ref: 'Annotation' },
+  parent: { type: ObjectId, ref: 'Annotation', default: null },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
@@ -94,11 +94,11 @@ annotationSchema.pre('remove', function preRemove(next, user, callback) {
   });
 });
 
-annotationSchema.virtual('isTopLevel').get(function () {
-  return this.parent == undefined;
+annotationSchema.virtual('isTopLevel').get(function getIsTopLevel() {
+  return this.parent === null;
 });
 
-annotationSchema.virtual('numChildren').get(function () {
+annotationSchema.virtual('numChildren').get(function getNumChildren() {
   return this.childAnnotations.length;
 });
 
