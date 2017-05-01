@@ -196,21 +196,31 @@ router.get('/api/group/:groupId/articles', (req, res) => {
 /*
 Get articles posted in a group as pages. Request should include query:
   limit: number of items per page
-  page: number of page to be loaded
+  page: number of page to be loaded (starting at 0)
   sort: field to sort on, must be field on Article model
   sort_dir: direction to sort in, -1 for decreasing, 1 for increasing
 */
 router.get('/api/group/:groupId/articles/paginated', (req, res) => {
-  const conditions = { query: {}, pagination: {}, sort: {} };
-  conditions.query.group = req.params.groupId;
-  if (req.query.limit) {
-    conditions.pagination.limit = req.query.limit;
+  const conditions = { pagination: {}, sort: {} };
+
+  // defaults
+  let limit = Number.parseInt(req.query.limit, 10);
+  if (!limit || limit < 0) {
+    limit = 50;
   }
-  if (req.query.last) {
-    conditions.pagination.skip = req.query.limit * req.query.page;
+  let page = Number.parseInt(req.query.page, 10);
+  if (!page || page < 0) {
+    page = 0;
   }
-  if (req.query.sort) {
-    conditions.sort[req.query.sort] = req.query.sort_dir;
+  let direction = Number.parseInt(req.query.sort_dir, 10);
+  if (!(direction === 1 || direction === -1)) {
+    direction = -1;
+  }
+
+  conditions.pagination.limit = limit;
+  conditions.pagination.skip = limit * page;
+  if (typeof(req.query.sort) === 'string') {
+    conditions.sort[req.query.sort] = direction;
   }
 
   Groups.getGroupArticlesPaginated(req.params.groupId, conditions)
@@ -303,8 +313,8 @@ router.get('/api/article/annotations/paginated', (req, res) => {
     conditions.query.isPublic = true;
   } else {
     conditions.query.$or = [{ groups: { $in: user.groups } },
-                       { isPublic: true },
-                       { author: user._id }];
+                            { isPublic: true },
+                            { author: user._id }];
   }
 
   if (req.query.limit) {

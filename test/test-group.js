@@ -23,7 +23,8 @@ describe('Groups', function () {
   let newGroup;
   let newUser;
   let user2;
-  let article1, article2, article3, article4;
+  let article1;
+  let article2;
   const fakeObjectId = '123412341234123412341234';
 
   before(function () {
@@ -161,7 +162,7 @@ describe('Groups', function () {
 
           conditions.query = { groups: newGroup.id };
           conditions.pagination = { skip: 1, limit: 2 };
-          conditions.sort_opt = { editDate: -1 };
+          conditions.sort = { editDate: -1 };
 
           return Groups.getGroupArticlesPaginated(newGroup.id, conditions)
             .then((articles) => {
@@ -256,15 +257,16 @@ describe('Groups', function () {
         });
     });
 
-    it('should get two articles of group', function () {
+    it('should get two articles of group', function (done) {
       passportStub.login(newUser);
       chai.request(app)
-      .get(`/api/group/${newGroup._id}/articles/paginated&page=1&limit=2`)
+      .get(`/api/group/${newGroup._id}/articles/paginated?page=1&limit=2`)
       .end((err, res) => {
         res.body.should.be.an('array');
         res.body.should.have.length('2');
         res.body[0].should.have.property('uri');
         res.body[0].should.have.property('info');
+        done();
       });
     });
 
