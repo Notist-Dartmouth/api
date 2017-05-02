@@ -56,6 +56,20 @@ export const updateUserExploreNumber = (user, value) => {
 };
 
 /*
+Everytime new user interacts / engages with article by annotating, update avg user score.
+*/
+export const updateArticleScore = (article, value) => {
+  Article.findById(article)
+  .then(article => {
+    const old_avg = article.avgUserScore;
+    const new_avg = ((old_avg * article.numShares) + value) / (article.numShares + 1);
+    article.avgUserScore = new_avg;
+    article.numShares = article.numShares + 1;
+    article.save();
+  });
+};
+
+/*
 Function to get called when populating the explore feed view
 QUESTION: Where are we getting initial data from, facebook ?!
 
