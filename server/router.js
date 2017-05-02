@@ -255,6 +255,27 @@ router.get('/api/article/annotations', (req, res) => {
 });
 
 /*
+Get number of annotations and replies of an article
+Input:
+  req.body.uri: URI of article
+Output: Returns number of the annotations and replies
+*/
+router.get('/api/article/annotations/count', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const articleURI = req.query.uri;
+  Articles.getArticleReplyNumber(user, articleURI)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
 Get specific annotation.
 Input:
   req.params.id: String annotation ID

@@ -98,17 +98,12 @@ Input:
   uri: String article uri
 Output: Number of replies.
 */
-const flatten = (arr) => {
-  return arr.reduce((flat, toFlatten) => {
-    return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
-  }, []);
-};
-
 export const getArticleReplyNumber = (user, uri) => {
   return getArticleAnnotations(user, uri, false)
   .then((annotations) => {
-    const anno = flatten(annotations);
-    return anno.length;
+    const stringAnno = JSON.stringify(annotations);
+    const count = (stringAnno.match(/_id/g) || []).length;
+    return count;
   });
 };
 
