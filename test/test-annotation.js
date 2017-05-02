@@ -45,13 +45,15 @@ describe('Annotations', function () {
       ]).then((res) => {
         done();
       })
-      .catch((err) => {
-        done(err);
-      });
+        .catch((err) => {
+          done(err);
+        });
     }, 50);
   });
 
   describe('FirstAnnotation', function () {
+    let AnnotationB;
+
     it('should return 401 error for unauthenticated user', function (done) {
       chai.request(app)
       .post('/api/annotation')
@@ -169,6 +171,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.articleText.should.equal(articleText);
         res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
+        AnnotationB = res.body.SUCCESS;
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
       return util.checkDatabase((resolve) => {
@@ -190,6 +193,26 @@ describe('Annotations', function () {
 
       return util.checkDatabase((resolve) => {
         resolve(true);
+      });
+    });
+
+    it('should return only two annotations on articleA visible to user', function (done) {
+      Promise.all([
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a third annotation on ArticleA'),
+        util.addArticleAnnotation(ArticleA._id, null, user, 'This is a fourth annotation on ArticleA'),
+      ]).then((newAnnotations) => {
+        passportStub.login(user);
+        chai.request(app)
+        .get(`/api/article/annotations/paginated?article=${ArticleA.id}&limit=2&toplevel=true&last=${newAnnotations[1]._id}`)
+        .end(function (err, res) {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.should.have.length.of(2);
+          res.body[0].should.have.property('articleText');
+          res.body[0].articleText.should.eql(newAnnotations[0].articleText);
+          res.body[0].should.have.property('text');
+          done();
+        });
       });
     });
 
@@ -303,6 +326,15 @@ describe('Annotations', function () {
       return util.checkDatabase((resolve) => {
         resolve(Annotation.findById(StupidAnnotation.id).should.eventually.be.null);
       });
+
+      // TODO: Remove this, for now keep commented for reference
+      // return util.checkDatabase((resolve) => {
+      //   let emptyoptions;
+      //   resolve(Article.findOne({ uri: ArticleA.uri }).populate({ path: 'annotations', options: { limit: 2, sort: { createDate: -1 } } })
+      //   .then((article) => {
+      //     console.log(article.annotations);
+      //   }));
+      // });
     });
 
     it('should delete annotation with reply', function () {
