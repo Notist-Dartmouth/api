@@ -24,12 +24,36 @@ User Flow:
 * Function that uses politecho.com to determine one's social media bubble, computing
 * an average and assigning it to a user
 */
-export const computeUserExploreNumber = () => {};
+export const computeUserExploreNumber = (user) => {
+  // get friends politecho scores, assuming returned as an array
+  const friendScores = getAllFriendsScores2();
+
+  // compute average
+  let total = 0;
+  let num_friends = 0;
+  friendScores.forEach(function (score) {
+    num_friends++;
+    total = total + score;
+  });
+
+  // update user
+  const explore_num = total / num_friends;
+  user.numExplorations = num_friends; // do I need to get User or does this work?
+  user.exploreNumber = explore_num;
+  user.save();
+};
 
 /*
 * Every time a user annotates an article, we should re-calculate their average
 */
-export const updateUserExploreNumber = () => {};
+export const updateUserExploreNumber = (user, value) => {
+  const old_avg = user.exploreNumber;
+  const new_avg = ((old_avg * user.numExplorations) + value) / (user.numExplorations + 1);
+
+  user.exploreNumber = new_avg;
+  user.numExplorations = user.numExplorations + 1;
+  user.save();
+};
 
 /*
 Function to get called when populating the explore feed view
