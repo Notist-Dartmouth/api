@@ -28,7 +28,7 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
   const user = new User({
     googleId: `test_${username}`,
     name: `Test User '${username}'`,
-    username,
+    // username,
     email: `${username}@testuri.com`,
   });
 

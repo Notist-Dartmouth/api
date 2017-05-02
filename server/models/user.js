@@ -19,12 +19,12 @@ const userSchema = new Schema({
 
 userSchema.virtual('articles').get(() => {
   // get annotations
-  return Annotation.distinct(article, { author: this }).then((articles) => {
+  return Annotation.distinct('article', { author: this }).then((articles) => {
     return articles;
   });
 });
 
-userSchema.virtual('annotations').get(function () {
+userSchema.virtual('annotations').get(function getUserAnnotations() {
   return Annotation.find({ author: this }).then((annotations) => {
     return annotations;
   });
