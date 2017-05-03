@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import * as Explore from './explore';
 
 import util from './util';
 
@@ -230,6 +231,46 @@ router.get('/api/group/:groupId/articles/paginated', (req, res) => {
   .catch((err) => {
     util.returnError(res, err);
   });
+});
+
+/*
+* Get articles to populate a user's explore feed. Requires that the user's
+* exploreNumber and exploreStandardDev have already been calculated.
+* Query parameters (optional):
+*   limit: number of items per page
+*   page: number of page to be loaded (starting at 0)
+*/
+router.get('/api/explore', (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    if (user.exploreNumber === undefined || user.exploreStandardDev === undefined) {
+      util.returnError(res, new Error('Explore data not yet computed'));
+      return;
+    }
+    const conditions = { pagination: {} };
+
+    // defaults
+    let limit = Number.parseInt(req.query.limit, 10);
+    if (!limit || limit < 0) {
+      limit = 50;
+    }
+    let page = Number.parseInt(req.query.page, 10);
+    if (!page || page < 0) {
+      page = 0;
+    }
+    conditions.pagination.limit = limit;
+    conditions.pagination.skip = limit * page;
+
+    Explore.populateExploreFeed(user, conditions)
+    .then((result) => {
+      util.returnGetSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else { // not authenticated
+    res.status(401).end();
+  }
 });
 
 /*

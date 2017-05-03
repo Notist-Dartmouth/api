@@ -35,7 +35,8 @@ export const getArticle = (uri, query) => {
 /*
 Get a list of articles, filtered by some conditions.
 Input:
-  query: A mongodb query selector object
+  filter: A mongodb query selector object
+  options: pagination/sort options (pagination.skip, pagination.limit, and sort)
 Output: Resolves to a list of matching groups
 Example:
   Articles.getArticlesFiltered({
@@ -44,11 +45,22 @@ Example:
     groups: someGroup._id,
   });
 */
-export const getArticlesFiltered = (query) => {
-  if (typeof query !== 'object') {
-    return Promise.reject(new Error('Invalid article query'));
+export const getArticlesFiltered = (filter, options) => {
+  if (typeof filter !== 'object') {
+    return Promise.reject(new Error('Invalid article filter'));
   }
-  return Article.find(query);
+
+  let query = Article.find(filter);
+  if (options.sort) {
+    query = query.sort(options.sort);
+  }
+  if (options.pagination.skip) {
+    query = query.skip(options.pagination.skip);
+  }
+  if (options.pagination.limit) {
+    query = query.limit(options.pagination.limit);
+  }
+  return query;
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {
