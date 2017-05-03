@@ -28,8 +28,8 @@ User Flow:
 * [exploreNumber-exploreStdDev*EXPLORE_MAX_DISTANCE exploreNumber-exploreStdDev*EXPLORE_MIN_DISTANCE] U
 * [exploreNumber+exploreStdDev*EXPLORE_MIN_DISTANCE exploreNumber+exploreStdDev*EXPLORE_MAX_DISTANCE]
 */
-const EXPLORE_MIN_DISTANCE = 1;
-const EXPLORE_MAX_DISTANCE = 2;
+export const MIN_DISTANCE = 1;
+export const MAX_DISTANCE = 2;
 
 /*
 * Function that uses politecho.com to determine one's social media bubble, computing
@@ -52,21 +52,21 @@ export const populateExploreFeed = (user, conditions) => {
   // target avgUserScores
   const mean = user.exploreNumber;
   const std = user.exploreStandardDev;
-  const lowerMin = mean - EXPLORE_MAX_DISTANCE * std;
-  const lowerMax = mean - EXPLORE_MIN_DISTANCE * std;
-  const upperMin = mean + EXPLORE_MIN_DISTANCE * std;
-  const upperMax = mean + EXPLORE_MAX_DISTANCE * std;
+  const lowerMin = mean - MAX_DISTANCE * std;
+  const lowerMax = mean - MIN_DISTANCE * std;
+  const upperMin = mean + MIN_DISTANCE * std;
+  const upperMax = mean + MAX_DISTANCE * std;
 
-  const knownArticles = user.articles;
-  const filter = {
-    _id: { $nin: knownArticles },
-    $or: [
-      { avgUserScore: { $gt: lowerMin, $lt: lowerMax } },
-      { avgUserScore: { $gt: upperMin, $lt: upperMax } },
-    ],
-  };
-
-  return Articles.getArticlesFiltered(filter, conditions);
+  return user.articles.then((knownArticles) => {
+    const filter = {
+      _id: { $nin: knownArticles },
+      $or: [
+        { avgUserScore: { $gt: lowerMin, $lt: lowerMax } },
+        { avgUserScore: { $gt: upperMin, $lt: upperMax } },
+      ],
+    };
+    return Articles.getArticlesFiltered(filter, conditions);
+  });
 };
 
 /*
