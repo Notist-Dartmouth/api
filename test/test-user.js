@@ -66,7 +66,6 @@ describe('Users', function () {
           .end((err, res) => {
             should.not.exist(err);
             res.should.have.status(200);
-            res.body.should.have.property('username', 'user0');
             res.body.should.have.property('email', 'user0@testuri.com');
             res.body.should.have.property('name', 'Test User \'user0\'');
             res.body.should.have.property('googleId', 'test_user0');
@@ -82,7 +81,6 @@ describe('Users', function () {
           .end((err, res) => {
             should.not.exist(err);
             res.should.have.status(200);
-            res.body.should.have.property('username', 'user1');
             res.body.should.have.property('email', 'user1@testuri.com');
             res.body.should.have.property('name', 'Test User \'user1\'');
             res.body.should.have.property('googleId', 'test_user1');

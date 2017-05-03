@@ -5,7 +5,6 @@ import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 
 import util from './util';
-import path from 'path';
 
 const router = Router();
 
@@ -179,9 +178,52 @@ Get the articles of a group.
 Input:
   req.params.groupId: String group ID
 Output: Returns json list of articles of the group.
+
+NOTE: user is not validated here because assumption is that this call is made
+on navigating to this group, which is only possible if user can see group
 */
 router.get('/api/group/:groupId/articles', (req, res) => {
   Groups.getGroupArticles(req.params.groupId)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+
+/*
+Get articles posted in a group as pages. Request should include query:
+  limit: number of items per page
+  page: number of page to be loaded (starting at 0)
+  sort: field to sort on, must be field on Article model
+  sort_dir: direction to sort in, -1 for decreasing, 1 for increasing
+*/
+router.get('/api/group/:groupId/articles/paginated', (req, res) => {
+  const conditions = { pagination: {}, sort: {} };
+
+  // defaults
+  let limit = Number.parseInt(req.query.limit, 10);
+  if (!limit || limit < 0) {
+    limit = 50;
+  }
+  let page = Number.parseInt(req.query.page, 10);
+  if (!page || page < 0) {
+    page = 0;
+  }
+  let direction = Number.parseInt(req.query.sort_dir, 10);
+  if (!(direction === 1 || direction === -1)) {
+    direction = -1;
+  }
+
+  conditions.pagination.limit = limit;
+  conditions.pagination.skip = limit * page;
+  if (typeof(req.query.sort) === 'string') {
+    conditions.sort[req.query.sort] = direction;
+  }
+
+  Groups.getGroupArticlesPaginated(req.params.groupId, conditions)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
@@ -235,17 +277,59 @@ router.post('/api/annotation', (req, res) => {
 /*
 Get annotations of an article
 Input:
-  req.body.uri: URI of article
+  req.query.uri: URI of article
 Output: Returns json file of the article's annotations or error.
 */
+
 router.get('/api/article/annotations', (req, res) => {
   let user = null;
-  const topLevelOnly = req.query.topLevelOnly;
+  const topLevelOnly = req.query.toplevel;
   if (req.isAuthenticated()) {
     user = req.user;
   }
+
   const articleURI = req.query.uri;
   Articles.getArticleAnnotations(user, articleURI, topLevelOnly)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+router.get('/api/article/annotations/paginated', (req, res) => {
+  let user = null;
+  const conditions = { query: {}, pagination: {} };
+
+  conditions.topLevelOnly = req.query.toplevel;
+  conditions.query.article = req.query.article;
+
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+
+  if (user === null) {
+    conditions.query.isPublic = true;
+  } else {
+    conditions.query.$or = [{ groups: { $in: user.groups } },
+                            { isPublic: true },
+                            { author: user._id }];
+  }
+
+  if (req.query.limit) {
+    conditions.pagination.limit = req.query.limit * 1;
+  }
+
+  if (req.query.last) {
+    conditions.pagination.last = req.query.last;
+  }
+
+  if (req.query.sort) {
+    conditions.pagination.sort = req.query.sort; // TODO: assumption is always decreasing order right now
+  }
+
+  Articles.getArticleAnnotationsPaginated(user, conditions)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
