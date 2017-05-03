@@ -248,18 +248,8 @@ router.get('/api/explore', (req, res) => {
       return;
     }
     const conditions = { pagination: {} };
-
-    // defaults
-    let limit = Number.parseInt(req.query.limit, 10);
-    if (!limit || limit < 0) {
-      limit = 50;
-    }
-    let page = Number.parseInt(req.query.page, 10);
-    if (!page || page < 0) {
-      page = 0;
-    }
-    conditions.pagination.limit = limit;
-    conditions.pagination.skip = limit * page;
+    conditions.pagination.limit = Number.parseInt(req.query.limit, 10);
+    conditions.pagination.skip = Number.parseInt(req.query.page, 10);
 
     Explore.populateExploreFeed(user, conditions)
     .then((result) => {
