@@ -318,6 +318,27 @@ router.get('/api/annotation/:id/replies', (req, res) => {
 });
 
 /*
+Get replies to an annotation
+Input:
+  req.params.id: String annotation ID
+Output: Returns json file of the annotation's replies or error.
+*/
+router.get('/api/annotation/:id/replies/all', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const annotationId = req.params.id;
+  Annotations.getAnnotationReplies(user, annotationId)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
 Edit specific annotation.
 Input:
   req.params.id: String annotation ID
