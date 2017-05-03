@@ -5,7 +5,7 @@ import * as Groups from '../controllers/group_controller';
 import Article from './article';
 
 mongoose.Promise = global.Promise;
-
+const deepPopulate = require('mongoose-deep-populate')(mongoose);
 const ObjectId = Schema.Types.ObjectId;
 
 // sub-schema for "ranges" entries
@@ -21,6 +21,7 @@ const annotationSchema = new Schema({
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation' },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
+  replyDepth: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
@@ -102,6 +103,10 @@ annotationSchema.virtual('numChildren').get(function () {
   return this.childAnnotations.length;
 });
 
+
+annotationSchema.plugin(deepPopulate, {
+  populate: 'childAnnotations',
+});
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 
