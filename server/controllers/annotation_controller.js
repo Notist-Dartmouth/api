@@ -21,6 +21,17 @@ export const getAnnotation = (user, annotationId) => {
     });
 };
 
+// // access to all of an annotation's replies
+export const getAnnotationReplies = (user, annotationId) => {
+  return Annotation.findById(annotationId)
+  .deepPopulate(['.childAnnotations'.repeat(50)])
+  .then((annotation) => {
+    if (annotation === null) {
+      return [];
+    }
+    return annotation.childAnnotations;
+  });
+};
 
 export const createAnnotation = (user, body, article) => {
   const annotation = new Annotation();
