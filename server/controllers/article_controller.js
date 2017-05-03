@@ -51,14 +51,16 @@ export const getArticlesFiltered = (filter, options) => {
   }
 
   let query = Article.find(filter);
-  if (options.sort) {
-    query = query.sort(options.sort);
-  }
-  if (options.pagination.skip) {
-    query = query.skip(options.pagination.skip);
-  }
-  if (options.pagination.limit) {
-    query = query.limit(options.pagination.limit);
+  if (typeof options === 'object') {
+    if (options.sort) {
+      query = query.sort(options.sort);
+    }
+    if (options.pagination.skip) {
+      query = query.skip(options.pagination.skip);
+    }
+    if (options.pagination.limit) {
+      query = query.limit(options.pagination.limit);
+    }
   }
   return query;
 };

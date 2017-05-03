@@ -17,11 +17,9 @@ const userSchema = new Schema({
   exploreStandardDev: Number,
 });
 
-userSchema.virtual('articles').get(() => {
+userSchema.virtual('articles').get(function getUserArticles() {
   // get annotations
-  return Annotation.distinct('article', { author: this }).then((articles) => {
-    return articles;
-  });
+  return Annotation.distinct('article', { author: this });
 });
 
 userSchema.virtual('annotations').get(function getUserAnnotations() {
