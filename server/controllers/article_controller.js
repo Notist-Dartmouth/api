@@ -85,7 +85,8 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
   } else {
     const deepPath = 'annotations'.concat('.childAnnotations'.repeat(50));
     return getArticle(uri)
-    .deepPopulate(deepPath, { match: query })
+    // .deepPopulate(deepPath, { match: query })
+    .deepPopulate(deepPath, { populate: { annotations: { match: { parent: null } } } })
     .then((article) => {
       if (article === null) {
         return [];
