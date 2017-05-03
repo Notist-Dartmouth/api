@@ -71,7 +71,7 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
     });
   } else {
     return getArticle(uri)
-    .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+    .deepPopulate(['annotations'.concat('.childAnnotations'.repeat(50))])
     .then((article) => {
       if (article === null) {
         return [];
@@ -106,7 +106,6 @@ export const getArticleReplyNumber = (user, uri) => {
     return count;
   });
 };
-
 
 
 /*
