@@ -21,7 +21,6 @@ const annotationSchema = new Schema({
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation', default: null },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
-  replyDepth: { type: Number, default: 0 },
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
