@@ -20,16 +20,15 @@ exports.checkDatabase = function (delayedCallback, dbUpdateWait = 50) {
   });
 };
 
-exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = 'Group') {
-  if (typeof nGroups !== 'number' || nGroups < 0 || typeof username !== 'string' || typeof groupName !== 'string') {
+exports.addUserWithNGroups = function (nGroups, name = 'User', groupName = 'Group') {
+  if (typeof nGroups !== 'number' || nGroups < 0 || typeof name !== 'string' || typeof groupName !== 'string') {
     throw new TypeError('Invalid argument(s)');
   }
 
   const user = new User({
-    googleId: `test_${username}`,
-    name: `Test User '${username}'`,
-    // username,
-    email: `${username}@testuri.com`,
+    googleId: `${name}_id`,
+    name,
+    email: `${name}@testuri.com`,
   });
 
   const groups = [];
@@ -58,16 +57,25 @@ exports.addUserWithNGroups = function (nGroups, username = 'user', groupName = '
   });
 };
 
-exports.addUserWithGroup = function (username = 'user', groupName = 'Group') {
-  return exports.addUserWithNGroups(1, username, groupName).then((res) => {
+exports.addUserWithGroup = function (name = 'User', groupName = 'Group') {
+  return exports.addUserWithNGroups(1, name, groupName).then((res) => {
     return { user: res.user, group: res.groups[0] };
   });
 };
 
-exports.addUser = function (username = 'user') {
-  return exports.addUserWithNGroups(0, username).then((res) => {
+exports.addUser = function (name = 'User') {
+  return exports.addUserWithNGroups(0, name).then((res) => {
     return res.user;
   });
+};
+
+exports.addNUsers = function (nUsers, name = 'User') {
+  const users = [];
+  for (let i = 0; i < nUsers; i++) {
+    const newUser = exports.addUser(`${name}${i}`);
+    users.push(newUser);
+  }
+  return Promise.all(users);
 };
 
 exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {
@@ -100,6 +108,15 @@ exports.addArticleInGroup = function (groupId, uri = 'www.testuri.com') {
 
 exports.addArticle = function (uri = 'www.testuri.com') {
   return exports.addArticleInGroups([], uri);
+};
+
+exports.addNArticles = function (nArticles, domain = 'testuri', tld = 'com') {
+  const articles = [];
+  for (let i = 0; i < nArticles; i++) {
+    const newArticle = exports.addArticle(`${domain}${i}.${tld}`);
+    articles.push(newArticle);
+  }
+  return Promise.all(articles);
 };
 
 exports.addArticleAnnotation = function (articleId, groupId, author, text = 'This is a test', isPublic = true) {
