@@ -1,4 +1,5 @@
 import Group from '../models/group';
+import Article from '../models/article';
 
 /*
 Create a new group.
@@ -106,7 +107,7 @@ Input:
 Output: Rejects if groupId is not found;
 otherwise resolves to array of article objects that are in the group.
 */
-// TODO: we don't actually have a router function for this quite yet
+// TODO: should only return articles within last 3 months
 export const getGroupArticles = (groupId) => {
   return Group.findById(groupId)
   .populate({ path: 'articles' })
@@ -122,7 +123,22 @@ export const getGroupArticles = (groupId) => {
   });
 };
 
-export const getGroupArticlesPaginated = (groupId, pagination_options) => {
-  return Articles.find({ groups: groupId }).limit(pagination_options.limit);
-  // TODO: somehow need to figure out sorting
+/*
+*/
+export const getGroupArticlesPaginated = (groupId, conditions) => {
+  if (!conditions) {
+    conditions = { pagination: {}, sort: {} };
+  }
+
+  const query = { groups: groupId };
+
+  const pagination = conditions.pagination || {};
+  if (!typeof(conditions.sort) === 'object' || Object.keys(conditions.sort).length === 0) {
+    conditions.sort = { createDate: -1 };
+  }
+
+  return Article.find(query)
+    .sort(conditions.sort)
+    .skip(pagination.skip)
+    .limit(pagination.limit);
 };

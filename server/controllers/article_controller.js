@@ -2,8 +2,8 @@ import Article from '../models/article';
 import * as Groups from './group_controller';
 import Annotation from '../models/annotation';
 
-import mongoose from 'mongoose';
-var ObjectId = mongoose.Types.ObjectId;
+import mongodb from 'mongodb';
+const ObjectId = mongodb.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
@@ -13,16 +13,22 @@ export const createArticle = (uri, groups) => {
   article.groups = groups;
   return article.save()
   .then((result) => {
-    return Groups.addGroupArticle(result._id, groups)
+    return Groups.addGroupArticle(result._id, groups) // TODO: move to post-save
     .then((res) => {
       return result;
     });
   });
 };
 
-export const getArticle = (uri) => {
+// Query must be JSON with an "uri" field
+export const getArticle = (uri, query) => {
+  if (!query) {
+    query = {};
+  }
+
   const nURI = Article.normalizeURI(uri);
-  return Article.findOne({ uri: nURI });
+  query.uri = nURI;
+  return Article.findOne(query);
 };
 
 
@@ -55,9 +61,20 @@ export const addArticleAnnotation = (articleId, annotationId) => {
 // Returns a promise.
 
 export const getArticleAnnotations = (user, uri, topLevelOnly) => {
+  const query = { parent: null };
+  if (user === null) {
+    query.isPublic = true;
+  } else {
+    query.$or = [{ groups: { $in: user.groups } },
+                 { isPublic: true },
+                 { author: user._id }];
+  }
   if (topLevelOnly) {
     return getArticle(uri)
-    .populate({ path: 'annotations' })
+    .populate({
+      path: 'annotations',
+      match: query,
+    })
     .exec()
     .then((article) => {
       if (article === null) {
@@ -66,8 +83,9 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
       return article.annotations;
     });
   } else {
+    const deepPath = 'annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations';
     return getArticle(uri)
-    .deepPopulate(['annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations'])
+    .deepPopulate(deepPath, { populate: { annotations: { match: query } } })
     .then((article) => {
       if (article === null) {
         return [];
@@ -79,16 +97,32 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
 
 /*
 * Get all annotations on an article but as dictated by pagination options
-* TODO: implement sorting
 */
-export const getArticleAnnotationsPaginated = (user, article, topLevelOnly, pagination) => {
-  if (topLevelOnly) {
-    return Annotation.find({ article, _id: { $gt: ObjectId(pagination.last) } })
-    .sort({ createdDate: 1 })
+export const getArticleAnnotationsPaginated = (user, conditions) => {
+  const query = conditions.query;
+  const pagination = conditions.pagination;
+  let sortOptions = {};
+
+  // TODO: sorting needs work
+  if (pagination.last && !pagination.sort) { // Default is to sort in order of most recent annotation
+    query._id = { $lt: new ObjectId(pagination.last) };
+    sortOptions = { createDate: -1 };
+    // query = { conditions.query, article, _id: { $gt: new ObjectId(pagination.last) } }; // should be less than if sorting in decreasing
+  } else if (pagination.last && pagination.sort && pagination.sort_dir === -1) { // NOTE: right now must be sorting on DATES
+    query[pagination.sort] = { $lt: new ObjectId(pagination.last) };
+    sortOptions[pagination.sort] = -1;
+  } else if (pagination.last && pagination.sort && pagination.sort_dir === 1) {
+    query[pagination.sort] = { $gt: new ObjectId(pagination.last) };
+    sortOptions[pagination.sort] = 1;
+  }
+
+  if (conditions.topLevelOnly) {
+    return Annotation.find(query)
+    .sort(sortOptions)
     .limit(pagination.limit);
   } else {
-    return Annotation.find({ article })
-    .sort({ createdDate: 1 })
+    return Annotation.find(query)
+    .sort(sortOptions)
     .limit(pagination.limit)
     .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
   }
