@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import { getFriendsLinkShares } from './explore.js';
 
 import util from './util';
 import path from 'path';
@@ -19,6 +20,13 @@ const router = Router();
   GET -> {stuff requested}
   DELETE -> {success}
 */
+
+// test for explore
+router.get('/api/explore', (req, res) => {
+  const fbData = getFriendsLinkShares();
+  console.log(fbData);
+  util.returnGetSuccess(res, 'SUCCESS!');
+});
 
 // navigate to logout page
 router.get('/logout', (req, res) => {
