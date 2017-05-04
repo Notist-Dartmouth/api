@@ -19,6 +19,32 @@ User Flow:
 3) Serve articles
   -> show articles that have avgUserScore in a range of some constant * standardDeviation
 */
+import FB from 'fb';
+/*
+* Function to get friend's url shares
+*/
+export const getFriendsLinkShares = () => {
+  // GET /v2.9/me?fields=friends{posts{link}}
+  // Host: graph.facebook.com
+  // TODO: For now, go to facebook graph api explorer and click "get user access token", then copy and paste to here
+  FB.setAccessToken('EAACEdEose0cBAEtOHIoGMdXjPuedKNw3wp0hpNqhZA2WX9nfZBy0VNOM1vmGTZAzZBDRZAUMkZCVkCnU8a4JBu06pSsG1ZAkLCAM91ENJYZB8xDS4S5mNZBb9FtiBLM19k69vqxy5mSr6GXZANeuqwd65utxW2XlUJRe4vDizQuj6rRPeocZBbkOFZBEX9exJJw09bUZD');
+  FB.api(
+    '/me?fields=friends{posts{link}}',
+    // '/me?fields=friends',
+    function (response) {
+      console.log('in explore');
+      console.log(response);
+      if (response && !response.error) {
+        /* handle the result */
+        console.log('response');
+        return response;
+      } else {
+        console.log('error');
+        return response.error;
+      }
+    }
+  );
+};
 
 /*
 * Function that uses politecho.com to determine one's social media bubble, computing
