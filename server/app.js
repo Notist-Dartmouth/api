@@ -42,11 +42,18 @@ app.use(passport.session());
 authInit(passport);
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: frontEndHost, failureRedirect: `${frontEndHost}/login` }));
+app.get('/auth/google/callback', passport.authenticate('google', {
+  successRedirect: frontEndHost,
+  failureRedirect: `${frontEndHost}/login`,
+  failureFlash: true,
+}));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { successRedirect: frontEndHost,
-                                      failureRedirect: `${frontEndHost}/login` }));
+  passport.authenticate('facebook', {
+    successRedirect: frontEndHost,
+    failureRedirect: `${frontEndHost}/login`,
+    failureFlash: true,
+  }));
 
 // enable/disable cross origin resource sharing if necessary
 const corsOptions = {
