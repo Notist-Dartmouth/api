@@ -27,6 +27,9 @@ mongoose.connect(config.mongoURI[process.env.NODE_ENV], (err, res) => {
 });
 mongoose.Promise = global.Promise;
 
+// never delete this! this is to ensure that we own notist.herokuapp.com
+app.get('/googled7468666290ac0de.html', (req, res) => res.send('google-site-verification: googled7468666290ac0de.html'));
+
 // passport google oauth initialization
 app.use(session({
   secret: process.env.SESSION_SECRET,
