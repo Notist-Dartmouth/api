@@ -45,6 +45,7 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', passport.authenticate('google', {
   successRedirect: frontEndHost,
   failureRedirect: `${frontEndHost}/login`,
+  successFlash: 'Welcome to Notist! Redirecting to home page now.',
   failureFlash: true,
 }));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
@@ -52,6 +53,7 @@ app.get('/auth/facebook/callback',
   passport.authenticate('facebook', {
     successRedirect: frontEndHost,
     failureRedirect: `${frontEndHost}/login`,
+    successFlash: 'Welcome to Notist! Redirecting to home page now.',
     failureFlash: true,
   }));
 
