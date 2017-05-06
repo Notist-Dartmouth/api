@@ -10,7 +10,7 @@ import session from 'express-session';
 
 const MongoStore = require('connect-mongo')(session);
 
-const frontEndHost = process.env.NODE_ENV === 'production' ? 'https://notist.herokuapp.com' : 'http://localhost:5000';
+const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist.io' : 'http://localhost:5000';
 
 const app = express();
 module.exports.app = app;
