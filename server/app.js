@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+
+import newrelic from 'newrelic';
 import express from 'express';
 import mongoose from 'mongoose';
 import config from './_config';
@@ -28,7 +31,9 @@ mongoose.connect(config.mongoURI[process.env.NODE_ENV], (err, res) => {
 mongoose.Promise = global.Promise;
 
 // never delete this! this is to ensure that we own notist.herokuapp.com
-app.get('/googled7468666290ac0de.html', (req, res) => res.send('google-site-verification: googled7468666290ac0de.html'));
+app.get('/googled7468666290ac0de.html', (req, res) => {
+  res.send('google-site-verification: googled7468666290ac0de.html');
+});
 
 // passport google oauth initialization
 app.use(session({
