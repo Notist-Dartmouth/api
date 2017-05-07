@@ -10,7 +10,7 @@ import session from 'express-session';
 
 const MongoStore = require('connect-mongo')(session);
 
-const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist-frontend.herokuapp.com' : 'http://localhost:5000';
+const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist.io' : 'http://localhost:5000';
 
 const app = express();
 module.exports.app = app;
@@ -27,6 +27,9 @@ mongoose.connect(config.mongoURI[process.env.NODE_ENV], (err, res) => {
 });
 mongoose.Promise = global.Promise;
 
+// never delete this! this is to ensure that we own notist.herokuapp.com
+app.get('/googled7468666290ac0de.html', (req, res) => res.send('google-site-verification: googled7468666290ac0de.html'));
+
 // passport google oauth initialization
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -42,11 +45,16 @@ app.use(passport.session());
 authInit(passport);
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { successRedirect: frontEndHost, failureRedirect: `${frontEndHost}/login` }));
+app.get('/auth/google/callback', passport.authenticate('google', {
+  successRedirect: frontEndHost,
+  failureRedirect: `${frontEndHost}/login`,
+}));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { successRedirect: frontEndHost,
-                                      failureRedirect: `${frontEndHost}/login` }));
+  passport.authenticate('facebook', {
+    successRedirect: frontEndHost,
+    failureRedirect: `${frontEndHost}/login`,
+  }));
 
 // enable/disable cross origin resource sharing if necessary
 const corsOptions = {
