@@ -94,9 +94,10 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
       return article.annotations;
     });
   } else {
-    const deepPath = 'annotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations';
+    const deepPath = 'annotations'.concat('.childAnnotations'.repeat(50));
     return getArticle(uri)
-    .deepPopulate(deepPath, { populate: { annotations: { match: query } } })
+    // .deepPopulate(deepPath, { match: query })
+    .deepPopulate(deepPath, { populate: { annotations: { match: { parent: null } } } })
     .then((article) => {
       if (article === null) {
         return [];
@@ -135,9 +136,27 @@ export const getArticleAnnotationsPaginated = (user, conditions) => {
     return Annotation.find(query)
     .sort(sortOptions)
     .limit(pagination.limit)
-    .deepPopulate(['childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations.childAnnotations']);
+    .deepPopulate(['annotations'.concat('.childAnnotations'.repeat(50))]);
   }
 };
+
+
+/*
+Get the number of replies to an article
+Input:
+  user: User object
+  uri: String article uri
+Output: Number of replies.
+*/
+export const getArticleReplyNumber = (user, uri) => {
+  return getArticleAnnotations(user, uri, false)
+  .then((annotations) => {
+    const stringAnno = JSON.stringify(annotations);
+    const count = (stringAnno.match(/_id/g) || []).length;
+    return count;
+  });
+};
+
 
 /*
 Add multiple groups to an article
