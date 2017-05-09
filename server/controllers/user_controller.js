@@ -16,3 +16,19 @@ export const addUserGroups = (userId, groupIds) => {
 export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
 };
+
+export const postUserExploreNumber = (user, explore_num, num_friends) => {
+  user.exploreNumber = explore_num;
+  return user.save();
+};
+
+export const updateUserExploreNumber = (user, value) => {
+  const old_avg = user.exploreNumber;
+  const new_avg = ((old_avg * user.numExplorations) + value) / (user.numExplorations + 1);
+
+  // TODO: should how we update explore number ever change so as to prioritize what types of articles a user is annotating?
+
+  user.exploreNumber = new_avg;
+  user.numExplorations = user.numExplorations + 1;
+  return user.save();
+};
