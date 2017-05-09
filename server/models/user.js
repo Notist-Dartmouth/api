@@ -12,8 +12,8 @@ const userSchema = new Schema({
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  exploreNumber: Number,
-  numExplorations: Number,
+  exploreNumber: { type: Number, default: 0 },
+  numExplorations: { type: Number, default: 20 },
   exploreStandardDev: Number,
 });
 
