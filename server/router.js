@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import config from './_config';
 
 import util from './util';
 
@@ -23,7 +24,7 @@ const router = Router();
 router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
-  res.redirect('/login');
+  res.redirect(`${config.frontEndHost}/login`);
 });
 
 /*

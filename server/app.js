@@ -13,8 +13,6 @@ import session from 'express-session';
 
 const MongoStore = require('connect-mongo')(session);
 
-const frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist.io' : 'http://localhost:5000';
-
 const app = express();
 module.exports.app = app;
 
@@ -51,19 +49,19 @@ authInit(passport);
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', {
-  successRedirect: frontEndHost,
-  failureRedirect: `${frontEndHost}/login`,
+  successRedirect: config.frontEndHost,
+  failureRedirect: `${config.frontEndHost}/login`,
 }));
 app.get('/login/facebook', passport.authenticate('facebook', { scope: ['email'] }));
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', {
-    successRedirect: frontEndHost,
-    failureRedirect: `${frontEndHost}/login`,
+    successRedirect: config.frontEndHost,
+    failureRedirect: `${config.frontEndHost}/login`,
   }));
 
 // enable/disable cross origin resource sharing if necessary
 const corsOptions = {
-  origin: frontEndHost,
+  origin: config.frontEndHost,
   credentials: true,
 };
 app.use(cors(corsOptions));
