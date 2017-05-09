@@ -20,12 +20,59 @@ const router = Router();
   DELETE -> {success}
 */
 
-// test for explore
-router.get('/api/explore', (req, res) => {
-  const fbData = getFriendsLinkShares();
-  console.log(fbData);
-  util.returnGetSuccess(res, 'SUCCESS!');
+// Routes for Explore Related Endpoints
+
+// route to post user exploreNumber
+router.post('/api/user/exploreNumber', (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const explore_num = req.body.explore;
+    User.postUserExploreNumber(user, explore_num)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
 });
+
+// route to update user exploreNumber
+router.put('/api/user/exploreNumber'), (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const explore_num = req.body.explore;
+    User.updateUserExploreNumber(user, explore_num)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+};
+
+// route to update article avgUserScore
+router.put('/api/article/userScore'), (req, res) => {
+  if (req.isAuthenticated()) {
+    const article = req.body.article;
+    const value = req.body.value;
+    Article.updateArticleScore(article, value)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+};
+
 
 // navigate to logout page
 router.get('/logout', (req, res) => {
