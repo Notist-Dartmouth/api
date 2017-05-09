@@ -47,7 +47,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 authInit(passport);
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', passport.authenticate('google', { scope: [
+  'https://www.googleapis.com/auth/plus.login',
+  'https://www.googleapis.com/auth/plus.profile.emails.read',
+] }));
+
 app.get('/auth/google/callback', passport.authenticate('google', {
   successRedirect: config.frontEndHost,
   failureRedirect: `${config.frontEndHost}/login`,
