@@ -20,6 +20,17 @@ export const createArticle = (uri, groups) => {
   });
 };
 
+export const updateArticleScore = (article, value) => {
+  return Article.findById(article)
+  .then(article => {
+    const old_avg = article.avgUserScore;
+    const new_avg = ((old_avg * article.numShares) + value) / (article.numShares + 1);
+    article.avgUserScore = new_avg;
+    article.numShares = article.numShares + 1;
+    return article.save();
+  });
+};
+
 // Query must be JSON with an "uri" field
 export const getArticle = (uri, query) => {
   if (!query) {
