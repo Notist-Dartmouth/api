@@ -17,8 +17,9 @@ export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
 };
 
-export const postUserExploreNumber = (user, explore_num, num_friends) => {
+export const postUserExploreNumber = (user, explore_num, std_dev) => {
   user.exploreNumber = explore_num;
+  user.exploreStandardDev = std_dev;
   return user.save();
 };
 

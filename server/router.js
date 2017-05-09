@@ -29,7 +29,8 @@ router.post('/api/user/exploreNumber', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const explore_num = req.body.explore;
-    User.postUserExploreNumber(user, explore_num)
+    const std_dev = req.body.stdDev;
+    User.postUserExploreNumber(user, explore_num, stdDev)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
