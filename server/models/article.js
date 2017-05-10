@@ -9,6 +9,7 @@ const normalizeURI = (uri) => {
     stripWWW: true,
     normalizeHttps: true,
     removeDirectoryIndex: true,
+    removeQueryParameters: [/[^v]+/, /v{2,}/], // anything but /v/
   };
   return normalizeUrl(uri, options);
 };

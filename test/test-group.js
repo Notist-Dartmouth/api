@@ -120,7 +120,7 @@ describe('Groups', function () {
         .then((members) => {
           members.should.have.lengthOf(2);
           for (let i = 0; i < 2; i++) {
-            members[i].should.have.property('name').match(/Test User/);
+            members[i].should.have.property('name').match(/user/);
             members[i].should.have.property('email');
           }
           members[0].id.should.not.equal(members[1].id);

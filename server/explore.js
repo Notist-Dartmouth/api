@@ -3,6 +3,7 @@
 * File where all functions relating to explore algorithm exists
 *
 */
+import * as Articles from './controllers/article_controller';
 
 // Note: all the below are TODO.
 
@@ -21,6 +22,16 @@ User Flow:
 */
 
 /*
+* These constants define the range of the avgUserScores of articles the user should
+* see in explore, in units of their exploreStandardDev from their exploreNumber.
+* An article is included if its avgUserScore is in the following range:
+* [exploreNumber-exploreStdDev*EXPLORE_MAX_DISTANCE exploreNumber-exploreStdDev*EXPLORE_MIN_DISTANCE] U
+* [exploreNumber+exploreStdDev*EXPLORE_MIN_DISTANCE exploreNumber+exploreStdDev*EXPLORE_MAX_DISTANCE]
+*/
+export const MIN_DISTANCE = 1;
+export const MAX_DISTANCE = 2;
+
+/*
 * Function that uses politecho.com to determine one's social media bubble, computing
 * an average and assigning it to a user
 */
@@ -33,11 +44,30 @@ export const updateUserExploreNumber = () => {};
 
 /*
 Function to get called when populating the explore feed view
-QUESTION: Where are we getting initial data from, facebook ?!
-
 */
-export const populateExploreFeed = () => {};
+export const populateExploreFeed = (user, conditions) => {
+  // show most recent articles first
+  conditions.sort = { _id: -1 };
 
+  // target avgUserScores
+  const mean = user.exploreNumber;
+  const std = user.exploreStandardDev;
+  const lowerMin = mean - MAX_DISTANCE * std;
+  const lowerMax = mean - MIN_DISTANCE * std;
+  const upperMin = mean + MIN_DISTANCE * std;
+  const upperMax = mean + MAX_DISTANCE * std;
+
+  return user.articles.then((knownArticles) => {
+    const filter = {
+      _id: { $nin: knownArticles },
+      $or: [
+        { avgUserScore: { $gt: lowerMin, $lt: lowerMax } },
+        { avgUserScore: { $gt: upperMin, $lt: upperMax } },
+      ],
+    };
+    return Articles.getArticlesFiltered(filter, conditions);
+  });
+};
 
 /*
 * An interesting idea is to calculate the standard deviation of values from

@@ -31,8 +31,7 @@ describe('Articles', function () {
   before(function () {
     return util.addUserWithNGroups(2)
     .then((created) => {
-      group0 = created.groups[0];
-      group1 = created.groups[1];
+      [group0, group1] = created.groups;
       user = created.user;
 
       return util.addArticle(testArticleURI);
