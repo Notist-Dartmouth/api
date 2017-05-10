@@ -4,7 +4,7 @@ import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 import * as Explore from './explore';
-
+import config from './_config';
 import util from './util';
 
 const router = Router();
@@ -24,7 +24,7 @@ const router = Router();
 router.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
-  res.redirect('/login');
+  res.redirect(`${config.frontEndHost}/login`);
 });
 
 /*
@@ -370,6 +370,27 @@ router.get('/api/article/annotations/paginated', (req, res) => {
 });
 
 /*
+Get number of annotations and replies of an article
+Input:
+  req.body.uri: URI of article
+Output: Returns number of the annotations and replies
+*/
+router.get('/api/article/annotations/count', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const articleURI = req.query.uri;
+  Articles.getArticleReplyNumber(user, articleURI)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
 Get specific annotation.
 Input:
   req.params.id: String annotation ID
@@ -403,6 +424,27 @@ router.get('/api/annotation/:id/replies', (req, res) => {
   }
   const annotationId = req.params.id;
   Annotations.getReplies(user, annotationId)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
+Get replies to an annotation
+Input:
+  req.params.id: String annotation ID
+Output: Returns json file of the annotation's replies or error.
+*/
+router.get('/api/annotation/:id/replies/all', (req, res) => {
+  let user = null;
+  if (req.isAuthenticated()) {
+    user = req.user;
+  }
+  const annotationId = req.params.id;
+  Annotations.getAnnotationReplies(user, annotationId)
   .then((result) => {
     util.returnGetSuccess(res, result);
   })
