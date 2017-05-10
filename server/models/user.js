@@ -49,18 +49,29 @@ userSchema.methods.isMemberOfAny = function isMemberOfAny(groupIds) {
   return groupIds.some(this.isMemberOf, this);
 };
 
-userSchema.post('save', (user, next) => {
+userSchema.pre('save', function (next) {
   // Save annotation to article
-  user.addUserGroups(['59127637f0717e001cbfe583', // US Politics
-                      '59127895f0717e001cbfe584', // Random
-                      '59127908f0717e001cbfe585', // World News
-                      '591279ecf0717e001cbfe586', // Opinion
-                    ]).exec();
+  if (this.groups.length === 0) {
+    this.groups.push('59127637f0717e001cbfe583'); // US Politics
+    Group.findOneAndUpdate({ _id: '59127637f0717e001cbfe583' }, { $push: { members: this._id } }, { new: true }).exec();
 
-  Group.addGroupMember('59127637f0717e001cbfe583', user._id);
-  Group.addGroupMember('59127895f0717e001cbfe584', user._id);
-  Group.addGroupMember('59127908f0717e001cbfe585', user._id);
-  Group.addGroupMember('591279ecf0717e001cbfe586', user._id);
+    this.groups.push('59127895f0717e001cbfe584'); // Random
+    Group.findOneAndUpdate({ _id: '59127895f0717e001cbfe584' }, { $push: { members: this._id } }, { new: true }).exec();
+
+    this.groups.push('59127908f0717e001cbfe585'); // World News
+    Group.findOneAndUpdate({ _id: '59127908f0717e001cbfe585' }, { $push: { members: this._id } }, { new: true }).exec();
+
+    this.groups.push('591279ecf0717e001cbfe586'); // Opinion
+    Group.findOneAndUpdate({ _id: '591279ecf0717e001cbfe586' }, { $push: { members: this._id } }, { new: true }).exec();
+  }
+
+  // Local Testing
+  if (this.groups.length === 0) {
+    this.groups.push('591347fd39cd540bb1f0b6b1');
+    this.groups.push('58e6a5e0f44bad53ee1cb2b4');
+    Group.findOneAndUpdate({ _id: '591347fd39cd540bb1f0b6b1' }, { $push: { members: this._id } }, { new: true }).exec();
+    Group.findOneAndUpdate({ _id: '58e6a5e0f44bad53ee1cb2b4' }, { $push: { members: this._id } }, { new: true }).exec();
+  }
 
   next();
 });
