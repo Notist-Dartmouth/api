@@ -3,6 +3,7 @@ mongoose.Promise = global.Promise;
 import mongodb from 'mongodb';
 
 import Annotation from './annotation';
+import Group from './group';
 
 const userSchema = new Schema({
   googleId: String,
@@ -47,6 +48,22 @@ userSchema.methods.isMemberOfAll = function isMemberOfAll(groupIds) {
 userSchema.methods.isMemberOfAny = function isMemberOfAny(groupIds) {
   return groupIds.some(this.isMemberOf, this);
 };
+
+userSchema.post('save', (user, next) => {
+  // Save annotation to article
+  user.addUserGroups(['59127637f0717e001cbfe583', // US Politics
+                      '59127895f0717e001cbfe584', // Random
+                      '59127908f0717e001cbfe585', // World News
+                      '591279ecf0717e001cbfe586', // Opinion
+                    ]).exec();
+
+  Group.addGroupMember('59127637f0717e001cbfe583', user._id);
+  Group.addGroupMember('59127895f0717e001cbfe584', user._id);
+  Group.addGroupMember('59127908f0717e001cbfe585', user._id);
+  Group.addGroupMember('591279ecf0717e001cbfe586', user._id);
+
+  next();
+});
 
 const UserModel = mongoose.model('User', userSchema);
 
