@@ -51,6 +51,25 @@ export const getArticlesFiltered = (query) => {
   return Article.find(query);
 };
 
+export const getPublicArticlesPaginated = (conditions) => {
+  if (!conditions) {
+    conditions = { pagination: {}, sort: {} };
+  }
+
+  const pagination = conditions.pagination || {};
+  if (!typeof(conditions.sort) === 'object' || Object.keys(conditions.sort).length === 0) {
+    conditions.sort = { createDate: -1 };
+  }
+
+  return Annotation.distinct('article', { isPublic: true })
+  .then(articles => {
+    return Article.find({ _id: { $in: articles } })
+    .sort(conditions.sort)
+    .skip(pagination.skip)
+    .limit(pagination.limit);
+  });
+};
+
 export const addArticleAnnotation = (articleId, annotationId) => {
   return Article.findByIdAndUpdate(articleId, { $addToSet: { annotations: annotationId } });
 };
