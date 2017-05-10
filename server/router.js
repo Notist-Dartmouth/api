@@ -233,6 +233,38 @@ router.get('/api/group/:groupId/articles/paginated', (req, res) => {
   });
 });
 
+router.get('/api/public/articles/paginated', (req, res) => {
+  const conditions = { pagination: {}, sort: {} };
+
+  // defaults
+  let limit = Number.parseInt(req.query.limit, 10);
+  if (!limit || limit < 0) {
+    limit = 50;
+  }
+  let page = Number.parseInt(req.query.page, 10);
+  if (!page || page < 0) {
+    page = 0;
+  }
+  let direction = Number.parseInt(req.query.sort_dir, 10);
+  if (!(direction === 1 || direction === -1)) {
+    direction = -1;
+  }
+
+  conditions.pagination.limit = limit;
+  conditions.pagination.skip = limit * page;
+  if (typeof(req.query.sort) === 'string') {
+    conditions.sort[req.query.sort] = direction;
+  }
+
+  Articles.getPublicArticlesPaginated(conditions)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
 /*
 Create a new annotation.
 Input:

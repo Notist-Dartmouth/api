@@ -1,7 +1,7 @@
 node_modules
 config.js
 .env
-npm-debug.log
+*.log
 dist
 .DS_Store
 test/mocha.opts
