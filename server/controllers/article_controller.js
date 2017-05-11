@@ -162,7 +162,7 @@ export const getArticleReplyNumber = (user, uri) => {
   return getArticleAnnotations(user, uri, false)
   .then((annotations) => {
     const stringAnno = JSON.stringify(annotations);
-    const count = (stringAnno.match(/_id/g) || []).length;
+    const count = (stringAnno.match(/points/g) || []).length;
     return count;
   });
 };

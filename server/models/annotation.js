@@ -17,9 +17,7 @@ const rangeSchema = new Schema({
 }, { _id: false });
 
 const annotationSchema = new Schema({
-  // Autopopulate author, but don't include _id so total # of annotations
-  // can still be found by counting the _id's in the reply tree
-  author: { type: ObjectId, ref: 'User', autopopulate: { select: '-_id' } },
+  author: { type: ObjectId, ref: 'User', autopopulate: true },
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation', default: null },
   childAnnotations: [{ type: ObjectId, ref: 'Annotation', autopopulate: true }],
