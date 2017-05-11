@@ -103,7 +103,7 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
                  { author: user._id }];
   }
 
-  const populateOptions = { path: 'annotations' };
+  const populateOptions = { path: 'annotations', match: query };
   if (topLevelOnly) {
     populateOptions.select = '-childAnnotations';
   }
@@ -159,11 +159,25 @@ Input:
 Output: Number of replies.
 */
 export const getArticleReplyNumber = (user, uri) => {
-  return getArticleAnnotations(user, uri, false)
+  return getArticle(uri)
+  .then((article) => {
+    if (article === null) {
+      throw new Error('Article not found');
+    }
+    const query = { article: article._id };
+    if (user === null) {
+      query.isPublic = true;
+    } else {
+      query.$or = [
+        { groups: { $in: user.groups } },
+        { isPublic: true },
+        { author: user._id },
+      ];
+    }
+    return Annotation.find(query);
+  })
   .then((annotations) => {
-    const stringAnno = JSON.stringify(annotations);
-    const count = (stringAnno.match(/points/g) || []).length;
-    return count;
+    return annotations.length;
   });
 };
 
