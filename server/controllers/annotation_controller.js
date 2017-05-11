@@ -3,6 +3,7 @@ import Annotation from '../models/annotation';
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
   return Annotation.findById(annotationId)
+    .select('-childAnnotations')
     .then((annotation) => {
       if (annotation === null) {
         throw new Error('Annotation not found');
@@ -24,7 +25,6 @@ export const getAnnotation = (user, annotationId) => {
 // // access to all of an annotation's replies
 export const getAnnotationReplies = (user, annotationId) => {
   return Annotation.findById(annotationId)
-  .deepPopulate(['.childAnnotations'.repeat(50)])
   .then((annotation) => {
     if (annotation === null) {
       return [];
@@ -51,7 +51,7 @@ export const createAnnotation = (user, body, article) => {
   return annotation.save();
 };
 
-// Get all replies to parentId (verifying that user has access to this comment)
+// Get direct replies to parentId (verifying that user has access to this comment)
 // Also succeeds if user is null and comment thread is public.
 // Returns a promise.
 export const getReplies = (user, parentId) => {
@@ -61,14 +61,14 @@ export const getReplies = (user, parentId) => {
   } else {
     conditions.$or = [{ groups: { $in: user.groups } }, { isPublic: true }];
   }
-  return Annotation.find(conditions);
+  return Annotation.find(conditions).select('-childAnnotations');
 };
 
 // PRECONDITION: user is not null.
 export const editAnnotation = (user, annotationId, updateText) => {
   const conditions = { _id: annotationId, author: user._id };
   const update = { $set: { text: updateText, editDate: Date.now(), edited: true } };
-  return Annotation.findOneAndUpdate(conditions, update, { new: true });
+  return Annotation.findOneAndUpdate(conditions, update, { new: true }).select('-childAnnotations');
 };
 
 // Removes an annotation from the database, updates the parent's numChildren

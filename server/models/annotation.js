@@ -1,11 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
+import autopopulate from 'mongoose-autopopulate';
 
 import * as Articles from '../controllers/article_controller';
 import * as Groups from '../controllers/group_controller';
 import Article from './article';
 
 mongoose.Promise = global.Promise;
-const deepPopulate = require('mongoose-deep-populate')(mongoose);
 const ObjectId = Schema.Types.ObjectId;
 
 // sub-schema for "ranges" entries
@@ -17,10 +17,10 @@ const rangeSchema = new Schema({
 }, { _id: false });
 
 const annotationSchema = new Schema({
-  author: { type: ObjectId, ref: 'User' },
+  author: { type: ObjectId, ref: 'User', autopopulate: { select: '-_id' } },
   article: { type: ObjectId, ref: 'Article' },
   parent: { type: ObjectId, ref: 'Annotation', default: null },
-  childAnnotations: [{ type: ObjectId, ref: 'Annotation' }],
+  childAnnotations: [{ type: ObjectId, ref: 'Annotation', autopopulate: true }],
   groups: [{ type: ObjectId, ref: 'Group' }],
   isPublic: { type: Boolean, default: true },
   text: { type: String, trim: true },
@@ -102,10 +102,7 @@ annotationSchema.virtual('numChildren').get(function getNumChildren() {
   return this.childAnnotations.length;
 });
 
-
-annotationSchema.plugin(deepPopulate, {
-  populate: 'childAnnotations',
-});
+annotationSchema.plugin(autopopulate);
 
 const AnnotationModel = mongoose.model('Annotation', annotationSchema);
 
