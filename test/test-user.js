@@ -67,8 +67,8 @@ describe('Users', function () {
             should.not.exist(err);
             res.should.have.status(200);
             res.body.should.have.property('email', 'user0@testuri.com');
-            res.body.should.have.property('name', 'Test User \'user0\'');
-            res.body.should.have.property('googleId', 'test_user0');
+            res.body.should.have.property('name', 'user0');
+            res.body.should.have.property('googleId', 'user0_id');
             res.body.should.have.property('groups').that.is.empty;
             done();
           });
@@ -82,8 +82,8 @@ describe('Users', function () {
             should.not.exist(err);
             res.should.have.status(200);
             res.body.should.have.property('email', 'user1@testuri.com');
-            res.body.should.have.property('name', 'Test User \'user1\'');
-            res.body.should.have.property('googleId', 'test_user1');
+            res.body.should.have.property('name', 'user1');
+            res.body.should.have.property('googleId', 'user1_id');
 
             res.body.should.have.property('groups').with.lengthOf(2);
             res.body.groups[0]._id.toString().should.not.equal(res.body.groups[1]._id.toString());
