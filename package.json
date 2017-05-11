@@ -29,7 +29,7 @@
     "mocha": "^3.2.0",
     "mongodb": "^2.2.24",
     "mongoose": "^4.7.8",
-    "mongoose-deep-populate": "^3.0.0",
+    "mongoose-autopopulate": "^0.5.0",
     "newrelic": "^1.39.0",
     "node-fetch": "^1.6.3",
     "normalize-url": "^1.9.0",
@@ -53,7 +53,6 @@
     "eslint-plugin-import": "^1.12.0",
     "eslint-plugin-jsx-a11y": "^1.5.5",
     "eslint-plugin-react": "^5.2.2",
-    "mongoose-deep-populate": "^3.0.0",
     "mongoose-tree2": "^0.2.2",
     "nodemon": "^1.10.0"
   },

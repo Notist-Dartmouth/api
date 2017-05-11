@@ -2,7 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
 import normalizeUrl from 'normalize-url';
 import fetch from 'node-fetch';
-const deepPopulate = require('mongoose-deep-populate')(mongoose);
 
 const normalizeURI = (uri) => {
   const options = {
@@ -49,10 +48,6 @@ const articleSchema = new Schema({
 
   isMisleading: { type: Boolean, default: false },
   isSatire: { type: Boolean, default: false },
-});
-
-articleSchema.plugin(deepPopulate, {
-  populate: 'annotations',
 });
 
 articleSchema.statics.normalizeURI = normalizeURI;

@@ -10,6 +10,7 @@ const userSchema = new Schema({
   facebookId: String,
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
+  bio: String,
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],

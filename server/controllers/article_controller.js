@@ -102,31 +102,19 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
                  { isPublic: true },
                  { author: user._id }];
   }
+
+  const populateOptions = { path: 'annotations', match: query };
   if (topLevelOnly) {
-    return getArticle(uri)
-    .populate({
-      path: 'annotations',
-      match: query,
-    })
-    .exec()
-    .then((article) => {
-      if (article === null) {
-        return [];
-      }
-      return article.annotations;
-    });
-  } else {
-    const deepPath = 'annotations'.concat('.childAnnotations'.repeat(50));
-    return getArticle(uri)
-    // .deepPopulate(deepPath, { match: query })
-    .deepPopulate(deepPath, { populate: { annotations: { match: { parent: null } } } })
-    .then((article) => {
-      if (article === null) {
-        return [];
-      }
-      return article.annotations;
-    });
+    populateOptions.select = '-childAnnotations';
   }
+  return getArticle(uri)
+  .populate(populateOptions)
+  .then((article) => {
+    if (article === null) {
+      return [];
+    }
+    return article.annotations;
+  });
 };
 
 /*
@@ -153,12 +141,12 @@ export const getArticleAnnotationsPaginated = (user, conditions) => {
   if (conditions.topLevelOnly) {
     return Annotation.find(query)
     .sort(sortOptions)
-    .limit(pagination.limit);
+    .limit(pagination.limit)
+    .select('-childAnnotations');
   } else {
     return Annotation.find(query)
     .sort(sortOptions)
-    .limit(pagination.limit)
-    .deepPopulate(['annotations'.concat('.childAnnotations'.repeat(50))]);
+    .limit(pagination.limit);
   }
 };
 
@@ -171,11 +159,25 @@ Input:
 Output: Number of replies.
 */
 export const getArticleReplyNumber = (user, uri) => {
-  return getArticleAnnotations(user, uri, false)
+  return getArticle(uri)
+  .then((article) => {
+    if (article === null) {
+      throw new Error('Article not found');
+    }
+    const query = { article: article._id };
+    if (user === null) {
+      query.isPublic = true;
+    } else {
+      query.$or = [
+        { groups: { $in: user.groups } },
+        { isPublic: true },
+        { author: user._id },
+      ];
+    }
+    return Annotation.find(query);
+  })
   .then((annotations) => {
-    const stringAnno = JSON.stringify(annotations);
-    const count = (stringAnno.match(/_id/g) || []).length;
-    return count;
+    return annotations.length;
   });
 };
 
