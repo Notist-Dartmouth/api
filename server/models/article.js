@@ -1,15 +1,28 @@
 import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
+import url from 'url';
 import normalizeUrl from 'normalize-url';
+import escapeStringRegexp from 'escape-string-regexp';
 import fetch from 'node-fetch';
+
+const IMPT_QUERY_PARAMS = {
+  'youtube.com': ['v'],
+  'news.ycombinator.com': ['id'],
+};
 
 const normalizeURI = (uri) => {
   const options = {
     stripWWW: true,
     normalizeHttps: true,
     removeDirectoryIndex: true,
-    removeQueryParameters: [/[^v]+/, /v{2,}/], // anything but /v/
+    removeQueryParameters: [],
   };
+  const intermediateURI = normalizeUrl(uri, options);
+  const uriObj = url.parse(intermediateURI, true);
+  delete uriObj.search;
+  const keepParams = IMPT_QUERY_PARAMS[uriObj.hostname] || [];
+  const paramsToDelete = Object.keys(uriObj.query).filter((x) => !keepParams.includes(x));
+  options.removeQueryParameters = paramsToDelete.map((x) => new RegExp(`^${escapeStringRegexp(x)}$`));
   return normalizeUrl(uri, options);
 };
 

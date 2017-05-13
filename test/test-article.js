@@ -67,6 +67,20 @@ describe('Articles', function () {
   });
 
   // unit tests
+  describe('normalizeURI', function () {
+    it('should normalize a known domain and keep important query parameters', function (done) {
+      const nURI = Article.normalizeURI('https://www.youtube.com/watch?v=xyz&foo=bar#baz');
+      nURI.should.equal('http://youtube.com/watch?v=xyz');
+      done();
+    });
+
+    it('should strip all query parameters from an unknown domain', function (done) {
+      const nURI = Article.normalizeURI('https://www.example.com/index.html?a=b&c=d&up=down');
+      nURI.should.equal('http://example.com');
+      done();
+    });
+  });
+
   describe('Article controller', function () {
     describe('createArticle', function () {
       it('should throw error on invalid input');
