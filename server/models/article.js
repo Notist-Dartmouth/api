@@ -20,9 +20,10 @@ const normalizeURI = (uri) => {
   const uriObj = url.parse(intermediateURI, true);
   delete uriObj.search;
   const keepParams = IMPT_QUERY_PARAMS[uriObj.hostname] || [];
-  const paramsToDelete = Object.keys(uriObj.query).filter((x) => !keepParams.includes(x));
-  for (const param of paramsToDelete) {
-    delete uriObj.query[param];
+  for (const param of Object.keys(uriObj.query)) {
+    if (!keepParams.includes(param)) {
+      delete uriObj.query[param];
+    }
   }
   // pass through normalizeUrl again to strip trailing slashes
   return normalizeUrl(url.format(uriObj));
