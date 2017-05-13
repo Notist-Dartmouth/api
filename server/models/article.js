@@ -2,7 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
 import url from 'url';
 import normalizeUrl from 'normalize-url';
-import escapeStringRegexp from 'escape-string-regexp';
 import fetch from 'node-fetch';
 
 const IMPT_QUERY_PARAMS = {
@@ -22,8 +21,11 @@ const normalizeURI = (uri) => {
   delete uriObj.search;
   const keepParams = IMPT_QUERY_PARAMS[uriObj.hostname] || [];
   const paramsToDelete = Object.keys(uriObj.query).filter((x) => !keepParams.includes(x));
-  options.removeQueryParameters = paramsToDelete.map((x) => new RegExp(`^${escapeStringRegexp(x)}$`));
-  return normalizeUrl(uri, options);
+  for (const param of paramsToDelete) {
+    delete uriObj.query[param];
+  }
+  // pass through normalizeUrl again to strip trailing slashes
+  return normalizeUrl(url.format(uriObj));
 };
 
 // Fields returned by Mercury
