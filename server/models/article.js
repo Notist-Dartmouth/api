@@ -5,8 +5,8 @@ import normalizeUrl from 'normalize-url';
 import fetch from 'node-fetch';
 
 const IMPT_QUERY_PARAMS = {
+  global: ['id'],
   'youtube.com': ['v'],
-  'news.ycombinator.com': ['id'],
 };
 
 const normalizeURI = (uri) => {
@@ -20,6 +20,7 @@ const normalizeURI = (uri) => {
   const uriObj = url.parse(intermediateURI, true);
   delete uriObj.search;
   const keepParams = IMPT_QUERY_PARAMS[uriObj.hostname] || [];
+  keepParams.push(...IMPT_QUERY_PARAMS.global);
   for (const param of Object.keys(uriObj.query)) {
     if (!keepParams.includes(param)) {
       delete uriObj.query[param];
