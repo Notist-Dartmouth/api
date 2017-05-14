@@ -1,16 +1,33 @@
 import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
+import url from 'url';
 import normalizeUrl from 'normalize-url';
 import fetch from 'node-fetch';
+
+const IMPT_QUERY_PARAMS = {
+  global: ['id'],
+  'youtube.com': ['v'],
+};
 
 const normalizeURI = (uri) => {
   const options = {
     stripWWW: true,
     normalizeHttps: true,
     removeDirectoryIndex: true,
-    removeQueryParameters: [/[^v]+/, /v{2,}/], // anything but /v/
+    removeQueryParameters: [],
   };
-  return normalizeUrl(uri, options);
+  const intermediateURI = normalizeUrl(uri, options);
+  const uriObj = url.parse(intermediateURI, true);
+  delete uriObj.search;
+  const keepParams = IMPT_QUERY_PARAMS[uriObj.hostname] || [];
+  keepParams.push(...IMPT_QUERY_PARAMS.global);
+  for (const param of Object.keys(uriObj.query)) {
+    if (!keepParams.includes(param)) {
+      delete uriObj.query[param];
+    }
+  }
+  // pass through normalizeUrl again to strip trailing slashes
+  return normalizeUrl(url.format(uriObj));
 };
 
 // Fields returned by Mercury
