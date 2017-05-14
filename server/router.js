@@ -3,6 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
+import * as Explore from './controllers/explore_controller';
 import { getFriendsLinkShares } from './explore.js';
 import config from './_config';
 
@@ -58,6 +59,11 @@ router.put('/api/user/exploreNumber'), (req, res) => {
     res.status(401).end();
   }
 };
+
+router.post('/api/initializeExplore/articles', (req, res) => {
+  const page_ids = req.body.pages;
+  Explore.postExploreArticles();
+});
 
 // route to update article avgUserScore
 router.put('/api/article/userScore'), (req, res) => {
