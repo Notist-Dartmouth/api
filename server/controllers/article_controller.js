@@ -7,10 +7,11 @@ const ObjectId = mongodb.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
-export const createArticle = (uri, groups) => {
+export const createArticle = (uri, groups, score) => {
   const article = new Article();
   article.uri = uri;
   article.groups = groups;
+  article.avgUserScore = score || 1;
   return article.save()
   .then((result) => {
     return Groups.addGroupArticle(result._id, groups) // TODO: move to post-save
