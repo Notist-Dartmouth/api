@@ -43,3 +43,30 @@ export const postExploreArticles = (ids, score) => {
 
   return Promise.all(promises);
 };
+
+/*
+Function to get called when populating the explore feed view
+*/
+export const populateExploreFeed = (user, conditions) => {
+  // show most recent articles first
+  conditions.sort = { _id: -1 };
+
+  // target avgUserScores
+  const mean = user.exploreNumber;
+  const std = user.exploreStandardDev;
+  const lowerMin = mean - MAX_DISTANCE * std;
+  const lowerMax = mean - MIN_DISTANCE * std;
+  const upperMin = mean + MIN_DISTANCE * std;
+  const upperMax = mean + MAX_DISTANCE * std;
+
+  return user.articles.then((knownArticles) => {
+    const filter = {
+      _id: { $nin: knownArticles },
+      $or: [
+        { avgUserScore: { $gt: lowerMin, $lt: lowerMax } },
+        { avgUserScore: { $gt: upperMin, $lt: upperMax } },
+      ],
+    };
+    return Articles.getArticlesFiltered(filter, conditions);
+  });
+};
