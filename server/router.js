@@ -102,6 +102,19 @@ router.post('/api/group', (req, res) => {
 });
 
 /*
+Get a list of all public groups
+*/
+router.get('/api/public/groups', (req, res) => {
+  Groups.getGroupsFiltered({ isPublic: true })
+  .then((groups) => {
+    util.returnGetSuccess(res, groups);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
 Get a specific group.
 Input:
   req.params.id: String ID of the group

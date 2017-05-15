@@ -179,15 +179,16 @@ describe('Groups', function () {
   });
 
   describe('API calls', function () {
-    it('should create a group on /api/group POST', function (done) {
+    const groupName = 'test group 2 name';
+    it('should create a public group on /api/group POST', function (done) {
       passportStub.login(newUser);
-      const groupName = 'test group 2 name';
       const groupDescription = 'test group 2 description';
       chai.request(app)
         .post('/api/group')
         .send({
           name: groupName,
           description: groupDescription,
+          isPublic: true,
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -202,10 +203,22 @@ describe('Groups', function () {
           res.body.SUCCESS.should.have.property('editDate');
           res.body.SUCCESS.should.have.property('articles').that.is.empty;
           res.body.SUCCESS.should.have.property('members').with.members([newUser._id.toString()]);
-          res.body.SUCCESS.should.have.property('isPublic', false);
+          res.body.SUCCESS.should.have.property('isPublic', true);
           res.body.SUCCESS.should.have.property('isPersonal', false);
           done();
         });
+    });
+
+    it('should get a list of public groups on /api/public/groups GET', (done) => {
+      chai.request(app)
+      .get('/api/public/groups')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.should.have.a.lengthOf(1);
+        res.body[0].name.should.equal(groupName);
+        done();
+      });
     });
 
     it('should get a specific group on /api/group/:id GET', (done) => {
