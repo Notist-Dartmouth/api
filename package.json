@@ -39,7 +39,8 @@
     "passport-google-oauth2": "^0.1.6",
     "passport-stub": "^1.1.1",
     "path": "^0.12.7",
-    "serialize-error": "^2.1.0"
+    "serialize-error": "^2.1.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
