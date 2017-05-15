@@ -50,6 +50,7 @@ router.put('/api/user/exploreNumber'), (req, res) => {
     const explore_num = req.body.explore;
     User.updateUserExploreNumber(user, explore_num)
     .then((result) => {
+      console.log(result);
       util.returnPostSuccess(res, result);
     })
     .catch((err) => {
@@ -63,14 +64,14 @@ router.put('/api/user/exploreNumber'), (req, res) => {
 router.post('/api/initializeExplore/articles', (req, res) => {
   const page_ids = req.body.pages;
   const score = req.body.score;
-  Explore.postExploreArticles(page_ids)
+  Explore.postExploreArticles(page_ids, score)
   .then((result) => {
+    console.log(result);
     util.returnPostSuccess(res, result);
-  });
+  })
   .catch((err) => {
     util.returnError(res, err);
-  })
-
+  });
 });
 
 // route to update article avgUserScore

@@ -11,7 +11,8 @@ export const createArticle = (uri, groups, score) => {
   const article = new Article();
   article.uri = uri;
   article.groups = groups;
-  article.avgUserScore = score || 1;
+  article.avgUserScore = (score ? score : 1);
+  article.numShares = (score ? 1 : 0);
   return article.save()
   .then((result) => {
     return Groups.addGroupArticle(result._id, groups) // TODO: move to post-save

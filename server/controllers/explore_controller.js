@@ -6,15 +6,15 @@ import _ from 'underscore';
 
 export const postExploreArticles = (ids, score) => {
   const regex = /((http|https):\/\/)?(www[.])?facebook.com\/.+/g;
-  var promises = [];
+  const appAccessToken = process.env.FACEBOOK_APP_ID + '|' + process.env.FACEBOOK_APP_SECRET;
+  let promises = [];
 
-  // TODO: get APP access token or user access token?!
-  FB.setAccessToken('EAACEdEose0cBACKm5rN7a3oz161sdM45R1HGIFr88yhr7QRshlkTZAIYwTZAZBgmOwVRaSeC16GhpWQ2EAnsZAO7GQ2ls4eHAZANWOS3Ybwg0NerI1Gf4vAej9Qkuu691zmxtZCezECoAlPRQj8iA4xi01licAHTyA8gieenBfI7s3TYE0ZAcSkkkRUG55MtHcZD');
   _.each(ids, (id) => {
     FB.api(
-      id, // '/146422995398181'
+      id,
       'GET',
-      { fields: 'posts.limit(10){link}' },
+      { access_token: appAccessToken,
+        fields: 'posts.limit(10){link}' },
       (response) => {
         if (response.posts) {
           const data = response.posts.data;
@@ -22,11 +22,17 @@ export const postExploreArticles = (ids, score) => {
             // save article to notist API with userScore as explore_num +- std_dev
             const link = link_obj.link;
             if (link && !link.match(regex)) {
-              console.log(link);
+              console.log('added/updated in db', link);
               var promise = new Promise(function (resolve, reject) {
-                return Articles.createArticle(link, [], score);
+                Articles.getArticle(link)
+                .then((article) => {
+                  if (article == null) {
+                    return Articles.createArticle(link, [], score);
+                  } else {
+                    return Articles.updateArticleScore(article.id, score);
+                  }
+                });
               });
-
               promises.push(promise);
             }
           });
