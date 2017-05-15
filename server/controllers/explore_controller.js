@@ -11,8 +11,8 @@ import _ from 'underscore';
 * [exploreNumber-exploreStdDev*EXPLORE_MAX_DISTANCE exploreNumber-exploreStdDev*EXPLORE_MIN_DISTANCE] U
 * [exploreNumber+exploreStdDev*EXPLORE_MIN_DISTANCE exploreNumber+exploreStdDev*EXPLORE_MAX_DISTANCE]
 */
-export const MIN_DISTANCE = 1.3;
-export const MAX_DISTANCE = 1.8;
+export const MIN_DISTANCE = 1.7;
+export const MAX_DISTANCE = 2.1;
 
 export const postExploreArticles = (ids, score) => {
   const regex = /((http|https):\/\/)?(www[.])?facebook.com\/.+/g;
