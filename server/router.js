@@ -29,9 +29,9 @@ router.post('/api/user/exploreNumber', (req, res) => {
   console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
-    const explore_num = req.body.explore;
-    const std_dev = req.body.stdDev;
-    User.postUserExploreNumber(user, explore_num, stdDev)
+    const explore_num = req.body.explore_num;
+    const std_dev = req.body.std_dev;
+    Users.postUserExploreNumber(user.id, explore_num, std_dev)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -48,7 +48,7 @@ router.put('/api/user/exploreNumber'), (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
     const explore_num = req.body.explore;
-    User.updateUserExploreNumber(user, explore_num)
+    User.updateUserExploreNumber(user.id, explore_num)
     .then((result) => {
       console.log(result);
       util.returnPostSuccess(res, result);

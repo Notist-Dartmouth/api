@@ -17,19 +17,17 @@ export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
 };
 
-export const postUserExploreNumber = (user, explore_num, std_dev) => {
-  user.exploreNumber = explore_num;
-  user.exploreStandardDev = std_dev;
-  return user.save();
+export const postUserExploreNumber = (userId, explore_num, std_dev) => {
+  return User.findByIdAndUpdate(userId, { exploreNumber: explore_num, exploreStandardDev: std_dev }, { new: true });
 };
 
-export const updateUserExploreNumber = (user, value) => {
-  const old_avg = user.exploreNumber;
-  const new_avg = ((old_avg * user.numExplorations) + value) / (user.numExplorations + 1);
-
-  // TODO: should how we update explore number ever change so as to prioritize what types of articles a user is annotating?
-
-  user.exploreNumber = new_avg;
-  user.numExplorations = user.numExplorations + 1;
-  return user.save();
+export const updateUserExploreNumber = (userId, value) => {
+  return User.findById(userId)
+  .then((user) => {
+    const old_avg = user.exploreNumber;
+    const new_avg = ((old_avg * user.numExplorations) + value) / (user.numExplorations + 1);
+    user.exploreNumber = new_avg;
+    user.numExplorations = user.numExplorations + 1;
+    return user.save();
+  });
 };
