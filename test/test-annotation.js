@@ -238,7 +238,7 @@ describe('Annotations', function () {
       });
     });
 
-    it('should post reply annotation the general group', function () {
+    it('should post reply annotation in the general group', function () {
       const publicText = 'This is a public reply';
 
       passportStub.login(user);
@@ -296,6 +296,7 @@ describe('Annotations', function () {
         res.body.should.be.an('array');
         res.body.should.have.length(1);
         res.body[0].isPublic.should.be.true;
+        res.body[0].author.should.have.property('name', user.name);
         done();
       });
     });

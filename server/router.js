@@ -5,8 +5,6 @@ import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 import * as Explore from './controllers/explore_controller';
 import config from './_config';
-
-
 import util from './util';
 
 const router = Router();
@@ -174,6 +172,19 @@ router.post('/api/group', (req, res) => {
 });
 
 /*
+Get a list of all public groups
+*/
+router.get('/api/public/groups', (req, res) => {
+  Groups.getGroupsFiltered({ isPublic: true })
+  .then((groups) => {
+    util.returnGetSuccess(res, groups);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
 Get a specific group.
 Input:
   req.params.id: String ID of the group
@@ -303,6 +314,68 @@ router.get('/api/group/:groupId/articles/paginated', (req, res) => {
   .catch((err) => {
     util.returnError(res, err);
   });
+});
+
+router.get('/api/public/articles/paginated', (req, res) => {
+  const conditions = { pagination: {}, sort: {} };
+
+  // defaults
+  let limit = Number.parseInt(req.query.limit, 10);
+  if (!limit || limit < 0) {
+    limit = 50;
+  }
+  let page = Number.parseInt(req.query.page, 10);
+  if (!page || page < 0) {
+    page = 0;
+  }
+  let direction = Number.parseInt(req.query.sort_dir, 10);
+  if (!(direction === 1 || direction === -1)) {
+    direction = -1;
+  }
+
+  conditions.pagination.limit = limit;
+  conditions.pagination.skip = limit * page;
+  if (typeof(req.query.sort) === 'string') {
+    conditions.sort[req.query.sort] = direction;
+  }
+
+  Articles.getPublicArticlesPaginated(conditions)
+  .then((result) => {
+    util.returnGetSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+/*
+* Get articles to populate a user's explore feed. Requires that the user's
+* exploreNumber and exploreStandardDev have already been calculated.
+* Query parameters (optional):
+*   limit: number of items per page
+*   page: number of page to be loaded (starting at 0)
+*/
+router.get('/api/explore', (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    if (user.exploreNumber === undefined || user.exploreStandardDev === undefined) {
+      util.returnError(res, new Error('Explore data not yet computed'));
+      return;
+    }
+    const conditions = { pagination: {} };
+    conditions.pagination.limit = Number.parseInt(req.query.limit, 10);
+    conditions.pagination.skip = Number.parseInt(req.query.page, 10);
+
+    Explore.populateExploreFeed(user, conditions)
+    .then((result) => {
+      util.returnGetSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else { // not authenticated
+    res.status(401).end();
+  }
 });
 
 /*

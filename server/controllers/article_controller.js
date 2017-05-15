@@ -48,7 +48,8 @@ export const getArticle = (uri, query) => {
 /*
 Get a list of articles, filtered by some conditions.
 Input:
-  query: A mongodb query selector object
+  filter: A mongodb query selector object
+  options: pagination/sort options (pagination.skip, pagination.limit, and sort)
 Output: Resolves to a list of matching groups
 Example:
   Articles.getArticlesFiltered({
@@ -57,11 +58,43 @@ Example:
     groups: someGroup._id,
   });
 */
-export const getArticlesFiltered = (query) => {
-  if (typeof query !== 'object') {
-    return Promise.reject(new Error('Invalid article query'));
+export const getArticlesFiltered = (filter, options) => {
+  if (typeof filter !== 'object') {
+    return Promise.reject(new Error('Invalid article filter'));
   }
-  return Article.find(query);
+
+  let query = Article.find(filter);
+  if (typeof options === 'object') {
+    if (options.sort) {
+      query = query.sort(options.sort);
+    }
+    if (options.pagination.skip) {
+      query = query.skip(options.pagination.skip);
+    }
+    if (options.pagination.limit) {
+      query = query.limit(options.pagination.limit);
+    }
+  }
+  return query;
+};
+
+export const getPublicArticlesPaginated = (conditions) => {
+  if (!conditions) {
+    conditions = { pagination: {}, sort: {} };
+  }
+
+  const pagination = conditions.pagination || {};
+  if (!typeof(conditions.sort) === 'object' || Object.keys(conditions.sort).length === 0) {
+    conditions.sort = { createDate: -1 };
+  }
+
+  return Annotation.distinct('article', { isPublic: true })
+  .then(articles => {
+    return Article.find({ _id: { $in: articles } })
+    .sort(conditions.sort)
+    .skip(pagination.skip)
+    .limit(pagination.limit);
+  });
 };
 
 export const addArticleAnnotation = (articleId, annotationId) => {
@@ -82,31 +115,19 @@ export const getArticleAnnotations = (user, uri, topLevelOnly) => {
                  { isPublic: true },
                  { author: user._id }];
   }
+
+  const populateOptions = { path: 'annotations', match: query };
   if (topLevelOnly) {
-    return getArticle(uri)
-    .populate({
-      path: 'annotations',
-      match: query,
-    })
-    .exec()
-    .then((article) => {
-      if (article === null) {
-        return [];
-      }
-      return article.annotations;
-    });
-  } else {
-    const deepPath = 'annotations'.concat('.childAnnotations'.repeat(50));
-    return getArticle(uri)
-    // .deepPopulate(deepPath, { match: query })
-    .deepPopulate(deepPath, { populate: { annotations: { match: { parent: null } } } })
-    .then((article) => {
-      if (article === null) {
-        return [];
-      }
-      return article.annotations;
-    });
+    populateOptions.select = '-childAnnotations';
   }
+  return getArticle(uri)
+  .populate(populateOptions)
+  .then((article) => {
+    if (article === null) {
+      return [];
+    }
+    return article.annotations;
+  });
 };
 
 /*
@@ -133,12 +154,12 @@ export const getArticleAnnotationsPaginated = (user, conditions) => {
   if (conditions.topLevelOnly) {
     return Annotation.find(query)
     .sort(sortOptions)
-    .limit(pagination.limit);
+    .limit(pagination.limit)
+    .select('-childAnnotations');
   } else {
     return Annotation.find(query)
     .sort(sortOptions)
-    .limit(pagination.limit)
-    .deepPopulate(['annotations'.concat('.childAnnotations'.repeat(50))]);
+    .limit(pagination.limit);
   }
 };
 
@@ -151,11 +172,25 @@ Input:
 Output: Number of replies.
 */
 export const getArticleReplyNumber = (user, uri) => {
-  return getArticleAnnotations(user, uri, false)
+  return getArticle(uri)
+  .then((article) => {
+    if (article === null) {
+      throw new Error('Article not found');
+    }
+    const query = { article: article._id };
+    if (user === null) {
+      query.isPublic = true;
+    } else {
+      query.$or = [
+        { groups: { $in: user.groups } },
+        { isPublic: true },
+        { author: user._id },
+      ];
+    }
+    return Annotation.find(query);
+  })
   .then((annotations) => {
-    const stringAnno = JSON.stringify(annotations);
-    const count = (stringAnno.match(/_id/g) || []).length;
-    return count;
+    return annotations.length;
   });
 };
 
