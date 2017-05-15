@@ -4,10 +4,20 @@ import * as Articles from '../controllers/article_controller';
 import FB from 'fb';
 import _ from 'underscore';
 
+/*
+* These constants define the range of the avgUserScores of articles the user should
+* see in explore, in units of their exploreStandardDev from their exploreNumber.
+* An article is included if its avgUserScore is in the following range:
+* [exploreNumber-exploreStdDev*EXPLORE_MAX_DISTANCE exploreNumber-exploreStdDev*EXPLORE_MIN_DISTANCE] U
+* [exploreNumber+exploreStdDev*EXPLORE_MIN_DISTANCE exploreNumber+exploreStdDev*EXPLORE_MAX_DISTANCE]
+*/
+export const MIN_DISTANCE = 1.3;
+export const MAX_DISTANCE = 1.8;
+
 export const postExploreArticles = (ids, score) => {
   const regex = /((http|https):\/\/)?(www[.])?facebook.com\/.+/g;
   const appAccessToken = process.env.FACEBOOK_APP_ID + '|' + process.env.FACEBOOK_APP_SECRET;
-  let promises = [];
+  const promises = [];
 
   _.each(ids, (id) => {
     FB.api(
@@ -23,7 +33,7 @@ export const postExploreArticles = (ids, score) => {
             const link = link_obj.link;
             if (link && !link.match(regex)) {
               console.log('added/updated in db', link);
-              var promise = new Promise(function (resolve, reject) {
+              const promise = new Promise(function (resolve, reject) {
                 Articles.getArticle(link)
                 .then((article) => {
                   if (article == null) {
