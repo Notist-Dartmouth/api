@@ -4,7 +4,6 @@ import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
 import * as Explore from './controllers/explore_controller';
-import { getFriendsLinkShares } from './explore.js';
 import config from './_config';
 
 
@@ -27,6 +26,7 @@ const router = Router();
 
 // route to post user exploreNumber
 router.post('/api/user/exploreNumber', (req, res) => {
+  console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
     const explore_num = req.body.explore;
@@ -62,7 +62,15 @@ router.put('/api/user/exploreNumber'), (req, res) => {
 
 router.post('/api/initializeExplore/articles', (req, res) => {
   const page_ids = req.body.pages;
-  Explore.postExploreArticles();
+  const score = req.body.score;
+  Explore.postExploreArticles(page_ids)
+  .then((result) => {
+    util.returnPostSuccess(res, result);
+  });
+  .catch((err) => {
+    util.returnError(res, err);
+  })
+
 });
 
 // route to update article avgUserScore
