@@ -18,7 +18,7 @@ export const addUserGroup = (userId, groupId) => {
 };
 
 export const postUserExploreNumber = (userId, explore_num, std_dev) => {
-  return User.findByIdAndUpdate(userId, { exploreNumber: explore_num, exploreStandardDev: std_dev }, { new: true });
+  return User.findByIdAndUpdate(userId, { exploreNumber: explore_num, exploreStandardDev: std_dev, numExplorations: 20 }, { new: true });
 };
 
 export const updateUserExploreNumber = (userId, value) => {
