@@ -57,8 +57,8 @@ const articleSchema = new Schema({
     required: true,
   },
 
-  avgUserScore: Number,
-  numShares: Number,
+  avgUserScore: { type: Number, default: 0 },
+  numShares: { type: Number, default: 0 },
   info: mercurySchema,
   annotations: [{ type: Schema.Types.ObjectId, ref: 'Annotation' }],
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
