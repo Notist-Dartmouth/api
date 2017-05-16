@@ -155,7 +155,7 @@ Output: Returns json file with the updated group information.
 router.post('/api/group/:groupId/user/:userId', (req, res) => {
   const groupId = req.params.groupId;
   const userId = req.params.userId;
-  if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
+  if (req.isAuthenticated() && Promise.resolve(Groups.groupAddPermission(groupId, userId))) {
     Users.addUserGroup(userId, groupId)
     .then((updatedUser) => {
       return Groups.addGroupMember(groupId, userId);
