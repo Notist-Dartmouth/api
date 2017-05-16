@@ -249,7 +249,7 @@ describe('Groups', function () {
       passportStub.login(newUser);
       const addedUserId = '345634563456345634563456';
       chai.request(app)
-        .post(`/api/group/${newGroup._id}/user/${addedUserId}`)
+        .post(`/api/group/${newGroup._id}/user?userId=${addedUserId}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.should.be.json;
