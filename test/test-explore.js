@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 import passportStub from 'passport-stub';
 import { app } from '../server/app';
 import util from './util';
-import * as Explore from '../server/explore';
+import * as Explore from '../server/controllers/explore_controller';
 import Annotation from '../server/models/annotation';
 import Article from '../server/models/article';
 import User from '../server/models/user';

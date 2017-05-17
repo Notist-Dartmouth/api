@@ -3,7 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
-import * as Explore from './explore';
+import * as Explore from './controllers/explore_controller';
 import config from './_config';
 import util from './util';
 
@@ -19,6 +19,76 @@ const router = Router();
   GET -> {stuff requested}
   DELETE -> {success}
 */
+
+// Routes for Explore Related Endpoints
+
+// route to post user exploreNumber
+router.post('/api/user/exploreNumber', (req, res) => {
+  console.log(req);
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const explore_num = req.body.explore_num;
+    const std_dev = req.body.std_dev;
+    Users.postUserExploreNumber(user.id, explore_num, std_dev)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+// route to update user exploreNumber
+router.put('/api/user/exploreNumber'), (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const explore_num = req.body.explore;
+    User.updateUserExploreNumber(user.id, explore_num)
+    .then((result) => {
+      console.log(result);
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+};
+
+router.post('/api/initializeExplore/articles', (req, res) => {
+  const page_ids = req.body.pages;
+  const score = req.body.score;
+  Explore.postExploreArticles(page_ids, score)
+  .then((result) => {
+    console.log(result);
+    util.returnPostSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+// route to update article avgUserScore
+router.put('/api/article/userScore'), (req, res) => {
+  if (req.isAuthenticated()) {
+    const article = req.body.article;
+    const value = req.body.value;
+    Article.updateArticleScore(article, value)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+};
+
 
 // navigate to logout page
 router.get('/logout', (req, res) => {
