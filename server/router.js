@@ -27,9 +27,9 @@ router.post('/api/user/exploreNumber', (req, res) => {
   console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
-    const explore_num = req.body.explore_num;
-    const std_dev = req.body.std_dev;
-    Users.postUserExploreNumber(user.id, explore_num, std_dev)
+    const exploreNum = req.body.explore_num;
+    const stdDev = req.body.std_dev;
+    Users.postUserExploreNumber(user.id, exploreNum, stdDev)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -42,11 +42,11 @@ router.post('/api/user/exploreNumber', (req, res) => {
 });
 
 // route to update user exploreNumber
-router.put('/api/user/exploreNumber'), (req, res) => {
+router.put('/api/user/exploreNumber', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
-    const explore_num = req.body.explore;
-    User.updateUserExploreNumber(user.id, explore_num)
+    const exploreNum = req.body.explore;
+    Users.updateUserExploreNumber(user.id, exploreNum)
     .then((result) => {
       console.log(result);
       util.returnPostSuccess(res, result);
@@ -57,12 +57,12 @@ router.put('/api/user/exploreNumber'), (req, res) => {
   } else {
     res.status(401).end();
   }
-};
+});
 
 router.post('/api/initializeExplore/articles', (req, res) => {
-  const page_ids = req.body.pages;
+  const pageIds = req.body.pages;
   const score = req.body.score;
-  Explore.postExploreArticles(page_ids, score)
+  Explore.postExploreArticles(pageIds, score)
   .then((result) => {
     console.log(result);
     util.returnPostSuccess(res, result);
@@ -73,11 +73,11 @@ router.post('/api/initializeExplore/articles', (req, res) => {
 });
 
 // route to update article avgUserScore
-router.put('/api/article/userScore'), (req, res) => {
+router.put('/api/article/userScore', (req, res) => {
   if (req.isAuthenticated()) {
     const article = req.body.article;
     const value = req.body.value;
-    Article.updateArticleScore(article, value)
+    Articles.updateArticleScore(article, value)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -87,7 +87,7 @@ router.put('/api/article/userScore'), (req, res) => {
   } else {
     res.status(401).end();
   }
-};
+});
 
 
 // navigate to logout page
@@ -226,18 +226,17 @@ router.post('/api/group/:groupId/user', (req, res) => {
   const groupId = req.params.groupId;
   const userId = (req.query.userId) ? req.query.userId : req.user.id;
 
-  if (req.isAuthenticated() && userId == req.user.id && req.user.isMemberOf(groupId)) {
+  if (req.isAuthenticated() && userId === req.user.id && req.user.isMemberOf(groupId)) {
     Users.removeUserGroup(userId, groupId)
-    .then(updatedUser) => {
-      return Groups.removeGroupMember(groupId, userId)
+    .then((updatedUser) => {
+      return Groups.removeGroupMember(groupId, userId);
     })
-    .then((updatedGroup)=> {
-      util.returnPostSuccess(res, updatedGroup)
+    .then((updatedGroup) => {
+      util.returnPostSuccess(res, updatedGroup);
     })
     .catch((err) => {
-      util.returnError(res,err);
+      util.returnError(res, err);
     });
-
   } else if (req.isAuthenticated() && Promise.resolve(Groups.groupAddPermission(groupId, req.user.id))) {
     Users.addUserGroup(userId, groupId)
     .then((updatedUser) => {
