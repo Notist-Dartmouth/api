@@ -34,6 +34,10 @@ export const addGroupMember = (groupId, userId) => {
   return Group.findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { new: true });
 };
 
+export const removeGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
+};
+
 /*
 Checks if user has permission to add users (self or others) to a specific group
 Input:

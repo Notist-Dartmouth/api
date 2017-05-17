@@ -16,3 +16,7 @@ export const addUserGroups = (userId, groupIds) => {
 export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
 };
+
+export const removeUserGroup = (userId, groupId) => {
+  return User.findByIdAndUpdate(userId, { $pull: { groups: groupId } }, { new: true });
+};
