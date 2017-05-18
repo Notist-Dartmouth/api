@@ -34,6 +34,10 @@ export const addGroupMember = (groupId, userId) => {
   return Group.findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { new: true });
 };
 
+export const removeGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
+};
+
 /*
 Checks if user has permission to add users (self or others) to a specific group
 Input:
@@ -73,7 +77,7 @@ export const getGroup = (groupId) => {
 };
 
 /*
-Get a list of groups, filtered by some conditions.
+Get a list of groups, filtered by some conditions. Creator name is populated.
 Input:
   query: A mongodb query selector object
 Output: Resolves to a list of matching groups
@@ -88,7 +92,8 @@ export const getGroupsFiltered = (query) => {
   if (typeof query !== 'object') {
     return Promise.reject(new Error('Invalid group query'));
   }
-  return Group.find(query);
+  return Group.find(query)
+  .populate('creator', 'name');
 };
 
 /*

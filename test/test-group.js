@@ -217,6 +217,8 @@ describe('Groups', function () {
         res.body.should.be.an('array');
         res.body.should.have.a.lengthOf(1);
         res.body[0].name.should.equal(groupName);
+        res.body[0].creator.name.should.equal(newUser.name);
+        res.body[0].creator._id.toString().should.equal(newUser.id);
         done();
       });
     });
