@@ -216,7 +216,7 @@ router.get('/api/group/:id', (req, res) => {
 });
 
 /*
-Add a user to a specific group as a member.
+Add a user to a specific group as a member, or remove them if they are already a member.
 Input:
   req.params.groupId: String group ID
   req.params.userId: String user ID to be added to the group.
@@ -225,7 +225,6 @@ Output: Returns json file with the updated group information.
 router.post('/api/group/:groupId/user', (req, res) => {
   const groupId = req.params.groupId;
   const userId = (req.query.userId) ? req.query.userId : req.user.id;
-
   if (req.isAuthenticated() && userId === req.user.id && req.user.isMemberOf(groupId)) {
     Users.removeUserGroup(userId, groupId)
     .then((updatedUser) => {

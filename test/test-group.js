@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import chaiAsPromised from 'chai-as-promised';
 import passportStub from 'passport-stub';
 import { app } from '../server/app';
 
@@ -14,6 +15,7 @@ import util from './util';
 
 chai.should();
 chai.use(chaiHttp);
+chai.use(chaiAsPromised);
 passportStub.install(app);
 
 // eslint comment:
@@ -178,15 +180,16 @@ describe('Groups', function () {
     });
   });
 
+  const group2Name = 'test group 2 name';
+  let group2Id;
   describe('API calls', function () {
-    const groupName = 'test group 2 name';
-    it('should create a public group on /api/group POST', function (done) {
+    it('should create a public group on /api/group POST', function () {
       passportStub.login(newUser);
       const groupDescription = 'test group 2 description';
       chai.request(app)
         .post('/api/group')
         .send({
-          name: groupName,
+          name: group2Name,
           description: groupDescription,
           isPublic: true,
         })
@@ -196,7 +199,8 @@ describe('Groups', function () {
           res.body.should.have.property('SUCCESS');
           res.body.SUCCESS.should.be.an('object');
           res.body.SUCCESS.should.have.property('_id');
-          res.body.SUCCESS.should.have.property('name', groupName);
+          group2Id = res.body.SUCCESS._id;
+          res.body.SUCCESS.should.have.property('name', group2Name);
           res.body.SUCCESS.should.have.property('description', groupDescription);
           res.body.SUCCESS.should.have.property('creator', newUser._id.toString());
           res.body.SUCCESS.should.have.property('createDate');
@@ -205,8 +209,15 @@ describe('Groups', function () {
           res.body.SUCCESS.should.have.property('members').with.members([newUser._id.toString()]);
           res.body.SUCCESS.should.have.property('isPublic', true);
           res.body.SUCCESS.should.have.property('isPersonal', false);
-          done();
         });
+
+      // update newUser
+      return util.checkDatabase((resolve) => {
+        resolve(User.findById(newUser._id)
+        .then((user) => {
+          newUser = user;
+        }));
+      });
     });
 
     it('should get a list of public groups on /api/public/groups GET', (done) => {
@@ -216,14 +227,14 @@ describe('Groups', function () {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.should.have.a.lengthOf(1);
-        res.body[0].name.should.equal(groupName);
+        res.body[0].name.should.equal(group2Name);
         res.body[0].creator.name.should.equal(newUser.name);
         res.body[0].creator._id.toString().should.equal(newUser.id);
         done();
       });
     });
 
-    it('should get a specific group on /api/group/:id GET', (done) => {
+    it('should get a specific group on /api/group/:id GET', function (done) {
       passportStub.login(newUser);
       chai.request(app)
         .get(`/api/group/${newGroup._id}`)
@@ -247,29 +258,48 @@ describe('Groups', function () {
         });
     });
 
-    it('should add a single member to specified group on /api/group/:groupId/user/:userId POST', (done) => {
+    it('should add a single member to specified group on /api/group/:groupId/user POST', function (done) {
       passportStub.login(newUser);
-      const addedUserId = '345634563456345634563456';
       chai.request(app)
-        .post(`/api/group/${newGroup._id}/user?userId=${addedUserId}`)
+        .post(`/api/group/${group2Id}/user?userId=${user2.id}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.should.be.json;
           res.body.should.have.property('SUCCESS');
-          res.body.SUCCESS.should.have.property('_id', newGroup._id.toString());
-          res.body.SUCCESS.should.have.property('name', newGroup.name);
-          res.body.SUCCESS.should.have.property('description', newGroup.description);
-          res.body.SUCCESS.should.have.property('creator', newUser._id.toString());
+          res.body.SUCCESS.should.have.property('_id');
+          res.body.SUCCESS._id.toString().should.equal(group2Id.toString());
+          res.body.SUCCESS.should.have.property('name');
+          res.body.SUCCESS.should.have.property('description');
+          res.body.SUCCESS.should.have.property('creator', newUser.id);
           res.body.SUCCESS.should.have.property('createDate');
           res.body.SUCCESS.should.have.property('editDate');
           res.body.SUCCESS.should.have.property('articles');
-          res.body.SUCCESS.articles.should.have.members([article1._id.toString(), article2._id.toString()]);
+          res.body.SUCCESS.articles.should.have.lengthOf(0);
           res.body.SUCCESS.should.have.property('members');
-          res.body.SUCCESS.members.should.have.members([newUser._id.toString(), user2._id.toString(), addedUserId]);
-          res.body.SUCCESS.should.have.property('isPublic', false);
+          res.body.SUCCESS.members.should.have.members([newUser.id, user2.id]);
+          res.body.SUCCESS.should.have.property('isPublic', true);
           res.body.SUCCESS.should.have.property('isPersonal', false);
           done();
         });
+    });
+
+    it('should remove self from specified group on /api/group/:groupId/user POST', function () {
+      passportStub.login(newUser);
+      chai.request(app)
+      .post(`/api/group/${group2Id}/user`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.be.json;
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.should.have.property('_id');
+        res.body.SUCCESS._id.toString().should.equal(group2Id.toString());
+        res.body.SUCCESS.should.have.property('members');
+        res.body.SUCCESS.members.should.have.members([user2.id]);
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(Group.findById(group2Id).should.eventually.have.property('members').with.lengthOf(1));
+      });
     });
 
     it('should get two articles of group', function (done) {
@@ -284,7 +314,5 @@ describe('Groups', function () {
         done();
       });
     });
-
-    it('should retrieve ');
   });
 });
