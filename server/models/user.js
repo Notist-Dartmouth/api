@@ -1,9 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 mongoose.Promise = global.Promise;
+const ObjectId = Schema.Types.ObjectId;
 import mongodb from 'mongodb';
+import autopopulate from 'mongoose-autopopulate';
 
 import Annotation from './annotation';
 import Group from './group';
+
+const NOTIFICATION_TYPES = ['reply'];
 
 const userSchema = new Schema({
   googleId: String,
@@ -11,12 +15,19 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
   bio: String,
-  groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
-  usersIFollow: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  usersFollowingMe: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  groups: [{ type: ObjectId, ref: 'Group' }],
+  usersIFollow: [{ type: ObjectId, ref: 'User' }],
+  usersFollowingMe: [{ type: ObjectId, ref: 'User' }],
   exploreNumber: { type: Number, default: 0 },
   numExplorations: { type: Number, default: 0 },
   exploreStandardDev: Number,
+  notifications: [{
+    type: { type: String, required: true, validate: (type) => NOTIFICATION_TYPES.includes(type) },
+    sender: { type: ObjectId, ref: 'User', autopopulate: { select: 'name' } },
+    createDate: { type: Date, default: Date.now },
+    isNew: { type: Boolean, default: true },
+    href: String,
+  }],
 });
 
 userSchema.virtual('articles').get(function getUserArticles() {
@@ -48,7 +59,7 @@ userSchema.methods.isMemberOfAny = function isMemberOfAny(groupIds) {
   return groupIds.some(this.isMemberOf, this);
 };
 
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function preSave(next) {
   // Add user's hard-coded groups
   if (this.groups.length === 0) {
     this.groups.push('59127637f0717e001cbfe583'); // US Politics
@@ -65,6 +76,8 @@ userSchema.pre('save', function (next) {
   }
   next();
 });
+
+userSchema.plugin(autopopulate);
 
 const UserModel = mongoose.model('User', userSchema);
 
