@@ -143,6 +143,27 @@ router.get('/api/user', (req, res) => {
 });
 
 /*
+Get current user's notifications.
+Query string options available:
+  limit: # of notifications to return
+  page: # of sets of [limit] notifications to skip from start of array
+Any returned notifications are marked as read asynchronously.
+*/
+router.get('/api/user/notifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getUserNotifications(req.user._id, req.query.limit, req.query.page)
+    .then((notifications) => {
+      util.returnGetSuccess(res, notifications);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
 Create a new group.
 Input:
   req.body.name: String name of the group

@@ -25,7 +25,7 @@ const userSchema = new Schema({
     type: { type: String, required: true, validate: (type) => NOTIFICATION_TYPES.includes(type) },
     sender: { type: ObjectId, ref: 'User', autopopulate: { select: 'name' } },
     createDate: { type: Date, default: Date.now },
-    isNew: { type: Boolean, default: true },
+    isRead: { type: Boolean, default: false },
     href: String,
   }],
 });
