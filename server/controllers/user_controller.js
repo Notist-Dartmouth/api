@@ -2,6 +2,8 @@ import User from '../models/user';
 
 // TODO: addFollowing (add a user to the list of user's i am following)
 
+const NOTIFICATION_TYPES = ['reply'];
+
 export const addUserGroups = (userId, groupIds) => {
   return User.findByIdAndUpdate(userId, { $addToSet: { groups: { $each: groupIds } } }, { new: true });
 };
@@ -31,14 +33,21 @@ export const updateUserExploreNumber = (userId, value) => {
 
 // Notifications are always prepended to the array, so the newest ones appear first.
 export const addUserNotification = (userId, type, sender, href) => {
-  const notification = { type };
+  if (!NOTIFICATION_TYPES.includes(type)) {
+    return Promise.reject(new Error('Unrecognized notification type'));
+  }
+  const notification = { messageType: type };
   if (sender) notification.sender = sender;
   if (href) notification.href = href;
-  return User.findByIdAndUpdate(userId, { $push: { notifications: { $each: [notification], $position: 0 } } }, { new: true });
+  return User.findByIdAndUpdate(
+    userId,
+    { $push: { notifications: { $each: [notification], $position: 0 } } },
+    { new: true, select: 'notifications' }
+  );
 };
 
 export const setNotificationsRead = (userId, notificationIds) => {
-  return User.findById(userId)
+  return User.findById(userId, 'notifications')
   .then((user) => {
     for (const id of notificationIds) {
       const notification = user.notifications.id(id);

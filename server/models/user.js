@@ -7,8 +7,6 @@ import autopopulate from 'mongoose-autopopulate';
 import Annotation from './annotation';
 import Group from './group';
 
-const NOTIFICATION_TYPES = ['reply'];
-
 const userSchema = new Schema({
   googleId: String,
   facebookId: String,
@@ -21,13 +19,13 @@ const userSchema = new Schema({
   exploreNumber: { type: Number, default: 0 },
   numExplorations: { type: Number, default: 0 },
   exploreStandardDev: Number,
-  notifications: [{
-    type: { type: String, required: true, validate: (type) => NOTIFICATION_TYPES.includes(type) },
+  notifications: { type: [{
+    messageType: { type: String, required: true },
     sender: { type: ObjectId, ref: 'User', autopopulate: { select: 'name' } },
     createDate: { type: Date, default: Date.now },
     isRead: { type: Boolean, default: false },
     href: String,
-  }],
+  }], select: false },
 });
 
 userSchema.virtual('articles').get(function getUserArticles() {
@@ -39,6 +37,10 @@ userSchema.virtual('annotations').get(function getUserAnnotations() {
   return Annotation.find({ author: this }).then((annotations) => {
     return annotations;
   });
+});
+
+userSchema.virtual('numUnreadNotifications').get(function getNumUnread() {
+  return this.notifications.filter((n) => !n.isRead).length;
 });
 
 userSchema.methods.isMemberOf = function isMemberOf(groupIdIn) {
@@ -61,7 +63,7 @@ userSchema.methods.isMemberOfAny = function isMemberOfAny(groupIds) {
 
 userSchema.pre('save', function preSave(next) {
   // Add user's hard-coded groups
-  if (this.groups.length === 0) {
+  if (this.groups && this.groups.length === 0) {
     this.groups.push('59127637f0717e001cbfe583'); // US Politics
     Group.findOneAndUpdate({ _id: '59127637f0717e001cbfe583' }, { $push: { members: this._id } }, { new: true }).exec();
 
