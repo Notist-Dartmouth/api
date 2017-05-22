@@ -126,6 +126,24 @@ router.post('/api/article', (req, res) => {
   }
 });
 
+/*
+Get information about an article by id.
+Does not include annotations, but populates group names.
+*/
+router.get('/api/articleById/:id', (req, res) => {
+  Articles.getArticleById(req.params.id)
+  .then((article) => {
+    if (!article) {
+      util.returnError(res, new Error('Article not found'));
+    } else {
+      util.returnGetSuccess(res, article);
+    }
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
