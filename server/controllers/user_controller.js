@@ -1,9 +1,5 @@
 import User from '../models/user';
-
-// TODO: addFollowing (add a user to the list of user's i am following)
-// TODO: getUserArticles: Get all the articles of a given user
-// TODO: getUserAnnotations: Get all the annotations made by a given user
-
+import Annotation from '../models/annotation';
 
 export const getUsers = (req, res) => {
   res.send('getting users');
@@ -15,4 +11,8 @@ export const addUserGroups = (userId, groupIds) => {
 
 export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
+};
+
+export const getUserAnnotations = (userId) => {
+  return Annotation.find({ author: userId }).sort({ date: -1 });
 };

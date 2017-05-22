@@ -110,7 +110,7 @@ otherwise resolves to array of article objects that are in the group.
 // TODO: should only return articles within last 3 months
 export const getGroupArticles = (groupId) => {
   return Group.findById(groupId)
-  .populate({ path: 'articles' })
+  .populate({ path: 'articles', options: { sort: { 'info.date_published': -1 } } })
   .select('articles')
   .exec()
   .then((group) => {
