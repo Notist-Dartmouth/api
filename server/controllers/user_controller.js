@@ -1,6 +1,8 @@
 import User from '../models/user';
 import Annotation from '../models/annotation';
 
+// TODO: addFollowing (add a user to the list of users I am following)
+
 export const getUsers = (req, res) => {
   res.send('getting users');
 };
@@ -15,4 +17,23 @@ export const addUserGroup = (userId, groupId) => {
 
 export const getUserAnnotations = (userId) => {
   return Annotation.find({ author: userId }).sort({ date: -1 });
+};
+
+export const removeUserGroup = (userId, groupId) => {
+  return User.findByIdAndUpdate(userId, { $pull: { groups: groupId } }, { new: true });
+};
+
+export const postUserExploreNumber = (userId, exploreNum, stdDev) => {
+  return User.findByIdAndUpdate(userId, { exploreNumber: exploreNum, exploreStandardDev: stdDev, numExplorations: 20 }, { new: true });
+};
+
+export const updateUserExploreNumber = (userId, value) => {
+  return User.findById(userId)
+  .then((user) => {
+    const oldAvg = user.exploreNumber;
+    const newAvg = ((oldAvg * user.numExplorations) + value) / (user.numExplorations + 1);
+    user.exploreNumber = newAvg;
+    user.numExplorations = user.numExplorations + 1;
+    return user.save();
+  });
 };

@@ -7,16 +7,29 @@ const ObjectId = mongodb.ObjectId;
 
 // Precondition: this action is authorized
 // TODO: Get title, body text from mercury?
-export const createArticle = (uri, groups) => {
+export const createArticle = (uri, groups, score) => {
   const article = new Article();
   article.uri = uri;
   article.groups = groups;
+  article.avgUserScore = (score ? score : 1);
+  article.numShares = (score ? 1 : 0);
   return article.save()
   .then((result) => {
     return Groups.addGroupArticle(result._id, groups) // TODO: move to post-save
     .then((res) => {
       return result;
     });
+  });
+};
+
+export const updateArticleScore = (article, value) => {
+  return Article.findById(article)
+  .then(article => {
+    const old_avg = article.avgUserScore;
+    const new_avg = ((old_avg * article.numShares) + value) / (article.numShares + 1);
+    article.avgUserScore = new_avg;
+    article.numShares = article.numShares + 1;
+    return article.save();
   });
 };
 

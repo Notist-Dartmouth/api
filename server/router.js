@@ -3,7 +3,7 @@ import * as Users from './controllers/user_controller';
 import * as Articles from './controllers/article_controller';
 import * as Annotations from './controllers/annotation_controller';
 import * as Groups from './controllers/group_controller';
-import * as Explore from './explore';
+import * as Explore from './controllers/explore_controller';
 import config from './_config';
 import util from './util';
 
@@ -19,6 +19,76 @@ const router = Router();
   GET -> {stuff requested}
   DELETE -> {success}
 */
+
+// Routes for Explore Related Endpoints
+
+// route to post user exploreNumber
+router.post('/api/user/exploreNumber', (req, res) => {
+  console.log(req);
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const exploreNum = req.body.explore_num;
+    const stdDev = req.body.std_dev;
+    Users.postUserExploreNumber(user.id, exploreNum, stdDev)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+// route to update user exploreNumber
+router.put('/api/user/exploreNumber', (req, res) => {
+  if (req.isAuthenticated()) {
+    const user = req.user;
+    const exploreNum = req.body.explore;
+    Users.updateUserExploreNumber(user.id, exploreNum)
+    .then((result) => {
+      console.log(result);
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+router.post('/api/initializeExplore/articles', (req, res) => {
+  const pageIds = req.body.pages;
+  const score = req.body.score;
+  Explore.postExploreArticles(pageIds, score)
+  .then((result) => {
+    console.log(result);
+    util.returnPostSuccess(res, result);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
+// route to update article avgUserScore
+router.put('/api/article/userScore', (req, res) => {
+  if (req.isAuthenticated()) {
+    const article = req.body.article;
+    const value = req.body.value;
+    Articles.updateArticleScore(article, value)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
 
 // navigate to logout page
 router.get('/logout', (req, res) => {
@@ -166,16 +236,27 @@ router.get('/api/group/:id', (req, res) => {
 });
 
 /*
-Add a user to a specific group as a member.
+Add a user to a specific group as a member, or remove them if they are already a member.
 Input:
   req.params.groupId: String group ID
   req.params.userId: String user ID to be added to the group.
 Output: Returns json file with the updated group information.
 */
-router.post('/api/group/:groupId/user/:userId', (req, res) => {
+router.post('/api/group/:groupId/user', (req, res) => {
   const groupId = req.params.groupId;
-  const userId = req.params.userId;
-  if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
+  const userId = (req.query.userId) ? req.query.userId : req.user.id;
+  if (req.isAuthenticated() && userId === req.user.id && req.user.isMemberOf(groupId)) {
+    Users.removeUserGroup(userId, groupId)
+    .then((updatedUser) => {
+      return Groups.removeGroupMember(groupId, userId);
+    })
+    .then((updatedGroup) => {
+      util.returnPostSuccess(res, updatedGroup);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else if (req.isAuthenticated() && Promise.resolve(Groups.groupAddPermission(groupId, req.user.id))) {
     Users.addUserGroup(userId, groupId)
     .then((updatedUser) => {
       return Groups.addGroupMember(groupId, userId);
