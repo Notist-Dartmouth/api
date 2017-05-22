@@ -164,6 +164,24 @@ router.get('/api/user/notifications', (req, res) => {
 });
 
 /*
+Get current user's number of unread notifications.
+Returns the result as a plain number in body of response.
+*/
+router.get('/api/user/numUnreadNotifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getNumUnreadNotifications(req.user._id)
+    .then((num) => {
+      util.returnGetSuccess(res, num);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
 Create a new group.
 Input:
   req.body.name: String name of the group

@@ -85,3 +85,14 @@ export const getUserNotifications = (userId, limit, page, noRead) => {
     return user.notifications;
   });
 };
+
+export const getNumUnreadNotifications = (userId) => {
+  return User.findById(userId, 'notifications')
+  .then((user) => {
+    if (user) {
+      return user.numUnreadNotifications;
+    } else {
+      throw new Error('User not found');
+    }
+  });
+};

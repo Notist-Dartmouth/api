@@ -140,6 +140,20 @@ describe('Users', function () {
     });
   });
 
+  describe('GET /api/user/numUnreadNotifications', function () {
+    it('should get the right number of unread notifications', (done) => {
+      passportStub.login(user1);
+      chai.request(app)
+        .get('/api/user/numUnreadNotifications')
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.equal(4);
+          done();
+        });
+    });
+  });
+
   describe('Annotation reply notification hook', function () {
     it('should not add notification when user replies to self', function () {
       passportStub.login(user0);
