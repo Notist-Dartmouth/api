@@ -126,6 +126,24 @@ router.post('/api/article', (req, res) => {
   }
 });
 
+/*
+Get information about an article by id.
+Does not include annotations, but populates group names.
+*/
+router.get('/api/articleById/:id', (req, res) => {
+  Articles.getArticleById(req.params.id)
+  .then((article) => {
+    if (!article) {
+      util.returnError(res, new Error('Article not found'));
+    } else {
+      util.returnGetSuccess(res, article);
+    }
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
@@ -133,6 +151,45 @@ router.get('/api/user', (req, res) => {
     .execPopulate()
     .then((user) => {
       util.returnGetSuccess(res, user);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's notifications.
+Query string options available:
+  limit: # of notifications to return
+  page: # of sets of [limit] notifications to skip from start of array
+Any returned notifications are marked as read asynchronously.
+*/
+router.get('/api/user/notifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getUserNotifications(req.user._id, req.query.limit, req.query.page)
+    .then((notifications) => {
+      util.returnGetSuccess(res, notifications);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's number of unread notifications.
+Returns the result as a plain number in body of response.
+*/
+router.get('/api/user/numUnreadNotifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getNumUnreadNotifications(req.user._id)
+    .then((num) => {
+      util.returnGetSuccess(res, num);
     })
     .catch((err) => {
       util.returnError(res, err);
