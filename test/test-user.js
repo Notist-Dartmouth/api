@@ -96,6 +96,24 @@ describe('Users', function () {
             done();
           });
       });
+
+      it('should update user info', function (done) {
+        passportStub.login(user1);
+        chai.request(app)
+        .put('/api/user')
+        .send({
+          name: 'user one',
+          facebookId: '1234',
+        }).end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.have.property('SUCCESS');
+          res.body.SUCCESS.should.have.property('email', 'user1@testuri.com');
+          res.body.SUCCESS.should.have.property('name', 'user one');
+          res.body.SUCCESS.should.have.property('googleId', 'user1_id');
+          done();
+        });
+      });
     });
   });
 });
