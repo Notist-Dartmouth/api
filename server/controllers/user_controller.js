@@ -33,3 +33,12 @@ export const updateUserExploreNumber = (userId, value) => {
     return user.save();
   });
 };
+
+export const updateUserInfo = (userId, value) => {
+  Object.keys(value).forEach((key) => {
+    if (key != 'bio' && key != 'email' && key != 'name') {
+      delete value[key];
+    }
+  });
+  return User.findByIdAndUpdate(userId, value, { new: true });
+};
