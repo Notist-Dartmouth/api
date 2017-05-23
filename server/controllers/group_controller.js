@@ -33,6 +33,25 @@ Output: Returns json file with the updated group.
 export const addGroupMember = (groupId, userId) => {
   return Group.findByIdAndUpdate(groupId, { $addToSet: { members: userId } }, { new: true });
 };
+
+export const removeGroupMember = (groupId, userId) => {
+  return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
+};
+
+/*
+Checks if user has permission to add users (self or others) to a specific group
+Input:
+  groupId: String group ID
+  userId: String user ID
+Output: Boolean.
+*/
+export const groupAddPermission = (groupId, userId) => {
+  Group.findById(groupId)
+  .then((group) => {
+    return group.isPublic || group.members.indexOf(userId) > -1;
+  });
+};
+
 /*
 Add an article to multiple groups
 Input:
@@ -53,14 +72,12 @@ Input:
   groupId: String of group ID
 Output: Returns json file of the group.
 */
-// TODO: Clarify the point of this endpoint, should it get all the articles or
-// annotations, or be like a history/info about the group?
 export const getGroup = (groupId) => {
   return Group.findById(groupId);
 };
 
 /*
-Get a list of groups, filtered by some conditions.
+Get a list of groups, filtered by some conditions. Creator name is populated.
 Input:
   query: A mongodb query selector object
 Output: Resolves to a list of matching groups
@@ -75,7 +92,8 @@ export const getGroupsFiltered = (query) => {
   if (typeof query !== 'object') {
     return Promise.reject(new Error('Invalid group query'));
   }
-  return Group.find(query);
+  return Group.find(query)
+  .populate('creator', 'name');
 };
 
 /*

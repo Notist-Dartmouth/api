@@ -6,6 +6,6 @@ config.mongoURI = {
   production: process.env.MONGODB_URI,
 };
 
-config.frontEndHost = process.env.NODE_ENV === 'production' ? 'http://notist.io' : 'http://localhost:5000';
+config.frontEndHost = process.env.NODE_ENV === 'production' ? 'https://notist.io' : 'http://localhost:5000';
 
 module.exports = config;

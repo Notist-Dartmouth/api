@@ -27,9 +27,9 @@ router.post('/api/user/exploreNumber', (req, res) => {
   console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
-    const explore_num = req.body.explore_num;
-    const std_dev = req.body.std_dev;
-    Users.postUserExploreNumber(user.id, explore_num, std_dev)
+    const exploreNum = req.body.explore_num;
+    const stdDev = req.body.std_dev;
+    Users.postUserExploreNumber(user.id, exploreNum, stdDev)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -42,11 +42,11 @@ router.post('/api/user/exploreNumber', (req, res) => {
 });
 
 // route to update user exploreNumber
-router.put('/api/user/exploreNumber'), (req, res) => {
+router.put('/api/user/exploreNumber', (req, res) => {
   if (req.isAuthenticated()) {
     const user = req.user;
-    const explore_num = req.body.explore;
-    User.updateUserExploreNumber(user.id, explore_num)
+    const exploreNum = req.body.explore;
+    Users.updateUserExploreNumber(user.id, exploreNum)
     .then((result) => {
       console.log(result);
       util.returnPostSuccess(res, result);
@@ -57,12 +57,12 @@ router.put('/api/user/exploreNumber'), (req, res) => {
   } else {
     res.status(401).end();
   }
-};
+});
 
 router.post('/api/initializeExplore/articles', (req, res) => {
-  const page_ids = req.body.pages;
+  const pageIds = req.body.pages;
   const score = req.body.score;
-  Explore.postExploreArticles(page_ids, score)
+  Explore.postExploreArticles(pageIds, score)
   .then((result) => {
     console.log(result);
     util.returnPostSuccess(res, result);
@@ -73,11 +73,11 @@ router.post('/api/initializeExplore/articles', (req, res) => {
 });
 
 // route to update article avgUserScore
-router.put('/api/article/userScore'), (req, res) => {
+router.put('/api/article/userScore', (req, res) => {
   if (req.isAuthenticated()) {
     const article = req.body.article;
     const value = req.body.value;
-    Article.updateArticleScore(article, value)
+    Articles.updateArticleScore(article, value)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -87,7 +87,7 @@ router.put('/api/article/userScore'), (req, res) => {
   } else {
     res.status(401).end();
   }
-};
+});
 
 
 // navigate to logout page
@@ -126,6 +126,24 @@ router.post('/api/article', (req, res) => {
   }
 });
 
+/*
+Get information about an article by id.
+Does not include annotations, but populates group names.
+*/
+router.get('/api/articleById/:id', (req, res) => {
+  Articles.getArticleById(req.params.id)
+  .then((article) => {
+    if (!article) {
+      util.returnError(res, new Error('Article not found'));
+    } else {
+      util.returnGetSuccess(res, article);
+    }
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
@@ -133,6 +151,45 @@ router.get('/api/user', (req, res) => {
     .execPopulate()
     .then((user) => {
       util.returnGetSuccess(res, user);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's notifications.
+Query string options available:
+  limit: # of notifications to return
+  page: # of sets of [limit] notifications to skip from start of array
+Any returned notifications are marked as read asynchronously.
+*/
+router.get('/api/user/notifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getUserNotifications(req.user._id, req.query.limit, req.query.page)
+    .then((notifications) => {
+      util.returnGetSuccess(res, notifications);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's number of unread notifications.
+Returns the result as a plain number in body of response.
+*/
+router.get('/api/user/numUnreadNotifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getNumUnreadNotifications(req.user._id)
+    .then((num) => {
+      util.returnGetSuccess(res, num);
     })
     .catch((err) => {
       util.returnError(res, err);
@@ -216,16 +273,27 @@ router.get('/api/group/:id', (req, res) => {
 });
 
 /*
-Add a user to a specific group as a member.
+Add a user to a specific group as a member, or remove them if they are already a member.
 Input:
   req.params.groupId: String group ID
   req.params.userId: String user ID to be added to the group.
 Output: Returns json file with the updated group information.
 */
-router.post('/api/group/:groupId/user/:userId', (req, res) => {
+router.post('/api/group/:groupId/user', (req, res) => {
   const groupId = req.params.groupId;
-  const userId = req.params.userId;
-  if (req.isAuthenticated() && req.user.isMemberOf(groupId)) {
+  const userId = (req.query.userId) ? req.query.userId : req.user.id;
+  if (req.isAuthenticated() && userId === req.user.id && req.user.isMemberOf(groupId)) {
+    Users.removeUserGroup(userId, groupId)
+    .then((updatedUser) => {
+      return Groups.removeGroupMember(groupId, userId);
+    })
+    .then((updatedGroup) => {
+      util.returnPostSuccess(res, updatedGroup);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else if (req.isAuthenticated() && Promise.resolve(Groups.groupAddPermission(groupId, req.user.id))) {
     Users.addUserGroup(userId, groupId)
     .then((updatedUser) => {
       return Groups.addGroupMember(groupId, userId);
