@@ -289,6 +289,27 @@ describe('Articles', function () {
             done();
           });
       });
+
+      it('should get the title for an article that Mercury can\'t access', function (done) {
+        this.timeout(0);
+        const uri = 'https://zapier.com/engineering/how-to-build-redux';
+        const nURI = Article.normalizeURI(uri);
+        const title = 'Build Yourself a Redux - The Zapier Engineering Blog - Zapier';
+        passportStub.login(user);
+        chai.request(app)
+          .post('/api/article')
+          .send({ uri, groups: [] })
+          .end((err, res) => {
+            should.not.exist(err);
+            res.should.have.status(200);
+            res.body.SUCCESS.should.have.property('uri', nURI);
+            res.body.SUCCESS.should.have.property('info');
+            should.exist(res.body.SUCCESS.info);
+            res.body.SUCCESS.info.should.have.property('title', title);
+            res.body.SUCCESS.info.should.not.have.property('content');
+            done();
+          });
+      });
     });
 
     describe('GET /api/articleById/:id', function () {
