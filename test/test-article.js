@@ -290,5 +290,20 @@ describe('Articles', function () {
           });
       });
     });
+
+    describe('GET /api/articleById/:id', function () {
+      it('should get article information for an existing article', function (done) {
+        chai.request(app)
+          .get(`/api/articleById/${testArticle.id}`)
+          .end((err, res) => {
+            should.not.exist(err);
+            res.should.have.status(200);
+            res.body._id.toString().should.equal(testArticle.id);
+            res.body.should.not.have.property('annotations');
+            res.body.should.have.property('groups');
+            done();
+          });
+      });
+    });
   });
 });
