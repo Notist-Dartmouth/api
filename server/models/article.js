@@ -35,7 +35,7 @@ const mercurySchema = new Schema({
   title: String,
   content: { type: String, select: false },
   author: String,
-  date_published: Date,
+  date_published: { type: Date, default: Date.now },
   lead_image_url: String,
   dek: String,
   next_page_url: String,
