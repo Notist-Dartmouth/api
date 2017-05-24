@@ -21,8 +21,7 @@ const authCallback = (accessToken, refreshToken, profile, done) => {
       }
 
       // try to find a profile photo
-      if (!myUser.photoSrc && profile.photos && profile.photos.length
-         && profile.photos.length > 0 && profile.photos[0].value) {
+      if (profile.photos && profile.photos.length && profile.photos.length > 0 && profile.photos[0].value) {
         myUser.photoSrc = profile.photos[0].value;
       }
 
