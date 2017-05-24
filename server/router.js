@@ -89,6 +89,20 @@ router.put('/api/article/userScore', (req, res) => {
   }
 });
 
+router.put('/api/user', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.updateUserInfo(req.user.id, req.body)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
 
 // navigate to logout page
 router.get('/logout', (req, res) => {
