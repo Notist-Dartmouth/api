@@ -85,7 +85,7 @@ articleSchema.methods.fetchMercuryInfo = function fetchMercuryInfo() {
       (typeof json.message === 'object' && json.message === null) ||
       json.error
     ) {
-      return null;
+      return {};
     } else {
       return json;
     }
@@ -101,7 +101,7 @@ articleSchema.pre('save', function preSave(next) {
       next();
     })
     .catch((err) => {
-      this.info = null;
+      this.info = {};
       next(err);
     });
   } else {
