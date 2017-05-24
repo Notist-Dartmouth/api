@@ -142,7 +142,7 @@ router.get('/api/user', (req, res) => {
   }
 });
 
-/* Get a user's groups, returned with most recent first
+/* Get a user's annotations, returned with most recent first
 Input:
   req.params.userId: String user ID of the person's annotations to be fetched
 Output: Returns json file with the list of annotations.
