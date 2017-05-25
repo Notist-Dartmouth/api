@@ -13,6 +13,7 @@ const userSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
   bio: String,
+  photoSrc: String,
   groups: [{ type: ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: ObjectId, ref: 'User' }],
