@@ -31,6 +31,15 @@ export const updateUserExploreNumber = (userId, value) => {
   });
 };
 
+export const updateUserInfo = (userId, value) => {
+  Object.keys(value).forEach((key) => {
+    if (key !== 'bio' && key !== 'email' && key !== 'name') {
+      delete value[key];
+    }
+  });
+  return User.findByIdAndUpdate(userId, value, { new: true });
+};
+
 // Notifications are always prepended to the array, so the newest ones appear first.
 export const addUserNotification = (userId, type, sender, href) => {
   if (!NOTIFICATION_TYPES.includes(type)) {
