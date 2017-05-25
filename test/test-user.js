@@ -137,6 +137,26 @@ describe('Users', function () {
           });
         });
       });
+
+      it('should update user info', function (done) {
+        passportStub.login(user1);
+        chai.request(app)
+        .put('/api/user')
+        .send({
+          name: 'user one',
+          facebookId: '1234',
+        })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.have.property('SUCCESS');
+          res.body.SUCCESS.should.have.property('email', 'user1@testuri.com');
+          res.body.SUCCESS.should.have.property('name', 'user one');
+          res.body.SUCCESS.should.have.property('googleId', 'user1_id');
+          user1.name = res.body.SUCCESS.name;
+          done();
+        });
+      });
     });
   });
 
@@ -229,9 +249,9 @@ describe('Users', function () {
         .end((err, res) => {
           should.not.exist(err);
           res.should.have.status(200);
-          res.body.should.have.property('email', 'user1@testuri.com');
-          res.body.should.have.property('name', 'user1');
-          res.body.should.have.property('googleId', 'user1_id');
+          res.body.should.have.property('email', user1.email);
+          res.body.should.have.property('name', user1.name);
+          res.body.should.have.property('googleId', user1.googleId);
 
           res.body.should.have.property('groups').with.lengthOf(2);
           res.body.groups[0]._id.toString().should.not.equal(res.body.groups[1]._id.toString());
