@@ -62,9 +62,6 @@ const articleSchema = new Schema({
   info: mercurySchema,
   annotations: [{ type: Schema.Types.ObjectId, ref: 'Annotation' }],
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
-
-  isMisleading: { type: Boolean, default: false },
-  isSatire: { type: Boolean, default: false },
 });
 
 articleSchema.statics.normalizeURI = normalizeURI;

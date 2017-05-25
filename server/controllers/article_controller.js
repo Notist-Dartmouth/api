@@ -11,7 +11,7 @@ export const createArticle = (uri, groups, score) => {
   const article = new Article();
   article.uri = uri;
   article.groups = groups;
-  article.avgUserScore = (score ? score : 1);
+  article.avgUserScore = (score || 1);
   article.numShares = (score ? 1 : 0);
   return article.save()
   .then((result) => {
@@ -22,12 +22,12 @@ export const createArticle = (uri, groups, score) => {
   });
 };
 
-export const updateArticleScore = (article, value) => {
-  return Article.findById(article)
-  .then(article => {
-    const old_avg = article.avgUserScore;
-    const new_avg = ((old_avg * article.numShares) + value) / (article.numShares + 1);
-    article.avgUserScore = new_avg;
+export const updateArticleScore = (articleIn, value) => {
+  return Article.findById(articleIn)
+  .then((article) => {
+    const oldAvg = article.avgUserScore;
+    const newAvg = ((oldAvg * article.numShares) + value) / (article.numShares + 1);
+    article.avgUserScore = newAvg;
     article.numShares = article.numShares + 1;
     return article.save();
   });
@@ -42,6 +42,13 @@ export const getArticle = (uri, query) => {
   const nURI = Article.normalizeURI(uri);
   query.uri = nURI;
   return Article.findOne(query);
+};
+
+// does not include annotations
+// does populate group names
+export const getArticleById = (articleId) => {
+  return Article.findById(articleId, '-annotations')
+  .populate('groups', 'name');
 };
 
 
