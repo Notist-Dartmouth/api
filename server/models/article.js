@@ -3,6 +3,8 @@ mongoose.Promise = global.Promise;
 import url from 'url';
 import normalizeUrl from 'normalize-url';
 import fetch from 'node-fetch';
+import childProcess from 'child_process';
+import { JSDOM } from 'jsdom';
 
 const IMPT_QUERY_PARAMS = {
   global: ['id'],
@@ -77,14 +79,36 @@ articleSchema.methods.fetchMercuryInfo = function fetchMercuryInfo() {
   .then((res) => {
     return res.json();
   }).then((json) => {
-    if ( // Mercury error conditions:
+    if ( // Mercury error conditions (there might be more!):
       !json ||
       (typeof json.message === 'object' && json.message === null) ||
-      json.error
+      json.error ||
+      json.errorMessage
     ) {
       return {};
     } else {
       return json;
+    }
+  });
+};
+
+articleSchema.methods.getTitleFromWget = function getTitleFromWget() {
+  return new Promise((resolve, reject) => {
+    childProcess.execFile('wget', ['-q', '-O', '-', this.uri], (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stdout);
+      }
+    });
+  })
+  .then((rawHTML) => {
+    const { window } = new JSDOM(rawHTML);
+    const titleElem = window.document.querySelector('title');
+    if (titleElem) {
+      return titleElem.textContent;
+    } else {
+      throw new Error('No title found');
     }
   });
 };
@@ -94,8 +118,21 @@ articleSchema.pre('save', function preSave(next) {
   if (!this.info) {
     this.fetchMercuryInfo()
     .then((info) => {
-      this.info = info;
-      next();
+      if (info) {
+        this.info = info;
+        next();
+      } else {
+        this.getTitleFromWget()
+        .then((title) => {
+          this.info = { title };
+          next();
+        })
+        .catch((err) => {
+          // give up
+          this.info = null;
+          next();
+        });
+      }
     })
     .catch((err) => {
       this.info = {};

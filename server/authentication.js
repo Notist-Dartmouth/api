@@ -19,12 +19,17 @@ const authCallback = (accessToken, refreshToken, profile, done) => {
       } else {
         myUser = user;
       }
+
+      // try to find a profile photo
+      if (profile.photos && profile.photos.length && profile.photos.length > 0 && profile.photos[0].value) {
+        myUser.photoSrc = profile.photos[0].value;
+      }
+
       if (profile.provider === 'facebook') {
         myUser.facebookId = profile.id;
       } else if (profile.provider === 'google') {
         myUser.googleId = profile.id;
       }
-      console.log(myUser);
       myUser.save()
         .then((result) => {
           done(null, myUser);
@@ -38,13 +43,11 @@ const authCallback = (accessToken, refreshToken, profile, done) => {
 
 export default function authInit(passport) {
   passport.serializeUser((user, done) => {
-    console.log('serialized');
     done(null, user._id);
   });
 
   passport.deserializeUser((id, done) => {
     User.findById(id, (err, user) => {
-      console.log('deserialized');
       done(err, user);
     });
   });
@@ -59,6 +62,6 @@ export default function authInit(passport) {
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: '/auth/facebook/callback',
-    profileFields: ['id', 'displayName', 'email'],
+    profileFields: ['id', 'displayName', 'email', 'picture.type(large)'],
   }, authCallback));
 }
