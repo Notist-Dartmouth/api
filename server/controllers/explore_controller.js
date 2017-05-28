@@ -1,5 +1,7 @@
 import Article from '../models/article';
+import User from '../models/user';
 import * as Articles from '../controllers/article_controller';
+import * as Users from '../controllers/user_controller';
 
 import FB from 'fb';
 import _ from 'underscore';
@@ -78,5 +80,32 @@ export const populateExploreFeed = (user, conditions) => {
       ],
     };
     return Articles.getArticlesFiltered(filter, conditions);
+  });
+};
+
+export const updateUserArticleExploreData = (userId, articleId) => {
+  const promises = [];
+
+  return User.findById(userId).then((user) => {
+    const userVal = user.exploreNumber;
+    Article.findById(articleId).then((article) => {
+      const articleVal = article.avgUserScore;
+
+      if (userVal && userVal != 0) {
+        var promise1 = new Promise(function (resolve, reject) {
+          return Articles.updateArticleScore(article.id, userVal);
+        });
+        promises.push(promise1);
+      }
+
+      if (articleVal && articleVal != 0) {
+        var promise2 = new Promise(function (resolve, reject) {
+          return Users.updateUserExploreNumber(user.id, articleVal);
+        });
+        promises.push(promise2);
+      }
+
+      return Promise.all(promises);
+    });
   });
 };
