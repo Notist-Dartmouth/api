@@ -24,7 +24,6 @@ const router = Router();
 
 // route to post user exploreNumber
 router.post('/api/user/exploreNumber', (req, res) => {
-  console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
     const exploreNum = req.body.explore_num;
@@ -48,7 +47,6 @@ router.put('/api/user/exploreNumber', (req, res) => {
     const exploreNum = req.body.explore;
     Users.updateUserExploreNumber(user.id, exploreNum)
     .then((result) => {
-      console.log(result);
       util.returnPostSuccess(res, result);
     })
     .catch((err) => {
@@ -64,7 +62,6 @@ router.post('/api/initializeExplore/articles', (req, res) => {
   const score = req.body.score;
   Explore.postExploreArticles(pageIds, score)
   .then((result) => {
-    console.log(result);
     util.returnPostSuccess(res, result);
   })
   .catch((err) => {
@@ -78,6 +75,20 @@ router.put('/api/article/userScore', (req, res) => {
     const article = req.body.article;
     const value = req.body.value;
     Articles.updateArticleScore(article, value)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+router.put('/api/user', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.updateUserInfo(req.user.id, req.body)
     .then((result) => {
       util.returnPostSuccess(res, result);
     })
@@ -126,6 +137,24 @@ router.post('/api/article', (req, res) => {
   }
 });
 
+/*
+Get information about an article by id.
+Does not include annotations, but populates group names.
+*/
+router.get('/api/articleById/:id', (req, res) => {
+  Articles.getArticleById(req.params.id)
+  .then((article) => {
+    if (!article) {
+      util.returnError(res, new Error('Article not found'));
+    } else {
+      util.returnGetSuccess(res, article);
+    }
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
+});
+
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
@@ -133,6 +162,65 @@ router.get('/api/user', (req, res) => {
     .execPopulate()
     .then((user) => {
       util.returnGetSuccess(res, user);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/* Get a user's annotations, returned with most recent first
+Input:
+  req.params.userId: String user ID of the person's annotations to be fetched
+Output: Returns json file with the list of annotations.
+*/
+router.get('/api/user/:userId/annotations', (req, res) => {
+  if (req.isAuthenticated()) {
+    const userId = req.params.userId;
+    Users.getUserAnnotations(userId)
+    .then((annotations) => {
+      util.returnGetSuccess(res, annotations);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's notifications.
+Query string options available:
+  limit: # of notifications to return
+  page: # of sets of [limit] notifications to skip from start of array
+Any returned notifications are marked as read asynchronously.
+*/
+router.get('/api/user/notifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getUserNotifications(req.user._id, req.query.limit, req.query.page)
+    .then((notifications) => {
+      util.returnGetSuccess(res, notifications);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
+/*
+Get current user's number of unread notifications.
+Returns the result as a plain number in body of response.
+*/
+router.get('/api/user/numUnreadNotifications', (req, res) => {
+  if (req.isAuthenticated()) {
+    Users.getNumUnreadNotifications(req.user._id)
+    .then((num) => {
+      util.returnGetSuccess(res, num);
     })
     .catch((err) => {
       util.returnError(res, err);

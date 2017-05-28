@@ -22,12 +22,12 @@ export const createArticle = (uri, groups, score) => {
   });
 };
 
-export const updateArticleScore = (article, value) => {
-  return Article.findById(article)
+export const updateArticleScore = (articleId, value) => {
+  return Article.findById(articleId)
   .then((article) => {
-    const old_avg = article.avgUserScore;
-    const new_avg = ((old_avg * article.numShares) + value) / (article.numShares + 1);
-    article.avgUserScore = new_avg;
+    const oldAvg = article.avgUserScore;
+    const newAvg = ((oldAvg * article.numShares) + value) / (article.numShares + 1);
+    article.avgUserScore = newAvg;
     article.numShares = article.numShares + 1;
     return article.save();
   });
@@ -42,6 +42,13 @@ export const getArticle = (uri, query) => {
   const nURI = Article.normalizeURI(uri);
   query.uri = nURI;
   return Article.findOne(query);
+};
+
+// does not include annotations
+// does populate group names
+export const getArticleById = (articleId) => {
+  return Article.findById(articleId, '-annotations')
+  .populate('groups', 'name');
 };
 
 

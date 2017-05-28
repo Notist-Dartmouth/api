@@ -38,6 +38,7 @@ export const removeGroupMember = (groupId, userId) => {
   return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true })
   .then((group) => {
     if (group.members.length < 1) {
+      console.log('removing');
       return Group.remove({ _id: group.id });
     } else {
       return group;
@@ -135,7 +136,7 @@ otherwise resolves to array of article objects that are in the group.
 // TODO: should only return articles within last 3 months
 export const getGroupArticles = (groupId) => {
   return Group.findById(groupId)
-  .populate({ path: 'articles' })
+  .populate({ path: 'articles', options: { sort: { 'info.date_published': -1 } } })
   .select('articles')
   .exec()
   .then((group) => {

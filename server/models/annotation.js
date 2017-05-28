@@ -4,7 +4,11 @@ import autopopulate from 'mongoose-autopopulate';
 import * as Articles from '../controllers/article_controller';
 import * as Groups from '../controllers/group_controller';
 import * as Explore from '../controllers/explore_controller';
+
+import * as Users from '../controllers/user_controller';
+
 import Article from './article';
+import config from '../_config';
 
 mongoose.Promise = global.Promise;
 const ObjectId = Schema.Types.ObjectId;
@@ -71,20 +75,41 @@ annotationSchema.pre('save', function preSave(next) {
   });
 });
 
-annotationSchema.post('save', (annotation, next) => {
+annotationSchema.post('save', function postSave(annotation, next) {
   // Save annotation to article
-  Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
-
-  // Save ecplore data
-  Explore.updateUserArticleExploreData(annotation.author, annotation.article);
-
-  // Save article to group
-  if (annotation.parent == null) {
-    Articles.addArticleGroups(annotation.article, annotation.groups).exec();
-    Groups.addGroupArticle(annotation.article, annotation.groups);
-  }
-
-  next();
+  Articles.addArticleAnnotation(annotation.article, annotation._id)
+  .then(() => {
+    if (annotation.parent == null) {
+      // Save article to group
+      return Promise.all([
+        Articles.addArticleGroups(annotation.article, annotation.groups),
+        Groups.addGroupArticle(annotation.article, annotation.groups),
+      ]);
+    } else {
+      // send notification to author of parent comment
+      // super hacky, see http://stackoverflow.com/questions/19281680/how-to-query-from-within-mongoose-pre-hook-in-a-node-js-express-app
+      return this.constructor.findById(annotation.parent)
+      .then((parent) => {
+        const notifiedId = parent.author._id;
+        const type = 'reply';
+        const senderId = annotation.author._id;
+        const href = `${config.frontEndHost}/discussion/${annotation.article}`;
+        if (notifiedId.toString() !== senderId.toString()) {
+          return Users.addUserNotification(notifiedId, type, senderId, href);
+        }
+        return Promise.resolve();
+      });
+    }
+  })
+  .then(() => {
+    return Explore.updateUserArticleExploreData(annotation.author, annotation.article);
+  })
+  .then(() => {
+    next();
+  })
+  .catch((err) => {
+    next(err);
+  });
 });
 
 annotationSchema.pre('remove', function preRemove(next, user, callback) {

@@ -3,6 +3,8 @@ mongoose.Promise = global.Promise;
 import url from 'url';
 import normalizeUrl from 'normalize-url';
 import fetch from 'node-fetch';
+import childProcess from 'child_process';
+import { JSDOM } from 'jsdom';
 
 const IMPT_QUERY_PARAMS = {
   global: ['id'],
@@ -35,7 +37,7 @@ const mercurySchema = new Schema({
   title: String,
   content: { type: String, select: false },
   author: String,
-  date_published: Date,
+  date_published: { type: Date, default: Date.now },
   lead_image_url: String,
   dek: String,
   next_page_url: String,
@@ -62,9 +64,6 @@ const articleSchema = new Schema({
   info: mercurySchema,
   annotations: [{ type: Schema.Types.ObjectId, ref: 'Annotation' }],
   groups: [{ type: Schema.Types.ObjectId, ref: 'Group' }],
-
-  isMisleading: { type: Boolean, default: false },
-  isSatire: { type: Boolean, default: false },
 });
 
 articleSchema.statics.normalizeURI = normalizeURI;
@@ -80,14 +79,36 @@ articleSchema.methods.fetchMercuryInfo = function fetchMercuryInfo() {
   .then((res) => {
     return res.json();
   }).then((json) => {
-    if ( // Mercury error conditions:
+    if ( // Mercury error conditions (there might be more!):
       !json ||
       (typeof json.message === 'object' && json.message === null) ||
-      json.error
+      json.error ||
+      json.errorMessage
     ) {
-      return null;
+      return {};
     } else {
       return json;
+    }
+  });
+};
+
+articleSchema.methods.getTitleFromWget = function getTitleFromWget() {
+  return new Promise((resolve, reject) => {
+    childProcess.execFile('wget', ['-q', '-O', '-', this.uri], (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stdout);
+      }
+    });
+  })
+  .then((rawHTML) => {
+    const { window } = new JSDOM(rawHTML);
+    const titleElem = window.document.querySelector('title');
+    if (titleElem) {
+      return titleElem.textContent;
+    } else {
+      throw new Error('No title found');
     }
   });
 };
@@ -97,11 +118,24 @@ articleSchema.pre('save', function preSave(next) {
   if (!this.info) {
     this.fetchMercuryInfo()
     .then((info) => {
-      this.info = info;
-      next();
+      if (info.title) {
+        this.info = info;
+        next();
+      } else {
+        this.getTitleFromWget()
+        .then((title) => {
+          this.info = { title };
+          next();
+        })
+        .catch((err) => {
+          // give up
+          this.info = {};
+          next();
+        });
+      }
     })
     .catch((err) => {
-      this.info = null;
+      this.info = {};
       next(err);
     });
   } else {
