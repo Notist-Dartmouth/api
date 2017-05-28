@@ -118,7 +118,7 @@ articleSchema.pre('save', function preSave(next) {
   if (!this.info) {
     this.fetchMercuryInfo()
     .then((info) => {
-      if (info) {
+      if (info.title) {
         this.info = info;
         next();
       } else {
@@ -129,7 +129,7 @@ articleSchema.pre('save', function preSave(next) {
         })
         .catch((err) => {
           // give up
-          this.info = null;
+          this.info = {};
           next();
         });
       }
