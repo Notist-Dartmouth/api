@@ -3,6 +3,7 @@ import autopopulate from 'mongoose-autopopulate';
 
 import * as Articles from '../controllers/article_controller';
 import * as Groups from '../controllers/group_controller';
+import * as Explore from '../controllers/explore_controller';
 import Article from './article';
 
 mongoose.Promise = global.Promise;
@@ -73,6 +74,9 @@ annotationSchema.pre('save', function preSave(next) {
 annotationSchema.post('save', (annotation, next) => {
   // Save annotation to article
   Articles.addArticleAnnotation(annotation.article, annotation._id).exec();
+
+  // Save ecplore data
+  Explore.updateUserArticleExploreData(annotation.author, annotation.article);
 
   // Save article to group
   if (annotation.parent == null) {
