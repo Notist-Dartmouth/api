@@ -14,6 +14,7 @@ const userSchema = new Schema({
   email: { type: String, unique: true, required: true },
   bio: String,
   photoSrc: String,
+  isAdmin: { type: Boolean, default: false },
   groups: [{ type: ObjectId, ref: 'Group' }],
   usersIFollow: [{ type: ObjectId, ref: 'User' }],
   usersFollowingMe: [{ type: ObjectId, ref: 'User' }],

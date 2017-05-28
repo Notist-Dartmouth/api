@@ -20,62 +20,66 @@ exports.checkDatabase = function (delayedCallback, dbUpdateWait = 50) {
   });
 };
 
-exports.addUserWithNGroups = function (nGroups, name = 'User', groupName = 'Group') {
-  if (typeof nGroups !== 'number' || nGroups < 0 || typeof name !== 'string' || typeof groupName !== 'string') {
+exports.addNUsersWithNGroups = function (nUsers, nGroups, name = 'User', groupName = 'Group', isAdmin = false) {
+  if (typeof nUsers !== 'number' || typeof nGroups !== 'number' || nGroups < 0
+    || typeof name !== 'string' || typeof groupName !== 'string') {
     throw new TypeError('Invalid argument(s)');
   }
 
-  const user = new User({
-    googleId: `${name}_id`,
-    name,
-    email: `${name}@testuri.com`,
-  });
+  const users = [];
+  for (let i = 0; i < nUsers; i++) {
+    const currName = nUsers === 1 ? name : `${name}${i + 1}`;
+    users[i] = new User({
+      googleId: `${currName}_id`,
+      name,
+      email: `${currName}@testuri.com`,
+      isAdmin,
+    });
+  }
 
   const groups = [];
   for (let i = 0; i < nGroups; i++) {
+    const currGroupName = nGroups === 1 ? groupName : `${groupName} ${i + 1}`;
     groups[i] = new Group({
-      name: `${groupName} ${i}`,
-      description: `Description of ${groupName} ${i}`,
-      creator: user._id,
-      members: [user._id],
+      name: `${currGroupName}`,
+      description: `Description of ${currGroupName}`,
+      creator: users[0]._id,
+      members: users.map((user) => user._id),
     });
   }
 
-  return Promise.all(groups.map((group) => { return group.save(); }))
+  return Promise.all(groups.map((group) => group.save()))
   .then((savedGroups) => {
-    user.groups = savedGroups.map((group) => {
-      return {
-        _id: group._id,
-        name: group.name,
-        isPersonal: group.isPersonal,
-      };
-    });
-    return user.save()
-    .then((savedUser) => {
-      return { user: savedUser, groups: savedGroups };
+    for (const user of users) {
+      user.groups = savedGroups.map((group) => group._id);
+    }
+    return Promise.all(users.map((user) => user.save()))
+    .then((savedUsers) => {
+      return { users: savedUsers, groups: savedGroups };
     });
   });
 };
 
-exports.addUserWithGroup = function (name = 'User', groupName = 'Group') {
-  return exports.addUserWithNGroups(1, name, groupName).then((res) => {
-    return { user: res.user, group: res.groups[0] };
-  });
+exports.addUserWithNGroups = function (nGroups, name, groupName, isAdmin) {
+  return exports.addNUsersWithNGroups(1, nGroups, name, groupName, isAdmin)
+  .then((res) => ({ user: res.users[0], groups: res.groups }));
 };
 
-exports.addUser = function (name = 'User') {
-  return exports.addUserWithNGroups(0, name).then((res) => {
-    return res.user;
-  });
+exports.addUserWithGroup = function (name, groupName) {
+  return exports.addUserWithNGroups(1, name, groupName)
+  .then((res) => ({ user: res.user, group: res.groups[0] }));
+};
+
+exports.addUser = function (name) {
+  return exports.addUserWithNGroups(0, name).then((res) => res.user);
+};
+
+exports.addAdmin = function (name = 'Admin') {
+  return exports.addUserWithNGroups(0, name, 'Group', true).then((res) => res.user);
 };
 
 exports.addNUsers = function (nUsers, name = 'User') {
-  const users = [];
-  for (let i = 0; i < nUsers; i++) {
-    const newUser = exports.addUser(`${name}${i}`);
-    users.push(newUser);
-  }
-  return Promise.all(users);
+  return exports.addNUsersWithNGroups(nUsers, 0, name).then((res) => res.users);
 };
 
 exports.addArticleInGroups = function (groupIds, uri = 'www.testuri.com') {

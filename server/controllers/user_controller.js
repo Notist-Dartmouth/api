@@ -3,7 +3,7 @@ import Annotation from '../models/annotation';
 
 // TODO: addFollowing (add a user to the list of user's i am following)
 
-const NOTIFICATION_TYPES = ['reply'];
+const NOTIFICATION_TYPES = ['reply', 'adminDelete'];
 
 export const addUserGroups = (userId, groupIds) => {
   return User.findByIdAndUpdate(userId, { $addToSet: { groups: { $each: groupIds } } }, { new: true });
