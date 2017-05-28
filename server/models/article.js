@@ -37,7 +37,7 @@ const mercurySchema = new Schema({
   title: String,
   content: { type: String, select: false },
   author: String,
-  date_published: Date,
+  date_published: { type: Date, default: Date.now },
   lead_image_url: String,
   dek: String,
   next_page_url: String,
@@ -85,7 +85,7 @@ articleSchema.methods.fetchMercuryInfo = function fetchMercuryInfo() {
       json.error ||
       json.errorMessage
     ) {
-      return null;
+      return {};
     } else {
       return json;
     }
@@ -118,7 +118,7 @@ articleSchema.pre('save', function preSave(next) {
   if (!this.info) {
     this.fetchMercuryInfo()
     .then((info) => {
-      if (info) {
+      if (info.title) {
         this.info = info;
         next();
       } else {
@@ -129,14 +129,14 @@ articleSchema.pre('save', function preSave(next) {
         })
         .catch((err) => {
           // give up
-          this.info = null;
+          this.info = {};
           next();
         });
       }
     })
     .catch((err) => {
-      this.info = null;
-      next();
+      this.info = {};
+      next(err);
     });
   } else {
     next();

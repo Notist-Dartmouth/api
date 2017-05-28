@@ -212,7 +212,8 @@ describe('Articles', function () {
             res.should.be.json;
             res.should.have.deep.property('body.SUCCESS');
             res.body.SUCCESS.should.have.property('uri', nURI);
-            res.body.SUCCESS.should.have.property('info', null);
+            res.body.SUCCESS.should.have.property('info');
+            res.body.SUCCESS.info.should.have.property('date_published');
             res.body.SUCCESS.should.have.property('groups').that.is.empty;
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
             done();
@@ -256,7 +257,8 @@ describe('Articles', function () {
             res.should.be.json;
             res.should.have.deep.property('body.SUCCESS');
             res.body.SUCCESS.should.have.property('uri', nURI);
-            res.body.SUCCESS.should.have.property('info', null);
+            res.body.SUCCESS.should.have.property('info');
+            res.body.SUCCESS.info.should.have.property('date_published');
             res.body.SUCCESS.should.have.property('annotations').that.is.empty;
             res.body.SUCCESS.should.have.property('groups').with.members([group0._id.toString()]);
             done();

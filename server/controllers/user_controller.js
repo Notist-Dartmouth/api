@@ -1,4 +1,5 @@
 import User from '../models/user';
+import Annotation from '../models/annotation';
 
 // TODO: addFollowing (add a user to the list of user's i am following)
 
@@ -10,6 +11,10 @@ export const addUserGroups = (userId, groupIds) => {
 
 export const addUserGroup = (userId, groupId) => {
   return addUserGroups(userId, [groupId]);
+};
+
+export const getUserAnnotations = (userId) => {
+  return Annotation.find({ author: userId }).sort({ createDate: -1 });
 };
 
 export const removeUserGroup = (userId, groupId) => {

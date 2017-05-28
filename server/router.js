@@ -174,6 +174,26 @@ router.get('/api/user', (req, res) => {
   }
 });
 
+/* Get a user's annotations, returned with most recent first
+Input:
+  req.params.userId: String user ID of the person's annotations to be fetched
+Output: Returns json file with the list of annotations.
+*/
+router.get('/api/user/:userId/annotations', (req, res) => {
+  if (req.isAuthenticated()) {
+    const userId = req.params.userId;
+    Users.getUserAnnotations(userId)
+    .then((annotations) => {
+      util.returnGetSuccess(res, annotations);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
 /*
 Get current user's notifications.
 Query string options available:
