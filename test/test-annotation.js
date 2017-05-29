@@ -21,12 +21,14 @@ describe('Annotations', function () {
   let GroupA;
   let ArticleA;
   let user;
+  let user2;
 
   before(function () {
-    return util.addUserWithGroup()
+    return util.addNUsersWithNGroups(2, 1)
     .then((created) => {
-      GroupA = created.group;
-      user = created.user;
+      GroupA = created.groups[0];
+      user = created.users[0];
+      user2 = created.users[1];
       return util.addArticle('www.nytimes.com/articleA');
     })
     .then((newArticle) => {
@@ -52,8 +54,6 @@ describe('Annotations', function () {
   });
 
   describe('FirstAnnotation', function () {
-    let AnnotationB;
-
     it('should return 401 error for unauthenticated user', function (done) {
       chai.request(app)
       .post('/api/annotation')
@@ -90,6 +90,7 @@ describe('Annotations', function () {
         parentId: null,
       })
       .end(function (err, res) {
+        should.not.exist(err);
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.articleText.should.equal(articleText);
@@ -171,7 +172,7 @@ describe('Annotations', function () {
         res.body.SUCCESS.articleText.should.equal(articleText);
         res.body.SUCCESS.ranges.should.eql(ranges);
         res.body.SUCCESS.text.should.equal(text);
-        AnnotationB = res.body.SUCCESS;
+        res.body.SUCCESS;
       }); // INSTEAD OF DONE, we should make sure its in db ?
 
       return util.checkDatabase((resolve) => {
@@ -219,12 +220,11 @@ describe('Annotations', function () {
     it('should return annotations in groupA on articleA');
   });
 
+  let PublicAnnotation;
+  let PublicReply;
+  let PrivateAnnotation;
+  let StupidAnnotation;
   describe('AnnotationReplies', function () {
-    let PublicAnnotation;
-    let PublicReply;
-    let PrivateAnnotation;
-    let StupidAnnotation;
-
     before(function () {
       return Promise.all([
         util.addArticleAnnotation(ArticleA._id, null, user, 'This is a public annotation'),
@@ -314,6 +314,16 @@ describe('Annotations', function () {
         done();
       });
     });
+  });
+
+  describe('AnnotationDeletions', function () {
+    let admin;
+    before(function () {
+      return util.addAdmin()
+      .then((newAdmin) => {
+        admin = newAdmin;
+      });
+    });
 
     it('should delete annotation with no replies', function () {
       passportStub.login(user);
@@ -327,15 +337,6 @@ describe('Annotations', function () {
       return util.checkDatabase((resolve) => {
         resolve(Annotation.findById(StupidAnnotation.id).should.eventually.be.null);
       });
-
-      // TODO: Remove this, for now keep commented for reference
-      // return util.checkDatabase((resolve) => {
-      //   let emptyoptions;
-      //   resolve(Article.findOne({ uri: ArticleA.uri }).populate({ path: 'annotations', options: { limit: 2, sort: { createDate: -1 } } })
-      //   .then((article) => {
-      //     console.log(article.annotations);
-      //   }));
-      // });
     });
 
     it('should delete annotation with reply', function () {
@@ -351,7 +352,7 @@ describe('Annotations', function () {
         resolve(Annotation.findById(PublicAnnotation.id).then((annotation) => {
           annotation.text.should.equal('[deleted]');
           annotation.numChildren.should.equal(1);
-          annotation.deleted.should.be.true;
+          annotation.isDeleted.should.be.true;
         }));
       });
     });
@@ -372,11 +373,43 @@ describe('Annotations', function () {
         ]));
       });
     });
+
+    it('should not let non-admin delete someone else\'s annotation', function () {
+      passportStub.login(user2);
+      chai.request(app)
+      .delete(`/api/annotation/${PrivateAnnotation.id}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('ERROR');
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(Promise.all([
+          Annotation.findById(PrivateAnnotation.id).should.eventually.have.property('isDeleted').that.is.false,
+          User.findById(user.id, 'notifications').should.eventually.have.property('notifications').with.lengthOf(0),
+        ]));
+      });
+    });
+
+    it('should let admin delete someone else\'s annotation and send notification', function () {
+      passportStub.login(admin);
+      chai.request(app)
+      .delete(`/api/annotation/${PrivateAnnotation.id}`)
+      .end(function (err, res) {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS').that.is.true;
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(Promise.all([
+          Annotation.findById(PrivateAnnotation.id).should.eventually.have.property('isDeleted').that.is.true,
+          User.findById(user.id, 'notifications').should.eventually.have.property('notifications').with.lengthOf(1),
+        ]));
+      });
+    });
   });
 
   describe('AnnotationEdits', function () {
-    let PublicAnnotation;
-    let PrivateAnnotation;
     const updateText = 'The text of this annotation has been updated.';
 
     before(function () {
@@ -401,7 +434,7 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.text.should.equal(updateText);
-        res.body.SUCCESS.edited.should.be.true;
+        res.body.SUCCESS.isEdited.should.be.true;
         done();
       });
     });
@@ -417,7 +450,7 @@ describe('Annotations', function () {
         res.should.have.status(200);
         res.body.should.have.property('SUCCESS');
         res.body.SUCCESS.text.should.equal(updateText);
-        res.body.SUCCESS.edited.should.be.true;
+        res.body.SUCCESS.isEdited.should.be.true;
         done();
       });
     });
