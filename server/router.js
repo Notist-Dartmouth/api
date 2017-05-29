@@ -24,7 +24,6 @@ const router = Router();
 
 // route to post user exploreNumber
 router.post('/api/user/exploreNumber', (req, res) => {
-  console.log(req);
   if (req.isAuthenticated()) {
     const user = req.user;
     const exploreNum = req.body.explore_num;
@@ -48,7 +47,6 @@ router.put('/api/user/exploreNumber', (req, res) => {
     const exploreNum = req.body.explore;
     Users.updateUserExploreNumber(user.id, exploreNum)
     .then((result) => {
-      console.log(result);
       util.returnPostSuccess(res, result);
     })
     .catch((err) => {
@@ -64,7 +62,6 @@ router.post('/api/initializeExplore/articles', (req, res) => {
   const score = req.body.score;
   Explore.postExploreArticles(pageIds, score)
   .then((result) => {
-    console.log(result);
     util.returnPostSuccess(res, result);
   })
   .catch((err) => {

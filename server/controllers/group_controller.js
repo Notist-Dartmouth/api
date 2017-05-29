@@ -35,7 +35,15 @@ export const addGroupMember = (groupId, userId) => {
 };
 
 export const removeGroupMember = (groupId, userId) => {
-  return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true });
+  return Group.findByIdAndUpdate(groupId, { $pull: { members: userId } }, { new: true })
+  .then((group) => {
+    if (group.members.length < 1) {
+      console.log('removing');
+      return Group.remove({ _id: group.id });
+    } else {
+      return group;
+    }
+  });
 };
 
 /*

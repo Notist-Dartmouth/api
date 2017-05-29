@@ -3,7 +3,10 @@ import autopopulate from 'mongoose-autopopulate';
 
 import * as Articles from '../controllers/article_controller';
 import * as Groups from '../controllers/group_controller';
+import * as Explore from '../controllers/explore_controller';
+
 import * as Users from '../controllers/user_controller';
+
 import Article from './article';
 import config from '../_config';
 
@@ -96,6 +99,9 @@ annotationSchema.post('save', function postSave(annotation, next) {
         return Promise.resolve();
       });
     }
+  })
+  .then(() => {
+    return Explore.updateUserArticleExploreData(annotation.author, annotation.article);
   })
   .then(() => {
     next();
