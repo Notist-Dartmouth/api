@@ -23,19 +23,18 @@ export const removeUserGroup = (userId, groupId) => {
 
 // UserId is user TO follow, followingId is user doing the following
 export const followUser = (userId, followingId) => {
-  return User.findByIdAndUpdate(userId, { $push: { usersFollowingMe: followingId } })
+  return User.findByIdAndUpdate(userId, { $addToSet: { usersFollowingMe: followingId } })
   .then((user) => {
-    return User.findByIdAndUpdate(followingId, { $push: { usersIFollow: userId } }, { new: true });
+    return User.findByIdAndUpdate(followingId, { $addToSet: { usersIFollow: userId } }, { new: true });
   });
 };
 
-export const unfollowUser = (userId, followingId => {
+export const unfollowUser = (userId, followingId) => {
   return User.findByIdAndUpdate(userId, { $pull: { usersFollowingMe: followingId } })
   .then((user) => {
     return User.findByIdAndUpdate(followingId, { $pull: { usersIFollow: userId } }, { new: true });
   });
-});
-
+};
 
 export const postUserExploreNumber = (userId, exploreNum, stdDev) => {
   return User.findByIdAndUpdate(userId, { exploreNumber: exploreNum, exploreStandardDev: stdDev, numExplorations: 20 }, { new: true });

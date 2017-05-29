@@ -281,5 +281,20 @@ describe('Users', function () {
         resolve(User.findById(user1.id).should.eventually.have.property('usersFollowingMe').with.length(1));
       });
     });
+
+    it('user0 unfollow user1', function () {
+      passportStub.login(user0);
+      chai.request(app)
+      .post(`/api/user/${user1.id}/unfollow`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.should.have.property('usersIFollow').with.length(0);
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(User.findById(user1.id).should.eventually.have.property('usersFollowingMe').with.length(0));
+      });
+    });
   });
 });
