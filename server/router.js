@@ -116,6 +116,22 @@ router.post('/api/user/:userId/follow', (req, res) => {
   }
 });
 
+router.post('/api/user/:userId/unfollow', (req, res) => {
+  if (req.isAuthenticated()) {
+    const userToFollow = req.params.userId;
+    const userFollowing = req.user.id;
+    Users.unfollowUser(userToFollow, userFollowing)
+    .then((result) => {
+      util.returnPostSuccess(res, result);
+    })
+    .catch((err) => {
+      util.returnError(res, err);
+    });
+  } else {
+    res.status(401).end();
+  }
+});
+
 // navigate to logout page
 router.get('/logout', (req, res) => {
   req.logout();

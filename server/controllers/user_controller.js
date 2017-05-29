@@ -29,6 +29,13 @@ export const followUser = (userId, followingId) => {
   });
 };
 
+export const unfollowUser = (userId, followingId => {
+  return User.findByIdAndUpdate(userId, { $pull: { usersFollowingMe: followingId } })
+  .then((user) => {
+    return User.findByIdAndUpdate(followingId, { $pull: { usersIFollow: userId } }, { new: true });
+  });
+});
+
 
 export const postUserExploreNumber = (userId, exploreNum, stdDev) => {
   return User.findByIdAndUpdate(userId, { exploreNumber: exploreNum, exploreStandardDev: stdDev, numExplorations: 20 }, { new: true });
