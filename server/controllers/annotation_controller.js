@@ -1,4 +1,5 @@
 import Annotation from '../models/annotation';
+import * as Users from '../controllers/user_controller';
 
 // direct access to a specific annotation
 export const getAnnotation = (user, annotationId) => {
@@ -67,24 +68,24 @@ export const getReplies = (user, parentId) => {
 // PRECONDITION: user is not null.
 export const editAnnotation = (user, annotationId, updateText) => {
   const conditions = { _id: annotationId, author: user._id };
-  const update = { $set: { text: updateText, editDate: Date.now(), edited: true } };
+  const update = { $set: { text: updateText, editDate: Date.now(), isEdited: true } };
   return Annotation.findOneAndUpdate(conditions, update, { new: true }).select('-childAnnotations');
 };
 
 // Removes an annotation from the database, updates the parent's numChildren
 // and recurses if the parent needs to be removed as well.
-const deleteAnnotationHelper = (user, annotation) => {
-  if (annotation.parent == null) { // base case: annotation is top-level
-    return annotation.remove(user, (result) => {});
+const deleteAnnotationHelper = (annotation) => {
+  if (annotation.parent === null) { // base case: annotation is top-level
+    return annotation.remove();
   } else {
-    return annotation.remove(user)
+    return annotation.remove()
     .then((removed) => {
       return Annotation.findByIdAndUpdate(removed.parent, { $pull: { childAnnotations: removed._id } }, { new: true });
     })
     .then((parent) => {
-      if (parent.deleted && parent.numChildren < 1) {
+      if (parent.isDeleted && parent.numChildren < 1) {
         // remove parent recursively
-        return deleteAnnotationHelper(user, parent);
+        return deleteAnnotationHelper(parent);
       } else {
         return parent;
       }
@@ -93,20 +94,33 @@ const deleteAnnotationHelper = (user, annotation) => {
 };
 
 export const deleteAnnotation = (user, annotationId) => {
-  const deleteUpdate = {
-    deleted: true,
-    text: '[deleted]',
-  };
-  return Annotation.findByIdAndUpdate(annotationId, deleteUpdate, { new: true })
+  return Annotation.findById(annotationId)
   .then((annotation) => {
     if (annotation === null) {
       throw new Error('Annotation to delete not found');
     }
+
+    const promises = [];
+    const author = annotation.author;
+    if (author._id.toString() !== user._id.toString()) {
+      if (user.isAdmin) {
+        // send notification to author
+        promises.push(Users.addUserNotification(author._id, 'adminDelete', null, annotation.discussionURI));
+      } else {
+        throw new Error('User cannot remove annotation');
+      }
+    }
+
     if (annotation.numChildren < 1) {
       // annotation has no children, so remove
-      return deleteAnnotationHelper(user, annotation);
+      promises.push(deleteAnnotationHelper(annotation));
     } else {
-      return annotation;
+      const deleteUpdate = {
+        isDeleted: true,
+        text: '[deleted]',
+      };
+      promises.push(annotation.update(deleteUpdate, { new: true }));
     }
+    return Promise.all(promises);
   });
 };

@@ -35,8 +35,8 @@ const annotationSchema = new Schema({
   points: { type: Number, default: 0 },
   createDate: { type: Date, default: Date.now },
   editDate: { type: Date, default: Date.now },
-  edited: { type: Boolean, default: false },
-  deleted: { type: Boolean, default: false },
+  isEdited: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
 });
 
 // Enforce that private annotations have exactly one group.
@@ -87,13 +87,12 @@ annotationSchema.post('save', function postSave(annotation, next) {
       ]);
     } else {
       // send notification to author of parent comment
-      // super hacky, see http://stackoverflow.com/questions/19281680/how-to-query-from-within-mongoose-pre-hook-in-a-node-js-express-app
       return this.constructor.findById(annotation.parent)
       .then((parent) => {
         const notifiedId = parent.author._id;
         const type = 'reply';
         const senderId = annotation.author._id;
-        const href = `${config.frontEndHost}/discussion/${annotation.article}`;
+        const href = annotation.discussionURI;
         if (notifiedId.toString() !== senderId.toString()) {
           return Users.addUserNotification(notifiedId, type, senderId, href);
         }
@@ -112,14 +111,10 @@ annotationSchema.post('save', function postSave(annotation, next) {
   });
 });
 
-annotationSchema.pre('remove', function preRemove(next, user, callback) {
-  if (!this.deleted && user._id.toString() !== this.author.toString()) {
-    next(new Error('User cannot remove annotation'));
-  }
-
+annotationSchema.pre('remove', function preRemove(next) {
   // Remove annotation from article
   Article.findByIdAndUpdate(this.article, { $pull: { annotations: this._id } }).then((article) => {
-    next(callback); // if no more annotations then should probably do something?
+    next(); // TODO: if no more annotations then should probably do something?
   });
 });
 
@@ -129,6 +124,10 @@ annotationSchema.virtual('isTopLevel').get(function getIsTopLevel() {
 
 annotationSchema.virtual('numChildren').get(function getNumChildren() {
   return this.childAnnotations.length;
+});
+
+annotationSchema.virtual('discussionURI').get(function getDiscussionURI() {
+  return `${config.frontEndHost}/discussion/${this.article}`;
 });
 
 annotationSchema.plugin(autopopulate);

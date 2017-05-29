@@ -101,7 +101,7 @@ describe('Groups', function () {
         return Groups.getGroupsFiltered({ members: newUser._id })
         .then((result) => {
           result.should.have.lengthOf(1);
-          result[0].name.should.equal('Group 0');
+          result[0].name.should.equal('Group');
           result[0].id.should.equal(newGroup.id);
         });
       });
