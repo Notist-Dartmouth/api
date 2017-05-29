@@ -14,7 +14,7 @@ export const addUserGroup = (userId, groupId) => {
 };
 
 export const getUserAnnotations = (userId) => {
-  return Annotation.find({ author: userId }).sort({ createDate: -1 });
+  return Annotation.find({ author: userId, parent: null }).sort({ createDate: -1 });
 };
 
 export const removeUserGroup = (userId, groupId) => {
