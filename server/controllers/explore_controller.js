@@ -92,16 +92,12 @@ export const updateUserArticleExploreData = (userId, articleId) => {
       const articleVal = article.avgUserScore;
 
       if (userVal && userVal != 0) {
-        var promise1 = new Promise(function (resolve, reject) {
-          return Articles.updateArticleScore(article.id, userVal);
-        });
+        const promise1 = Articles.updateArticleScore(article.id, userVal);
         promises.push(promise1);
       }
 
       if (articleVal && articleVal != 0) {
-        var promise2 = new Promise(function (resolve, reject) {
-          return Users.updateUserExploreNumber(user.id, articleVal);
-        });
+        const promise2 = Users.updateUserExploreNumber(user.id, articleVal);
         promises.push(promise2);
       }
 
