@@ -265,4 +265,21 @@ describe('Users', function () {
         });
     });
   });
+
+  describe('POST user following', function () {
+    it('should add user0 as following user1', function () {
+      passportStub.login(user0);
+      chai.request(app)
+      .post(`/api/user/${user1.id}/follow`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property('SUCCESS');
+        res.body.SUCCESS.should.have.property('usersIFollow').with.members([user1.id.toString()]);
+      });
+
+      return util.checkDatabase((resolve) => {
+        resolve(User.findById(user1.id).should.eventually.have.property('usersFollowingMe').with.length(1));
+      });
+    });
+  });
 });
