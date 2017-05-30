@@ -266,6 +266,33 @@ describe('Users', function () {
     });
   });
 
+  describe('GET /api/user/info/:userId', function () {
+    it('should get profile information about another user', function (done) {
+      passportStub.login(user0);
+      chai.request(app)
+        .get(`/api/user/info/${user1.id}`)
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.have.property('name', user1.name);
+          res.body.should.have.property('bio', user1.bio);
+          res.body.should.have.property('photoSrc', user1.photoSrc);
+          res.body.should.have.property('usersFollowingMe').that.is.an('array').that.is.empty;
+          res.body.should.not.have.property('googleId');
+          res.body.should.not.have.property('facebookId');
+          res.body.should.not.have.property('email');
+          res.body.should.not.have.property('isAdmin');
+          res.body.should.not.have.property('groups');
+          res.body.should.not.have.property('usersIFollow');
+          res.body.should.not.have.property('exploreNumber');
+          res.body.should.not.have.property('exploreStandardDev');
+          res.body.should.not.have.property('numExplorations');
+          res.body.should.not.have.property('notifications');
+          done();
+        });
+    });
+  });
+
   describe('POST user following', function () {
     it('should add user0 as following user1', function () {
       passportStub.login(user0);
