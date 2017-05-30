@@ -33,6 +33,8 @@ exports.addNUsersWithNGroups = function (nUsers, nGroups, name = 'User', groupNa
       googleId: `${currName}_id`,
       name,
       email: `${currName}@testuri.com`,
+      bio: `Hi, my name is ${currName}.`,
+      photoSrc: `somewebsite.com/${currName}.png`,
       isAdmin,
     });
   }

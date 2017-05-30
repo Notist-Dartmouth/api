@@ -60,6 +60,20 @@ export const updateUserInfo = (userId, value) => {
   return User.findByIdAndUpdate(userId, value, { new: true });
 };
 
+/*
+Return info required for the profile view. Replaces usersFollowingMe with the
+number of followers.
+*/
+export const getUserInfo = (userId) => {
+  return User.findById(userId, 'name bio photoSrc usersFollowingMe')
+  .then((user) => {
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  });
+};
+
 // Notifications are always prepended to the array, so the newest ones appear first.
 export const addUserNotification = (userId, type, sender, href) => {
   if (!NOTIFICATION_TYPES.includes(type)) {

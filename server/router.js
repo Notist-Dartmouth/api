@@ -186,6 +186,9 @@ router.get('/api/articleById/:id', (req, res) => {
   });
 });
 
+/*
+Get logged-in user's full profile
+*/
 router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
@@ -200,6 +203,20 @@ router.get('/api/user', (req, res) => {
   } else {
     res.status(401).end();
   }
+});
+
+/*
+Get a specified user's public profile.
+*/
+router.get('/api/user/info/:userId', (req, res) => {
+  const userId = req.params.userId;
+  Users.getUserInfo(userId)
+  .then((user) => {
+    util.returnGetSuccess(res, user);
+  })
+  .catch((err) => {
+    util.returnError(res, err);
+  });
 });
 
 /* Get a user's annotations, returned with most recent first
