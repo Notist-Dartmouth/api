@@ -193,6 +193,10 @@ router.get('/api/user', (req, res) => {
   if (req.isAuthenticated()) {
     // populate the user's groups
     req.user.populate('groups')
+    .populate({
+      path: 'usersIFollow',
+      select: 'name photoSrc',
+    })
     .execPopulate()
     .then((user) => {
       util.returnGetSuccess(res, user);

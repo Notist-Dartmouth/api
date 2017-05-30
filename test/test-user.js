@@ -215,57 +215,6 @@ describe('Users', function () {
     });
   });
 
-  describe('GET /api/user', function () {
-    it('should return 401 error for unauthenticated user', function (done) {
-      // not logged in
-      chai.request(app)
-        .get('/api/user')
-        .end((err, res) => {
-          should.exist(res);
-          res.should.have.status(401);
-          done();
-        });
-    });
-
-    it('should return user object when authenticated', function (done) {
-      passportStub.login(user0);
-      chai.request(app)
-        .get('/api/user')
-        .end((err, res) => {
-          should.not.exist(err);
-          res.should.have.status(200);
-          res.body.should.have.property('email', 'user0@testuri.com');
-          res.body.should.have.property('name', 'user0');
-          res.body.should.have.property('googleId', 'user0_id');
-          res.body.should.have.property('groups').that.is.empty;
-          done();
-        });
-    });
-
-    it('should populate groups field when authenticated user is in groups', function (done) {
-      passportStub.login(user1);
-      chai.request(app)
-        .get('/api/user')
-        .end((err, res) => {
-          should.not.exist(err);
-          res.should.have.status(200);
-          res.body.should.have.property('email', user1.email);
-          res.body.should.have.property('name', user1.name);
-          res.body.should.have.property('googleId', user1.googleId);
-
-          res.body.should.have.property('groups').with.lengthOf(2);
-          res.body.groups[0]._id.toString().should.not.equal(res.body.groups[1]._id.toString());
-          for (let i = 0; i < 2; i++) {
-            const group = res.body.groups[i];
-            group.name.should.match(/Group [1-2]/);
-            group.description.should.equal(`Description of ${group.name}`);
-            group.creator.toString().should.equal(user1.id);
-          }
-          done();
-        });
-    });
-  });
-
   describe('GET /api/user/info/:userId', function () {
     it('should get profile information about another user', function (done) {
       passportStub.login(user0);
@@ -322,6 +271,72 @@ describe('Users', function () {
       return util.checkDatabase((resolve) => {
         resolve(User.findById(user1.id).should.eventually.have.property('usersFollowingMe').with.length(0));
       });
+    });
+  });
+
+  describe('GET /api/user', function () {
+    before(function (done) {
+      passportStub.login(user0);
+      chai.request(app)
+      .post(`/api/user/${user1.id}/follow`)
+      .end((err, res) => {
+        user0 = new User(res.body.SUCCESS);
+        passportStub.logout();
+        done();
+      });
+    });
+
+    it('should return 401 error for unauthenticated user', function (done) {
+      // not logged in
+      chai.request(app)
+        .get('/api/user')
+        .end((err, res) => {
+          should.exist(res);
+          res.should.have.status(401);
+          done();
+        });
+    });
+
+    it('should return user object when authenticated', function (done) {
+      passportStub.login(user0);
+      chai.request(app)
+        .get('/api/user')
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.have.property('email', user0.email);
+          res.body.should.have.property('name', user0.name);
+          res.body.should.have.property('googleId', user0.googleId);
+          res.body.should.have.property('groups').that.is.empty;
+          res.body.should.have.property('usersIFollow').that.is.an('array').with.lengthOf(1);
+          res.body.usersIFollow[0]._id.toString().should.equal(user1.id);
+          res.body.usersIFollow[0].should.have.property('name', user1.name);
+          res.body.usersIFollow[0].should.have.property('photoSrc', user1.photoSrc);
+          done();
+        });
+    });
+
+    it('should populate groups field when authenticated user is in groups', function (done) {
+      passportStub.login(user1);
+      chai.request(app)
+        .get('/api/user')
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status(200);
+          res.body.should.have.property('email', user1.email);
+          res.body.should.have.property('name', user1.name);
+          res.body.should.have.property('googleId', user1.googleId);
+
+          res.body.should.have.property('groups').with.lengthOf(2);
+          res.body.groups[0]._id.toString().should.not.equal(res.body.groups[1]._id.toString());
+          for (let i = 0; i < 2; i++) {
+            const group = res.body.groups[i];
+            group.name.should.match(/Group [1-2]/);
+            group.description.should.equal(`Description of ${group.name}`);
+            group.creator.toString().should.equal(user1.id);
+          }
+          done();
+        });
     });
   });
 });
